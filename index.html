@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentic AI — Automate Federal Workflows</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <span class="logo">Agentic<span class="logo-accent">AI</span></span>
+      <nav>
+        <a href="#how-it-works">How it works</a>
+        <a href="#intake" class="btn-nav">Get started</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="badge">For federal agencies</div>
+        <h1>Turn manual workflows<br />into intelligent agents</h1>
+        <p class="hero-sub">
+          Describe the repetitive tasks your team handles every day. We map them,
+          model them, and deploy AI agents that do the work — so your people can
+          focus on mission-critical decisions.
+        </p>
+        <a href="#intake" class="btn-primary">Submit your workflows &darr;</a>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-it-works" id="how-it-works">
+      <div class="container">
+        <h2 class="section-title">How it works</h2>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-num">01</span>
+            <div>
+              <strong>Describe your workflows</strong>
+              <p>Use the form below to detail the tasks, handoffs, and decision points your team performs manually.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-num">02</span>
+            <div>
+              <strong>We analyze &amp; model</strong>
+              <p>Our team reviews your submissions and identifies the highest-impact automation opportunities.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-num">03</span>
+            <div>
+              <strong>Agents are deployed</strong>
+              <p>Purpose-built AI agents are delivered that integrate with your existing federal systems and tools.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Intake form -->
+    <section class="intake" id="intake">
+      <div class="container form-wrap">
+        <h2 class="section-title">Submit your workflow</h2>
+        <p class="section-sub">
+          All submissions are handled securely. We'll follow up within 2 business days.
+        </p>
+
+        <form id="workflowForm" novalidate>
+
+          <fieldset>
+            <legend>Organization</legend>
+            <div class="field-row">
+              <div class="field">
+                <label for="agency">Agency / Department <span class="req">*</span></label>
+                <input type="text" id="agency" name="agency" placeholder="e.g. Department of Veterans Affairs" required />
+              </div>
+              <div class="field">
+                <label for="division">Division or Office</label>
+                <input type="text" id="division" name="division" placeholder="e.g. Office of IT" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Workflow details</legend>
+            <div class="field">
+              <label for="workflow_name">Workflow name <span class="req">*</span></label>
+              <input type="text" id="workflow_name" name="workflow_name" placeholder="e.g. FOIA request processing" required />
+            </div>
+            <div class="field">
+              <label for="description">Describe the workflow <span class="req">*</span></label>
+              <textarea id="description" name="description" rows="5"
+                placeholder="Walk us through the steps, who is involved, what systems are used, and what inputs/outputs the process has." required></textarea>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="frequency">How often does this run? <span class="req">*</span></label>
+                <select id="frequency" name="frequency" required>
+                  <option value="" disabled selected>Select frequency</option>
+                  <option>Multiple times per day</option>
+                  <option>Daily</option>
+                  <option>Weekly</option>
+                  <option>Monthly</option>
+                  <option>Ad hoc / variable</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="volume">Approximate volume</label>
+                <input type="text" id="volume" name="volume" placeholder="e.g. 200 requests/month" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="pain_points">What are the biggest pain points?</label>
+              <textarea id="pain_points" name="pain_points" rows="3"
+                placeholder="Delays, errors, high manual effort, compliance risks…"></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Your contact</legend>
+            <div class="field-row">
+              <div class="field">
+                <label for="name">Full name <span class="req">*</span></label>
+                <input type="text" id="name" name="name" placeholder="Jane Smith" required />
+              </div>
+              <div class="field">
+                <label for="title">Job title</label>
+                <input type="text" id="title" name="title" placeholder="CIO, IT Director…" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="email">Government email <span class="req">*</span></label>
+              <input type="email" id="email" name="email" placeholder="jane.smith@agency.gov" required />
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn-primary btn-submit">Submit workflow</button>
+        </form>
+
+        <div id="successMsg" class="success-msg" hidden>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <div>
+            <strong>Submission received</strong>
+            <p>Thank you. Our team will review your workflow and reach out within 2 business days.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="logo">Agentic<span class="logo-accent">AI</span></span>
+      <p class="footer-note">&copy; 2026 Agentic AI. Secure handling of all federal submissions.</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
