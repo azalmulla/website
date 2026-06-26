@@ -180,6 +180,12 @@ html[lang="ar"] .brand .wm .sub{letter-spacing:normal;text-transform:none;font-s
 .tools{display:flex;align-items:center;gap:9px}
 .iconbtn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink-2);transition:.15s}
 .iconbtn:hover{background:var(--soft);border-color:#d6e0ee}
+.hsearch{display:inline-flex;align-items:center;gap:.45em;border:1px solid var(--line);background:#fff;border-radius:10px;padding:.44em .72em;color:var(--muted);cursor:pointer;min-width:190px;transition:.15s}
+.hsearch:hover{border-color:#d6e0ee;background:var(--soft)}
+.hsearch .ico{flex:none;color:var(--muted)}
+.hsearch input{border:0;background:none;outline:0;font:inherit;font-size:.85rem;color:var(--ink);cursor:pointer;width:100%;padding:0}
+.iconbtn.onlyMobile{display:none}
+@media(max-width:760px){.iconbtn.onlyMobile{display:grid}}
 .iconbtn svg{width:18px;height:18px}
 .langtog{display:inline-flex;align-items:center;gap:.45em;border:1px solid var(--line);background:#fff;border-radius:10px;padding:.46em .7em;font-weight:700;font-size:.85rem;color:var(--ink)}
 .langtog:hover{background:var(--soft)}
@@ -948,7 +954,8 @@ function renderHeader(){
     </div>
     <div class="spacer"></div>
     <div class="tools">
-      <button class="iconbtn hideMobile" data-action="goSearch" title="${esc(t('search'))}">${ic('search')}</button>
+      <div class="hsearch hideMobile" data-action="goSearch" title="${esc(t('search'))}">${ic('search')}<input placeholder="${esc(t('search'))}" data-action="goSearch" readonly tabindex="-1"></div>
+      <button class="iconbtn onlyMobile" data-action="goSearch" title="${esc(t('search'))}">${ic('search')}</button>
       <button class="iconbtn hideMobile" title="3">${ic('bell')}</button>
       <div class="adminsw ${state.admin?'on':''}" data-action="toggleAdmin" title="${esc(t('adminMode'))}">
         <span class="track"><span class="knob"></span></span><span class="lbl">${esc(t('adminMode'))}</span>
