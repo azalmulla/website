@@ -460,7 +460,7 @@ html[lang="ar"] .si-lockup .en{letter-spacing:.02em}
 ============================================================ */
 const state = { lang:'en', view:'home', admin:false, signedIn:false,
   entity:'Ministry of Cabinet Affairs', entityAr:'وزارة شؤون مجلس الوزراء',
-  kbCat:'all', maTopic:'all', menuOpen:false };
+  kbCat:'all', maTopic:'all', menuOpen:false, q:'' };
 
 const L = o => (o && typeof o==='object' && ('en' in o)) ? (o[state.lang] ?? o.en) : o;
 const t = k => L(UI[k]);
@@ -948,7 +948,7 @@ function renderHeader(){
     </div>
     <div class="spacer"></div>
     <div class="tools">
-      <button class="iconbtn hideMobile" data-action="nav" data-arg="decrees" title="${esc(t('search'))}">${ic('search')}</button>
+      <button class="iconbtn hideMobile" data-action="goSearch" title="${esc(t('search'))}">${ic('search')}</button>
       <button class="iconbtn hideMobile" title="3">${ic('bell')}</button>
       <div class="adminsw ${state.admin?'on':''}" data-action="toggleAdmin" title="${esc(t('adminMode'))}">
         <span class="track"><span class="knob"></span></span><span class="lbl">${esc(t('adminMode'))}</span>
@@ -995,10 +995,12 @@ function renderFooter(){
 function renderView(){
   const v = state.view;
   const html = v==='home'?viewHome():v==='mostAsked'?viewMostAsked():v==='kb'?viewKB()
-    :v==='decrees'?viewDecrees():v==='requests'?viewRequests():v==='vendors'?viewVendors():'';
+    :v==='decrees'?viewDecrees():v==='requests'?viewRequests():v==='vendors'?viewVendors()
+    :v==='search'?viewSearch():'';
   $('#main').innerHTML = html;
   $('#main').scrollIntoView({block:'start'});
   window.scrollTo({top:0});
+  if(v==='search'){ const sb=$('#searchBox'); if(sb){ sb.focus(); const n=sb.value.length; try{sb.setSelectionRange(n,n);}catch(_){} } }
 }
 
 /* ---- HOME ---- */
@@ -1019,7 +1021,7 @@ function viewHome(){
       <div class="eyebrow">${esc(L({en:'Federal AI Integration Programme',ar:'برنامج تكامل الذكاء الاصطناعي الاتحادي'}))}</div>
       <h1 style="margin-top:14px">${esc(L({en:'Clear answers for ',ar:'إجابات واضحة لتكامل '}))}<span class="hl">${esc(L({en:'AI integration',ar:'الذكاء الاصطناعي'}))}</span>${esc(L({en:' across UAE Government',ar:' في حكومة دولة الإمارات'}))}</h1>
       <p class="sub">${esc(L({en:'One place for infrastructure decisions, approved vendors, the future of your current projects, and every new AI decree — kept up to date.',ar:'مكان واحد لقرارات البنية التحتية، والموردين المعتمدين، ومستقبل مشاريعكم الحالية، وكل قرار جديد للذكاء الاصطناعي — محدّثًا أولًا بأول.'}))}</p>
-      <div class="searchbar">${ic('search')}<input placeholder="${esc(t('searchAll'))}" data-action="searchFocus" readonly><button class="btn primary sm" data-action="nav" data-arg="mostAsked">${esc(L({en:'Browse',ar:'تصفّح'}))}</button></div>
+      <div class="searchbar">${ic('search')}<input placeholder="${esc(t('searchAll'))}" data-action="goSearch" readonly><button class="btn primary sm" data-action="nav" data-arg="mostAsked">${esc(L({en:'Browse',ar:'تصفّح'}))}</button></div>
       <div class="stats">
         <div class="stat"><div class="n">12</div><div class="l">${esc(L({en:'Decrees published',ar:'قرارات منشورة'}))}</div></div>
         <div class="stat"><div class="n">480+</div><div class="l">${esc(L({en:'Questions answered',ar:'أسئلة مُجابة'}))}</div></div>
@@ -1108,6 +1110,42 @@ function accordion(q, rank){
   </div>`;
 }
 
+/* ---- SEARCH ---- */
+function searchResultsHTML(q){
+  const term=(q||'').trim().toLowerCase();
+  if(!term) return `<div class="card" style="text-align:center;color:var(--muted);padding:34px">${ic('search')}<div style="margin-top:10px">${esc(L({en:'Start typing to search decrees, questions and vendors.',ar:'ابدأ الكتابة للبحث في القرارات والأسئلة والموردين.'}))}</div></div>`;
+  const has=(...vals)=>vals.some(v=>v&&String(v).toLowerCase().includes(term));
+  const decrees=DECREES.filter(d=>has(d.no,d.title.en,d.title.ar,d.summary.en,d.summary.ar,...d.topics.map(topicName)));
+  const faqs=allQA().filter(x=>has(x.q.en,x.q.ar,x.a.en,x.a.ar,topicName(x.topic)));
+  const vendors=VENDORS.filter(v=>has(v.name,v.meta.en,v.meta.ar,v.uses.en,v.uses.ar,t(v.tier)));
+  const total=decrees.length+faqs.length+vendors.length;
+  if(!total) return `<div class="card" style="text-align:center;color:var(--muted);padding:34px">${ic('search')}<div style="margin-top:10px">${esc(L({en:'No results for',ar:'لا نتائج لـ'}))} “${esc(q)}”.</div></div>`;
+  const sec=(title,count,inner)=> count?`<div class="h-lead" style="margin:18px 0 12px"><h3 style="font-size:1.1rem">${esc(title)} <span style="color:var(--muted);font-weight:600">(${count})</span></h3></div>${inner}`:'';
+  const dHtml=decrees.map(d=>`<div class="rowcard" data-action="openDecree" data-arg="${d.no}" style="margin-bottom:11px">
+      <div class="lead">${ic('doc')}</div>
+      <div class="mid"><div class="ttl">${esc(L(d.title))}</div>
+        <div class="meta"><span class="tag">${esc(d.no)}</span><span>${ic('cal')} ${fmtDate(d.date)}</span>${d.topics.map(tp=>`<span class="pill">${esc(topicName(tp))}</span>`).join('')}</div></div>
+      <div class="end"><span class="st ${statusClass(d.status)}">${esc(t(d.status))}</span>${ic('chev','chev')}</div></div>`).join('');
+  const fHtml=faqs.map(x=>accordion(x,0)).join('');
+  const vHtml=vendors.map(v=>`<div class="rowcard" data-action="nav" data-arg="vendors" style="margin-bottom:11px">
+      <div class="lead" style="background:${v.color};color:#fff;font-weight:800;font-family:Sora;font-size:.8rem">${esc(v.initials)}</div>
+      <div class="mid"><div class="ttl">${esc(v.name)}</div><div class="meta"><span>${esc(L(v.meta))}</span></div></div>
+      <div class="end"><span class="st ${statusClass(v.tier)}">${esc(t(v.tier))}</span>${ic('chev','chev')}</div></div>`).join('');
+  return `<div style="font-size:.85rem;color:var(--muted);margin-bottom:6px">${total} ${esc(L({en:'results',ar:'نتيجة'}))}</div>`
+    + sec(L({en:'Decrees & policies',ar:'القرارات والسياسات'}),decrees.length,dHtml)
+    + sec(L({en:'Questions',ar:'الأسئلة'}),faqs.length,fHtml)
+    + sec(L({en:'Vendors',ar:'الموردون'}),vendors.length,vHtml);
+}
+function viewSearch(){
+  return `<div class="wrap"><section class="section">
+    <div class="eyebrow">${esc(t('search'))}</div>
+    <div class="h-lead"><div><h2>${esc(L({en:'Search',ar:'بحث'}))}</h2>
+      <p>${esc(L({en:'Search across decrees, questions, and approved vendors.',ar:'ابحث في القرارات والأسئلة والموردين المعتمدين.'}))}</p></div></div>
+    <div class="searchbar" style="max-width:none;margin-bottom:22px">${ic('search')}<input id="searchBox" placeholder="${esc(t('searchAll'))}" value="${esc(state.q)}" autocomplete="off"></div>
+    <div id="searchResults">${searchResultsHTML(state.q)}</div>
+  </section></div>`;
+}
+
 /* ---- KNOWLEDGE BASE ---- */
 function viewKB(){
   if(state.kbCat==='all'){
@@ -1146,7 +1184,7 @@ function viewDecrees(){
       <div><b>${esc(L({en:'Issuing Office — administrator view',ar:'مكتب الإصدار — عرض المشرف'}))}</b>
       <p>${esc(L({en:'You can publish a new decree or push an updated version. Entities see changes instantly.',ar:'يمكنك نشر قرار جديد أو دفع نسخة محدّثة. وترى الجهات التغييرات فورًا.'}))}</p></div>
       <button class="btn primary" data-action="openUpload">${ic('plus')} ${esc(L({en:'New',ar:'جديد'}))}</button></div>`:''}
-    <div class="searchbar hideMobile" style="margin-bottom:22px;max-width:none">${ic('search')}<input placeholder="${esc(t('searchAll'))}" readonly></div>
+    <div class="searchbar hideMobile" style="margin-bottom:22px;max-width:none" data-action="goSearch">${ic('search')}<input placeholder="${esc(t('searchAll'))}" data-action="goSearch" readonly></div>
     ${DECREES.map(d=>`<div class="rowcard" data-action="openDecree" data-arg="${d.no}" style="margin-bottom:11px">
       <div class="lead">${ic('doc')}</div>
       <div class="mid"><div class="ttl">${esc(L(d.title))}</div>
@@ -1371,10 +1409,17 @@ document.addEventListener('click', e=>{
     case 'closeModal': closeModal(); break;
     case 'closeAndAsk': closeModal(); state.view='mostAsked'; renderHeader(); renderView(); break;
     case 'toast': showToast(arg); break;
-    case 'searchFocus': state.view='mostAsked'; renderHeader(); renderView(); break;
+    case 'goSearch': state.view='search'; renderHeader(); renderView(); break;
   }
 });
 $('#overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
+
+document.addEventListener('input', e=>{
+  if(e.target && e.target.id==='searchBox'){
+    state.q = e.target.value;
+    const r = $('#searchResults'); if(r) r.innerHTML = searchResultsHTML(state.q);
+  }
+});
 
 document.addEventListener('submit', e=>{
   e.preventDefault(); const f=e.target; const fd=new FormData(f);
