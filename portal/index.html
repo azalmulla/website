@@ -1021,6 +1021,7 @@ function viewHome(){
     {v:'vendors',icon:'store',h:t('vendors'),p:L({en:'Who you can work with, and for what.',ar:'مع من يمكنكم العمل، ولأي غرض.'})},
     {v:'requests',icon:'chat',h:t('requests'),p:L({en:'Ask your own question and track the response.',ar:'اطرح سؤالك وتابع الرد عليه.'})},
   ];
+  const hq = state.q.trim();
   return `
   <section class="hero">
     <div class="blob b1"></div><div class="blob b2"></div>
@@ -1028,7 +1029,7 @@ function viewHome(){
       <div class="eyebrow">${esc(L({en:'Federal AI Integration Programme',ar:'برنامج تكامل الذكاء الاصطناعي الاتحادي'}))}</div>
       <h1 style="margin-top:14px">${esc(L({en:'Clear answers for ',ar:'إجابات واضحة لتكامل '}))}<span class="hl">${esc(L({en:'AI integration',ar:'الذكاء الاصطناعي'}))}</span>${esc(L({en:' across UAE Government',ar:' في حكومة دولة الإمارات'}))}</h1>
       <p class="sub">${esc(L({en:'One place for infrastructure decisions, approved vendors, the future of your current projects, and every new AI decree — kept up to date.',ar:'مكان واحد لقرارات البنية التحتية، والموردين المعتمدين، ومستقبل مشاريعكم الحالية، وكل قرار جديد للذكاء الاصطناعي — محدّثًا أولًا بأول.'}))}</p>
-      <div class="searchbar">${ic('search')}<input placeholder="${esc(t('searchAll'))}" data-action="goSearch" readonly><button class="btn primary sm" data-action="nav" data-arg="mostAsked">${esc(L({en:'Browse',ar:'تصفّح'}))}</button></div>
+      <div class="searchbar">${ic('search')}<input id="heroSearch" placeholder="${esc(t('searchAll'))}" value="${esc(state.q)}" autocomplete="off"><button class="btn primary sm" data-action="nav" data-arg="mostAsked">${esc(L({en:'Browse',ar:'تصفّح'}))}</button></div>
       <div class="stats">
         <div class="stat"><div class="n">12</div><div class="l">${esc(L({en:'Decrees published',ar:'قرارات منشورة'}))}</div></div>
         <div class="stat"><div class="n">480+</div><div class="l">${esc(L({en:'Questions answered',ar:'أسئلة مُجابة'}))}</div></div>
@@ -1038,7 +1039,9 @@ function viewHome(){
     </div>
   </section>
 
-  <div class="wrap">
+  <div class="wrap"><section class="section" id="heroResults" style="padding-top:18px">${hq?searchResultsHTML(state.q):''}</section></div>
+
+  <div class="wrap" id="homeBody" style="${hq?'display:none':''}">
     <section class="section">
       <div class="grid g-4">
         ${quick.map(q=>`<div class="card hover qlink" data-action="nav" data-arg="${q.v}">
@@ -1425,6 +1428,13 @@ document.addEventListener('input', e=>{
   if(e.target && e.target.id==='searchBox'){
     state.q = e.target.value;
     const r = $('#searchResults'); if(r) r.innerHTML = searchResultsHTML(state.q);
+  }
+  if(e.target && e.target.id==='heroSearch'){
+    state.q = e.target.value;
+    const term = state.q.trim();
+    const hr = $('#heroResults'), hb = $('#homeBody');
+    if(hr) hr.innerHTML = term ? searchResultsHTML(state.q) : '';
+    if(hb) hb.style.display = term ? 'none' : '';
   }
 });
 
