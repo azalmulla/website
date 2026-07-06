@@ -1070,7 +1070,7 @@ function renderHeader(){
   const ent = isAr()?state.entityAr:state.entity;
   $('#utilrow').innerHTML = `
     <div class="uflag" aria-hidden="true"><i class="fr"></i><i class="fg"></i><i class="fw"></i><i class="fb"></i></div>
-    <span class="uttl">${esc(L({en:'The official portal of the Agentic AI Assistant project — UAE Government',ar:'البوابة الرسمية لمشروع الذكاء الاصطناعي المساعد — حكومة دولة الإمارات'}))}</span>
+    <span class="uttl">${esc(L({en:'The official portal of the Agentic AI project — UAE Government',ar:'البوابة الرسمية لمشروع الذكاء الاصطناعي المساعد — حكومة دولة الإمارات'}))}</span>
     <span class="uspacer"></span>
     <span class="ufs" role="group" aria-label="Text size">
       <button data-action="fontSize" data-arg="-" title="${esc(L({en:'Decrease text size',ar:'تصغير الخط'}))}">A−</button>
@@ -1115,7 +1115,7 @@ function renderFooter(){
       ${col(L({en:'Support',ar:'الدعم'}),[{en:'Search',ar:'البحث',v:'search'},{en:'Ministry of Cabinet Affairs',ar:'وزارة شؤون مجلس الوزراء',v:'home'}])}
     </div>
     <div class="foot-bottom">
-      <span>© 2026 ${esc(L({en:'Agentic AI Assistant Project — United Arab Emirates Government',ar:'مشروع الذكاء الاصطناعي المساعد — حكومة دولة الإمارات العربية المتحدة'}))}</span>
+      <span>© 2026 ${esc(L({en:'Agentic AI Project — United Arab Emirates Government',ar:'مشروع الذكاء الاصطناعي المساعد — حكومة دولة الإمارات العربية المتحدة'}))}</span>
       <span>${esc(t('demoEnv'))}</span>
     </div>
   </div>`;
@@ -1150,7 +1150,7 @@ function animateCounters(){
   });
 }
 
-/* ---- HOME (Agentic AI Assistant — Strategy) ---- */
+/* ---- HOME (Agentic AI — Strategy) ---- */
 const HOME = {
   journeyIntro:{en:'Over the past two decades, the UAE has undergone a rapid digital transformation that made it a global model in modernising government work and raising its efficiency.',ar:'شهدت دولة الإمارات خلال العقدين الماضيين تحولاً رقمياً متسارعاً جعلها نموذجاً عالمياً في تحديث العمل الحكومي ورفع كفاءته.'},
   journey:[
@@ -1159,14 +1159,14 @@ const HOME = {
     {y:'2017', t:{en:'First Minister of AI',ar:'أول وزير للذكاء الاصطناعي'}},
     {y:'2019', t:{en:'Digital Government',ar:'الحكومة الرقمية'}},
     {y:'2020', t:{en:'First AI University — MBZUAI',ar:'أول جامعة للذكاء الاصطناعي — محمد بن زايد'}},
-    {y:'2026', t:{en:'Agentic AI Assistant',ar:'الذكاء الاصطناعي المساعد'}, now:true},
+    {y:'2026', t:{en:'Agentic AI',ar:'الذكاء الاصطناعي المساعد'}, now:true},
   ],
   announce:{en:'Under the directives of His Highness Sheikh Mohamed bin Zayed Al Nahyan, President of the UAE, His Highness Sheikh Mohammed bin Rashid Al Maktoum, Vice President and Prime Minister and Ruler of Dubai, announced in April 2026 the launch of a strategic national project — supervised by His Highness Sheikh Mansour bin Zayed Al Nahyan, Vice President, Deputy Prime Minister and Chairman of the Presidential Court.',ar:'بتوجيهات من صاحب السمو الشيخ محمد بن زايد آل نهيان، رئيس الدولة «حفظه الله»، أعلن صاحب السمو الشيخ محمد بن راشد آل مكتوم، نائب رئيس الدولة رئيس مجلس الوزراء حاكم دبي «رعاه الله»، في أبريل 2026 عن إطلاق مشروع وطني استراتيجي، بإشراف سمو الشيخ منصور بن زايد آل نهيان، نائب رئيس الدولة نائب رئيس مجلس الوزراء رئيس ديوان الرئاسة.'},
   vision:{en:'The UAE government — first in the world to transform its sectors and services to Agentic AI models.',ar:'حكومة الإمارات الأولى عالمياً في تحوّل قطاعاتها وخدماتها لنماذج الذكاء الاصطناعي المساعد.'},
   visionSub:{en:'Your executive government partner to support decisions, improve services, and raise operational efficiency.',ar:'شريكنا التنفيذي الحكومي لدعم القرارات وتحسين الخدمات ورفع كفاءة العمليات.'},
   mission:{en:'Transform 50% of government sectors, services and operations to apply Agentic AI models — monitoring change, providing analytics, raising recommendations, managing operations, and executing an autonomous chain of actions without human intervention.',ar:'تحويل 50% من قطاعات وخدمات وعمليات الحكومة لتطبّق نماذج الذكاء الاصطناعي المساعد — رصد المتغيرات، وتقديم التحليلات، ورفع التوصيات، وإدارة العمليات، وتنفيذ سلسلة مستقلة من الإجراءات بدون تدخلات بشرية.'},
   objectives:[
-    {ic:'users', t:{en:'Build capabilities & train people',ar:'بناء القدرات وتدريب الموارد البشرية'}, d:{en:'Prepare every employee to work in an environment supported by AI assistants.',ar:'تأهيل جميع الموظفين للعمل في بيئة مدعومة بمساعدي الذكاء الاصطناعي.'}},
+    {ic:'users', t:{en:'Build capabilities & train people',ar:'بناء القدرات وتدريب الموارد البشرية'}, d:{en:'Prepare every employee to work in an environment supported by AI Agents.',ar:'تأهيل جميع الموظفين للعمل في بيئة مدعومة بمساعدي الذكاء الاصطناعي.'}},
     {ic:'flow', t:{en:'A new system for government work',ar:'المنظومة الجديدة للعمل الحكومي'}, d:{en:'Redesign government processes, services and tasks so Agentic AI can execute them efficiently — boosting productivity and elevating performance.',ar:'إعادة تصميم العمليات والخدمات والمهام الحكومية لتمكين الذكاء الاصطناعي المساعد من تنفيذها بكفاءة، بما يعزز الإنتاجية ويرتقي بالأداء.'}},
     {ic:'shield', t:{en:'Reliable & secure Agentic AI models',ar:'نماذج ذكاء اصطناعي مساعد موثوقة وآمنة'}, d:{en:'Enhance the availability, use and security of Agentic AI capabilities across government.',ar:'تعزيز إتاحة واستخدام وأمن قدرات الذكاء الاصطناعي المساعد عبر الحكومة.'}},
   ],
@@ -1192,7 +1192,7 @@ const HOME = {
       scope:[{k:{en:'General',ar:'الفئة العامة'},v:'80,000'},{k:{en:'Specialised',ar:'الفئة التخصصية'},v:'50,000'},{k:{en:'Technical',ar:'الفئة التقنية'},v:'1,500'},{k:{en:'Leadership',ar:'الفئة القيادية'},v:'240'},{k:{en:'Train‑the‑trainer',ar:'تدريب المدربين'},v:'1,000'}]},
     {id:'t2', ic:'server', name:{en:'AI technologies & data',ar:'تقنيات الذكاء الاصطناعي والبيانات'},
       line:{en:'Unified standards, secure infrastructure and smooth adoption of AI models across government.',ar:'معايير موحدة وبنية تحتية آمنة وتبنٍّ سلس لنماذج الذكاء الاصطناعي عبر الحكومة.'},
-      obj:[{en:'Set smooth procedures to adopt AI assistants and to contract with developer companies.',ar:'وضع إجراءات سلسة لتبني مساعدي الذكاء الاصطناعي وللتعاقد مع الشركات المطورة.'},{en:'Unify technical standards and controls for Agentic AI models across the federal government.',ar:'توحيد المعايير والضوابط التقنية لنماذج وأنظمة الذكاء الاصطناعي المساعد على مستوى الحكومة الاتحادية.'},{en:'Provide high‑efficiency, secure infrastructure for Agentic AI models and systems.',ar:'توفير بنية تحتية ذات كفاءة عالية وآمنة لنماذج وأنظمة الذكاء الاصطناعي المساعد.'}],
+      obj:[{en:'Set smooth procedures to adopt AI Agents and to contract with developer companies.',ar:'وضع إجراءات سلسة لتبني مساعدي الذكاء الاصطناعي وللتعاقد مع الشركات المطورة.'},{en:'Unify technical standards and controls for Agentic AI models across the federal government.',ar:'توحيد المعايير والضوابط التقنية لنماذج وأنظمة الذكاء الاصطناعي المساعد على مستوى الحكومة الاتحادية.'},{en:'Provide high‑efficiency, secure infrastructure for Agentic AI models and systems.',ar:'توفير بنية تحتية ذات كفاءة عالية وآمنة لنماذج وأنظمة الذكاء الاصطناعي المساعد.'}],
       scope:[{k:{en:'Governance',ar:'الحوكمة'},v:''},{k:{en:'Contracting',ar:'التعاقد'},v:''},{k:{en:'Model & system integration',ar:'تكامل النماذج والأنظمة'},v:''},{k:{en:'Infrastructure (GPU · LLMs · platforms)',ar:'البنية التحتية (GPU · نماذج · منصات)'},v:''},{k:{en:'Agentic AI Marketplace',ar:'منصة تداول الذكاء الاصطناعي'},v:''}]},
     {id:'t3', ic:'flow', name:{en:'Operations & institutional support',ar:'العمليات والدعم المؤسسي'},
       line:{en:'Apply Agentic AI to specialised and support operations across all federal entities.',ar:'توظيف الذكاء الاصطناعي المساعد في العمليات التخصصية والدعم المؤسسي في كافة الجهات الاتحادية.'},
@@ -1225,8 +1225,8 @@ const HOME = {
   ],
   phases:[
     {id:'p1', ph:{en:'Phase 1',ar:'المرحلة 1'}, t:{en:'Assessment & preparation',ar:'التقييم والتهيئة'}, dt:{en:'Jun – Aug 2026',ar:'يونيو – أغسطس 2026'}, d:{en:'Inventory tasks, operations and services per track; identify what can transform; run workshops to set priorities; assess infrastructure readiness and needs (incl. contracts); launch leadership & team training.',ar:'حصر المهام والعمليات والخدمات لكل مسار؛ تحديد القابل للتحول؛ تنظيم الورش لتحديد الأولويات؛ تقييم جاهزية البنية التحتية والمتطلبات بما يشمل التعاقدات؛ إطلاق تدريب القيادات والفرق.'}},
-    {id:'p2', ph:{en:'Phase 2',ar:'المرحلة 2'}, t:{en:'First batch / pilot',ar:'إطلاق الدفعة الأولى / التجربة'}, dt:{en:'Sep – Nov 2026',ar:'سبتمبر – نوفمبر 2026'}, d:{en:'Confirm readiness of tasks, operations and services for transformation; complete requirements on government systems and platforms; develop, pilot and run the first batch of AI assistants.',ar:'التأكد من جاهزية المهام والعمليات والخدمات للتحويل؛ استكمال متطلبات التطبيق على الأنظمة والمنصات الحكومية؛ تطوير وتجربة وتشغيل الدفعة الأولى من مساعدي الذكاء الاصطناعي.'}},
-    {id:'p3', ph:{en:'Phases 3–7',ar:'المراحل 3–7'}, t:{en:'Batch rollouts',ar:'إطلاق الدفعات'}, dt:{en:'Dec 2026 – Feb 2028',ar:'ديسمبر 2026 – فبراير 2028'}, d:{en:'Launch AI‑assistant batches every 3 months by priority; continuously assess and review the performance of launched models to ensure effectiveness and fit.',ar:'إطلاق دفعات مساعدي الذكاء الاصطناعي كل 3 أشهر حسب الأولوية؛ تقييم ومراجعة أداء النماذج المُطلقة باستمرار لضمان فعاليتها وملاءمتها.'}},
+    {id:'p2', ph:{en:'Phase 2',ar:'المرحلة 2'}, t:{en:'First batch / pilot',ar:'إطلاق الدفعة الأولى / التجربة'}, dt:{en:'Sep – Nov 2026',ar:'سبتمبر – نوفمبر 2026'}, d:{en:'Confirm readiness of tasks, operations and services for transformation; complete requirements on government systems and platforms; develop, pilot and run the first batch of AI Agents.',ar:'التأكد من جاهزية المهام والعمليات والخدمات للتحويل؛ استكمال متطلبات التطبيق على الأنظمة والمنصات الحكومية؛ تطوير وتجربة وتشغيل الدفعة الأولى من مساعدي الذكاء الاصطناعي.'}},
+    {id:'p3', ph:{en:'Phases 3–7',ar:'المراحل 3–7'}, t:{en:'Batch rollouts',ar:'إطلاق الدفعات'}, dt:{en:'Dec 2026 – Feb 2028',ar:'ديسمبر 2026 – فبراير 2028'}, d:{en:'Launch AI‑Agents batches every 3 months by priority; continuously assess and review the performance of launched models to ensure effectiveness and fit.',ar:'إطلاق دفعات مساعدي الذكاء الاصطناعي كل 3 أشهر حسب الأولوية؛ تقييم ومراجعة أداء النماذج المُطلقة باستمرار لضمان فعاليتها وملاءمتها.'}},
     {id:'p8', ph:{en:'Phase 8',ar:'المرحلة 8'}, t:{en:'Scaling adoption',ar:'التوسع في التطبيق'}, dt:{en:'Mar – May 2028',ar:'مارس – مايو 2028'}, d:{en:'Review prior phases against targets; scale adoption inside and outside entities for full uptake and maximum value; improve model performance; prepare the comprehensive transformation report.',ar:'مراجعة مخرجات المراحل السابقة ومواءمتها مع المستهدفات؛ التوسع في التطبيق داخل وخارج الجهة للتبني الكامل وأقصى استفادة؛ تحسين أداء النماذج؛ إعداد التقرير الشامل حول التحول.'}},
   ],
 };
@@ -1242,7 +1242,7 @@ function viewHome(){
         <div>
           <div class="eyebrow">${esc(L({en:'Federal Government Strategy · July 2026',ar:'استراتيجية الحكومة الاتحادية · يوليو 2026'}))}</div>
           <h1>${L({en:'A new era of government work, powered by <span class="hl">Agentic AI</span>',ar:'مرحلة جديدة من العمل الحكومي مدعومة <span class="hl">بالذكاء الاصطناعي المساعد</span>'})}</h1>
-          <p class="sub">${esc(L({en:'The UAE federal government is transforming half of its sectors, services and operations to Agentic AI models by 2028 — faster services, smarter decisions and greater impact for everyone who lives, works or does business in the UAE.',ar:'تعمل حكومة دولة الإمارات على تحويل نصف قطاعاتها وخدماتها وعملياتها إلى نماذج الذكاء الاصطناعي المساعد بحلول 2028 — خدمات أسرع وقرارات أذكى وأثر أعظم لكل من يعيش أو يعمل أو يستثمر في الدولة.'}))}</p>
+          <p class="sub">${esc(L({en:'The UAE federal government is transforming 50% of its sectors, services and operations to Agentic AI models by 2028 — faster services, smarter decisions and greater impact for everyone who lives, works or does business in the UAE.',ar:'تعمل حكومة دولة الإمارات على تحويل 50% من قطاعاتها وخدماتها وعملياتها إلى نماذج الذكاء الاصطناعي المساعد بحلول 2028 — خدمات أسرع وقرارات أذكى وأثر أعظم لكل من يعيش أو يعمل أو يستثمر في الدولة.'}))}</p>
           <div class="shero-tag"><span>${esc(L({en:'Faster',ar:'أسرع'}))}</span><i>·</i><span>${esc(L({en:'Smarter',ar:'أذكى'}))}</span><i>·</i><span>${esc(L({en:'Greater impact',ar:'أعظم أثراً'}))}</span></div>
         </div>
         <figure class="shero-photo">
@@ -1267,8 +1267,8 @@ function viewHome(){
         ${HOME.journey.map(j=>`<div class="jitem ${j.now?'now':''}"><div class="jline"></div><div class="jdot"></div><div class="jyear">${esc(j.y)}</div><div class="jt">${esc(L(j.t))}</div></div>`).join('')}
       </div>
       <figure class="shero-photo jphoto">
-        <img src="${JOURNEY_IMG}" alt="${esc(L({en:'Launch of the first batch of Agentic AI agents in the UAE Government',ar:'إطلاق المجموعة الأولى من الذكاء الاصطناعي المساعد في حكومة دولة الإمارات'}))}">
-        <figcaption class="cap">${esc(L({en:'Launch of the first batch of Agentic AI Agents in the UAE Government',ar:'إطلاق المجموعة الأولى من الذكاء الاصطناعي المساعد في حكومة دولة الإمارات - مايو 2026'}))}</figcaption>
+        <img src="${JOURNEY_IMG}" alt="${esc(L({en:'Launch of the first batch of AI Agents in the UAE Government',ar:'إطلاق المجموعة الأولى من الذكاء الاصطناعي المساعد في حكومة دولة الإمارات'}))}">
+        <figcaption class="cap">${esc(L({en:'Launch of the first batch of AI Agents in the UAE Government',ar:'إطلاق المجموعة الأولى من الذكاء الاصطناعي المساعد في حكومة دولة الإمارات - مايو 2026'}))}</figcaption>
       </figure>
     </section>
 
@@ -1326,7 +1326,7 @@ function viewHome(){
     </section>
 
     <section class="section" id="sec-roadmap">
-      <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'Transformation roadmap',ar:'خطة التحول'}))}</div><h2>${esc(L({en:'Eight phases from mid-2026 to 2028',ar:'ثماني مراحل من منتصف 2026 حتى 2028'}))}</h2><p>${esc(L({en:'Delivered in recurring 90‑day batches — each batch a wave of AI assistants. June 2026 → May 2028.',ar:'تُنفَّذ عبر دفعات دورية مدة كل منها 90 يوماً — كل دفعة موجة من مساعدي الذكاء الاصطناعي. يونيو 2026 ← مايو 2028.'}))}</p></div></div>
+      <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'Transformation roadmap',ar:'خطة التحول'}))}</div><h2>${esc(L({en:'Eight phases from mid-2026 to 2028',ar:'ثماني مراحل من منتصف 2026 حتى 2028'}))}</h2><p>${esc(L({en:'Delivered in recurring 90‑day batches — each batch a wave of AI Agents. June 2026 → May 2028.',ar:'تُنفَّذ عبر دفعات دورية مدة كل منها 90 يوماً — كل دفعة موجة من مساعدي الذكاء الاصطناعي. يونيو 2026 ← مايو 2028.'}))}</p></div></div>
       <div class="road">
         ${HOME.phases.map(p=>`<button class="phase ${p.id===state.homePhase?'active':''}" data-action="selPhase" data-arg="${p.id}"><span class="ph-dot"></span><b>${esc(L(p.ph))}</b><span class="ph-t">${esc(L(p.t))}</span><span class="ph-dt">${esc(L(p.dt))}</span></button>`).join('')}
       </div>
@@ -1360,12 +1360,12 @@ function accordion(q, rank){
    FRAMEWORK (نظام العمل)
 ============================================================ */
 const FW = {
-  intro:{en:'This framework was prepared to enable ministries and federal entities to implement the Agentic AI Assistant project effectively and in an integrated way — covering its key aspects: concepts, tracks, targets, principles, timeline, prioritisation criteria and governance.',ar:'أُعدّ هذا النظام بهدف تمكين الوزارات والجهات الاتحادية من تطبيق مشروع الذكاء الاصطناعي المساعد بشكل فعّال ومتكامل، ويتناول أبرز الجوانب المتعلقة به: المفاهيم، والمسارات، والمستهدفات، والمبادئ، والبرنامج الزمني، ومعايير الأولويات، والحوكمة.'},
+  intro:{en:'This framework was prepared to enable ministries and federal entities to implement the Agentic AI project effectively and in an integrated way — covering its key aspects: concepts, tracks, targets, principles, timeline, prioritisation criteria and governance.',ar:'أُعدّ هذا النظام بهدف تمكين الوزارات والجهات الاتحادية من تطبيق مشروع الذكاء الاصطناعي المساعد بشكل فعّال ومتكامل، ويتناول أبرز الجوانب المتعلقة به: المفاهيم، والمسارات، والمستهدفات، والمبادئ، والبرنامج الزمني، ومعايير الأولويات، والحوكمة.'},
   version:{en:'First edition · 2026 — Ministry of Cabinet Affairs',ar:'الإصدار الأول · 2026 — وزارة شؤون مجلس الوزراء'},
   concepts:[
     {t:{en:'Agentic AI',ar:'الذكاء الاصطناعي المساعد'}, d:{en:'A system able to understand requests, analyse information and execute tasks independently on behalf of a user or another system — charting its own course of action and using available tools to achieve the intended goal.',ar:'نظام قادر على فهم الطلبات وتحليل المعلومات وتنفيذ المهام بصورة مستقلة نيابةً عن المستخدم أو أي نظام آخر، من خلال تحديد مسار عمله بنفسه واستخدام الأدوات المتاحة لتحقيق الهدف المطلوب.'}},
-    {t:{en:'Specialised AI assistants',ar:'مساعدو الذكاء الاصطناعي المتخصصون'}, d:{en:'Agentic AI models and systems serving the needs of a federal entity, designed around its mandates and data.',ar:'نماذج وأنظمة الذكاء الاصطناعي المساعد التي تخدم احتياجات الجهة الاتحادية والتي صُمّمت بناءً على اختصاصاتها وبياناتها.'}},
-    {t:{en:'Shared AI assistants',ar:'مساعدو الذكاء الاصطناعي المشتركون'}, d:{en:'Agentic AI models and systems serving similar needs across all federal entities — such as translation, presentation design, and more.',ar:'نماذج وأنظمة الذكاء الاصطناعي المساعد التي تخدم الاحتياجات المتشابهة في جميع الجهات الاتحادية مثل الترجمة وتصميم العروض وغيرها.'}},
+    {t:{en:'Specialised AI Agents',ar:'مساعدو الذكاء الاصطناعي المتخصصون'}, d:{en:'Agentic AI models and systems serving the needs of a federal entity, designed around its mandates and data.',ar:'نماذج وأنظمة الذكاء الاصطناعي المساعد التي تخدم احتياجات الجهة الاتحادية والتي صُمّمت بناءً على اختصاصاتها وبياناتها.'}},
+    {t:{en:'Shared AI Agents',ar:'مساعدو الذكاء الاصطناعي المشتركون'}, d:{en:'Agentic AI models and systems serving similar needs across all federal entities — such as translation, presentation design, and more.',ar:'نماذج وأنظمة الذكاء الاصطناعي المساعد التي تخدم الاحتياجات المتشابهة في جميع الجهات الاتحادية مثل الترجمة وتصميم العروض وغيرها.'}},
     {t:{en:'Procedures',ar:'الإجراءات'}, d:{en:'A set of linked steps executed within a defined period by an employee, team, organisational unit or committee — with defined inputs and outputs — related to developing or executing a strategy or policy, or delivering a service.',ar:'مجموعة من الخطوات المرتبطة التي يتم تنفيذها في مدة زمنية معينة من قبل الموظف أو فريق العمل أو الوحدة التنظيمية أو اللجنة المعنية، ولها مدخلات ومخرجات محددة، وتكون متعلقة بتطوير وتنفيذ استراتيجية أو سياسة أو تقديم خدمة معينة.'}},
     {t:{en:'Operations',ar:'العمليات'}, d:{en:'A set of activities performed — in parallel or in sequence — by an employee, team, organisational unit or committee to execute tasks and complete procedures inside or outside the entity.',ar:'مجموعة من الأنشطة التي يقوم بها الموظف أو فريق العمل أو الوحدة التنظيمية أو اللجنة المعنية، بشكل متوازٍ أو متعاقب، لتنفيذ المهام وإنجاز الإجراءات داخل أو خارج الجهة.'}},
     {t:{en:'Specialised operations',ar:'العمليات التخصصية'}, d:{en:'Operations tied to the non-service mandates of ministries and federal entities per their establishing legislation — classified into main processes and sub-processes.',ar:'العمليات المرتبطة بالاختصاصات غير الخدمية للوزارات والجهات الاتحادية وفق تشريعات إنشائها، وتُصنّف إلى عمليات رئيسية وعمليات فرعية.'}},
@@ -1402,9 +1402,9 @@ const FW = {
       {en:'Define technical, financial resources and requirements; contract implementation companies if needed.',ar:'تحديد الموارد والمتطلبات الفنية والتقنية والمالية، والتعاقد مع الشركات المنفذة (إن لزم).'},
       {en:'Set the internal working mechanism for the teams and run the needed workshops and meetings.',ar:'تحديد آلية العمل الداخلية وتنظيم الاجتماعات واللقاءات والورش اللازمة مع الأطراف المعنية.'},
     ]},
-    {ph:{en:'Phases 2–7 — Develop & launch AI assistants',ar:'المراحل الثانية إلى السابعة — تطوير وإطلاق مساعدي الذكاء الاصطناعي'}, dt:{en:'Sep 2026 – Feb 2028',ar:'سبتمبر 2026 – فبراير 2028'}, items:[
+    {ph:{en:'Phases 2–7 — Develop & launch AI Agents',ar:'المراحل الثانية إلى السابعة — تطوير وإطلاق مساعدي الذكاء الاصطناعي'}, dt:{en:'Sep 2026 – Feb 2028',ar:'سبتمبر 2026 – فبراير 2028'}, items:[
       {en:'Confirm readiness of tasks, services and operations; define the scope of change and success criteria.',ar:'التأكد من جاهزية المهام والخدمات والعمليات للتحويل وتحديد نطاق التغيير ومعايير النجاح.'},
-      {en:'Design, develop, test, pilot and operate AI assistants per launch batches.',ar:'تصميم وتطوير واختبار وتجربة وتشغيل مساعدي الذكاء الاصطناعي وفق دفعات الإطلاق.'},
+      {en:'Design, develop, test, pilot and operate AI Agents per launch batches.',ar:'تصميم وتطوير واختبار وتجربة وتشغيل مساعدي الذكاء الاصطناعي وفق دفعات الإطلاق.'},
       {en:'Comply with training requirements and provide FAHR the completion data; adjust employee status per FAHR procedures.',ar:'الامتثال لمتطلبات برامج التدريب وتزويد الهيئة بالبيانات اللازمة، وتعديل أوضاع الموظفين وفق إجراءات الهيئة.'},
       {en:'Coordinate with the AI technologies & data track lead on applying solutions to government systems and platforms.',ar:'التنسيق مع رئيس مسار تقنيات الذكاء الاصطناعي والبيانات بشأن متطلبات التطبيق على الأنظمة والمنصات الحكومية.'},
       {en:'Continuously assess launched models; monitor changes affecting quality or risk and take corrective action.',ar:'تقييم ومراجعة أداء النماذج المُطلقة باستمرار ورصد أي تغيرات تؤثر على الجودة أو المخاطر واتخاذ الإجراءات التصحيحية.'},
@@ -1452,7 +1452,7 @@ function viewFramework(){
   return `
   <section class="fw-hero"><div class="wrap">
     <div class="eyebrow">${esc(L({en:'The Framework',ar:'نظام العمل'}))}</div>
-    <h1>${esc(L({en:'Working framework of the Agentic AI Assistant project',ar:'نظام عمل مشروع الذكاء الاصطناعي المساعد'}))}</h1>
+    <h1>${esc(L({en:'Working framework of the Agentic AI project',ar:'نظام عمل مشروع الذكاء الاصطناعي المساعد'}))}</h1>
     <p class="sub">${esc(L(FW.intro))}</p>
     <div class="fw-ver">${ic('doc')} ${esc(L(FW.version))}</div>
     <div class="fw-nav">${FW_SECS.map(sc=>`<button class="fw-navbtn" data-action="scrollTo" data-arg="${sc.id}">${ic(sc.ic)}<span>${esc(L(sc.t))}</span></button>`).join('')}</div>
@@ -1542,7 +1542,7 @@ function viewGuides(){
   return `<div class="wrap"><section class="section">
     <div class="eyebrow">${esc(L({en:'Guides',ar:'الأدلة'}))}</div>
     <div class="h-lead"><div><h2>${esc(L({en:'Official guides & references',ar:'الأدلة والمراجع الرسمية'}))}</h2>
-      <p>${esc(L({en:'The approved national references for the Agentic AI Assistant project. Open a guide in your browser or download it as PDF.',ar:'المراجع الوطنية المعتمدة لمشروع الذكاء الاصطناعي المساعد. افتح الدليل في المتصفح أو حمّله بصيغة PDF.'}))}</p></div></div>
+      <p>${esc(L({en:'The approved national references for the Agentic AI project. Open a guide in your browser or download it as PDF.',ar:'المراجع الوطنية المعتمدة لمشروع الذكاء الاصطناعي المساعد. افتح الدليل في المتصفح أو حمّله بصيغة PDF.'}))}</p></div></div>
     <div class="guide-grid">
       ${GUIDES.map(g=>`<div class="gcard">
         <div class="ghead">
