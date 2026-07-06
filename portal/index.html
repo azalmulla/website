@@ -562,6 +562,61 @@ html[lang="ar"] .si-lockup .en{letter-spacing:.02em}
 @media(max-width:560px){
   .tgt-grid,.trk-tabs,.ben-grid,.road,.journey{grid-template-columns:1fr}
 }
+
+/* ===== FRAMEWORK / GUIDES / FAQS ===== */
+.fw-hero{background:linear-gradient(180deg,#f3f8ff,#fff 80%);border-bottom:1px solid var(--line);padding:46px 0 30px}
+.fw-hero h1{font-size:clamp(1.6rem,3.4vw,2.4rem);margin-top:12px;letter-spacing:-.015em;max-width:820px}
+.fw-hero .sub{color:var(--ink-2);max-width:780px;margin-top:12px}
+.fw-ver{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:.82rem;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:.4em .9em}
+.fw-ver .ico{width:15px;height:15px}
+.fw-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.fw-navbtn{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:.5em 1em;font-weight:600;font-size:.86rem;color:var(--ink-2);cursor:pointer;transition:.15s}
+.fw-navbtn:hover{border-color:var(--blue);color:var(--blue-deep);background:var(--soft)}
+.fw-navbtn .ico{width:16px;height:16px}
+.scope-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.scope{border-radius:var(--r-lg);padding:24px;border:1px solid var(--line)}
+.scope.in{background:linear-gradient(160deg,#f0faf4,#fff)}
+.scope.out{background:linear-gradient(160deg,#fdf3f3,#fff)}
+.scope-h{display:flex;align-items:center;gap:8px;font-family:'Sora';font-weight:700;margin-bottom:14px}
+.scope.in .scope-h{color:#0a7a43}.scope.out .scope-h{color:#b3403f}
+.scope-h .ico{width:20px;height:20px}
+.scope p{margin:0;color:var(--ink-2);font-size:.92rem;line-height:1.7}
+.fw-tgt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fw-tgt{display:flex;gap:18px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;box-shadow:var(--sh-sm)}
+.fw-tgt .num{flex:none;font-family:'Sora';font-weight:800;font-size:2.6rem;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.fw-tgt b{display:block;font-size:.96rem;color:var(--ink);line-height:1.5}
+.fw-tgt p{margin:8px 0 0;font-size:.85rem;color:var(--muted)}
+.fw-acc{margin-bottom:10px}
+.fw-check{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;font-size:.92rem;color:var(--ink-2)}
+.fw-check .ck{flex:none;width:24px;height:24px;border-radius:7px;background:var(--soft-2);color:var(--blue-deep);display:grid;place-items:center;font-family:'Sora';font-weight:700;font-size:.76rem;margin-top:1px}
+.crit-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.crit{background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 16px;cursor:pointer;transition:.16s}
+.crit:hover{border-color:#cdd8ea}
+.crit.open{background:var(--soft)}
+.crit-h{display:flex;align-items:center;gap:12px;padding:14px 0}
+.crit-i{flex:none;width:34px;height:34px;border-radius:9px;background:var(--soft-2);color:var(--blue-deep);display:grid;place-items:center}
+.crit-i .ico{width:18px;height:18px}
+.crit-h b{flex:1;font-size:.96rem;color:var(--ink)}
+.crit-h .chev{transition:.2s;color:var(--muted-2)}
+.crit.open .crit-h .chev{transform:rotate(180deg)}
+.crit-ul{margin:0;padding:0 0 16px;list-style:none}
+.crit-ul li{position:relative;padding-inline-start:20px;margin-bottom:8px;font-size:.9rem;color:var(--ink-2)}
+.crit-ul li::before{content:'';position:absolute;inset-inline-start:2px;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--grad)}
+.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.gcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:26px;box-shadow:var(--sh-sm);display:flex;flex-direction:column;gap:14px}
+.ghead{display:flex;gap:16px;align-items:center}
+.gcover{flex:none;width:64px;height:80px;border-radius:10px;background:linear-gradient(160deg,#0a1022,#1e3a8a);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Sora';font-weight:800;font-size:.95rem;gap:2px;box-shadow:var(--sh-md)}
+.gcover span{font-size:.6rem;letter-spacing:.14em;color:#7fc4ff}
+.ghead h3{font-size:1.05rem;line-height:1.35}
+.gmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.gdesc{margin:0;font-size:.9rem;color:var(--ink-2);line-height:1.65}
+.gtoc{display:flex;flex-wrap:wrap;gap:8px}
+.gfoot{display:flex;gap:10px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip-f{border:1px solid var(--line);background:#fff;border-radius:999px;padding:.45em 1em;font-weight:600;font-size:.84rem;color:var(--ink-2);cursor:pointer;transition:.15s}
+.chip-f:hover{border-color:#cdd8ea;background:var(--soft)}
+.chip-f.active{background:var(--grad);color:#fff;border-color:transparent}
+@media(max-width:900px){.scope-grid,.fw-tgt-grid,.guide-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -601,7 +656,10 @@ const isAr = () => state.lang==='ar';
 ============================================================ */
 const UI = {
   search:{en:'Search',ar:'بحث'},
-  searchAll:{en:'Search decrees, questions, vendors…',ar:'ابحث في القرارات والأسئلة والموردين…'},
+  framework:{en:'The Framework',ar:'نظام العمل'},
+  guides:{en:'Guides',ar:'الأدلة'},
+  faqs:{en:'FAQs',ar:'الأسئلة الشائعة'},
+  searchAll:{en:'Search the framework, guides and FAQs…',ar:'ابحث في نظام العمل والأدلة والأسئلة…'},
   signIn:{en:'Sign in',ar:'تسجيل الدخول'},
   signOut:{en:'Sign out',ar:'تسجيل الخروج'},
   switchRole:{en:'Switch role',ar:'تبديل الدور'},
@@ -887,118 +945,6 @@ const KB_EXTRA = [
     a:{en:'No. Central compute is additive and does not draw from your existing IT budget. It is intended to remove the capex barrier to starting AI projects, so your budget can focus on delivery and adoption.',ar:'لا. الحوسبة المركزية إضافية ولا تُخصم من ميزانية تقنية المعلومات الحالية لديكم. والهدف إزالة عائق الإنفاق الرأسمالي لبدء مشاريع الذكاء الاصطناعي، كي تركّز ميزانيتكم على التنفيذ والتبنّي.'} },
 ];
 
-const CATS = [
-  {id:'infra', icon:'server', name:{en:'Infrastructure — servers & GPUs',ar:'البنية التحتية — الخوادم والمعالجات'}, desc:{en:'Compute provisioning, the Government AI Cloud, GPU quotas and exceptions.',ar:'توفير الحوسبة، والسحابة الحكومية، وحصص المعالجات والاستثناءات.'}},
-  {id:'vendors', icon:'store', name:{en:'Vendors & platforms',ar:'الموردون والمنصّات'}, desc:{en:'Who you can work with, approval scope, and onboarding new vendors.',ar:'مع من يمكنكم العمل، ونطاق الاعتماد، واعتماد موردين جدد.'}},
-  {id:'continuity', icon:'flow', name:{en:'Existing projects & continuity',ar:'المشاريع القائمة والاستمرارية'}, desc:{en:'What happens to work already under way and how transition is assessed.',ar:'ماذا يحدث للأعمال الجارية وكيف يُقيَّم الانتقال.'}},
-  {id:'data', icon:'shield', name:{en:'Data, security & residency',ar:'البيانات والأمن والإقامة'}, desc:{en:'Classification, where data may live, and production approvals.',ar:'التصنيف، وأين يمكن أن تقيم البيانات، وموافقات الإنتاج.'}},
-  {id:'budget', icon:'scale', name:{en:'Procurement & budget',ar:'المشتريات والميزانية'}, desc:{en:'Who funds compute and licences, and central framework agreements.',ar:'من يموّل الحوسبة والتراخيص، والاتفاقيات الإطارية المركزية.'}},
-  {id:'workforce', icon:'users', name:{en:'Workforce & enablement',ar:'الكفاءات والتمكين'}, desc:{en:'Shared specialists, the AI Lead role, training and certification.',ar:'الاختصاصيون المشتركون، ودور قائد الذكاء الاصطناعي، والتدريب والاعتماد.'}},
-];
-
-let DECREES = [
-  { no:'AI-2026-002', date:'2026-05-18', status:'ineffect', ver:'1.0', topics:['governance'],
-    title:{en:'Agentic AI Governance & Guardrails',ar:'حوكمة الذكاء الاصطناعي الوكيل وضوابطه'},
-    summary:{en:'Establishes the tiered governance model for autonomous and agentic systems across federal entities: human-in-the-loop requirements for irreversible and citizen-facing actions, scoped permissions, mandatory audit logging, named accountable owners, and kill-switch obligations.',ar:'يُرسي نموذج الحوكمة المتدرّج للأنظمة المستقلة والوكيلة عبر الجهات الاتحادية: متطلبات التأكيد البشري للإجراءات غير القابلة للتراجع والموجَّهة للمتعاملين، والصلاحيات محدّدة النطاق، والتسجيل الإلزامي للعمليات، والملّاك المسؤولون المُسمّون، والتزامات مفتاح الإيقاف.'},
-    hist:[{v:'1.0',d:'2026-05-18',n:{en:'Issued and in effect',ar:'صدر ودخل حيّز التنفيذ'}}] },
-  { no:'AI-2025-021', date:'2025-11-30', status:'ineffect', ver:'1.2', topics:['continuity'],
-    title:{en:'Project Transition & Continuity',ar:'انتقال المشاريع واستمراريتها'},
-    summary:{en:'Defines the transition pathway for AI initiatives already under way: mandatory registration within the onboarding window, assessment against the new standards, remediation timelines for conflicting components, and continuity guarantees for compliant projects already in production.',ar:'يحدّد المسار الانتقالي لمبادرات الذكاء الاصطناعي الجارية بالفعل: التسجيل الإلزامي خلال فترة الانضمام، والتقييم وفق المعايير الجديدة، وجداول معالجة المكوّنات المتعارضة، وضمانات الاستمرارية للمشاريع المتوافقة في مرحلة الإنتاج.'},
-    hist:[{v:'1.2',d:'2025-11-30',n:{en:'Extended onboarding window for large entities',ar:'تمديد فترة الانضمام للجهات الكبيرة'}},{v:'1.0',d:'2025-09-10',n:{en:'Issued',ar:'صدر'}}] },
-  { no:'AI-2025-018', date:'2025-10-12', status:'ineffect', ver:'1.0', topics:['governance','data'],
-    title:{en:'AI Security Review & Go-Live Approval',ar:'المراجعة الأمنية واعتماد الإطلاق'},
-    summary:{en:'Sets the three-part approval required before any AI system enters production: data-classification sign-off, security review, and model risk assessment. Defines the fast-track route for low-risk pilots and the elevated review for citizen-facing systems.',ar:'يحدّد الاعتماد الثلاثي المطلوب قبل دخول أي نظام ذكاء اصطناعي مرحلة الإنتاج: اعتماد تصنيف البيانات، والمراجعة الأمنية، وتقييم مخاطر النموذج. ويعرّف المسار السريع للتجارب منخفضة المخاطر والمراجعة المشدّدة للأنظمة الموجَّهة للمتعاملين.'},
-    hist:[{v:'1.0',d:'2025-10-12',n:{en:'Issued',ar:'صدر'}}] },
-  { no:'AI-2025-014', date:'2025-08-22', status:'ineffect', ver:'1.1', topics:['infra'],
-    title:{en:'Sovereign Compute & GPU Allocation',ar:'الحوسبة السيادية وتخصيص المعالجات'},
-    summary:{en:'Centralises AI compute through the Government AI Cloud. Entities draw GPU capacity from allocated, sovereign quotas rather than procuring hardware. Sets exception criteria for entity-owned clusters and the request process for quota changes.',ar:'يُمركز حوسبة الذكاء الاصطناعي عبر السحابة الحكومية. وتسحب الجهات سعة المعالجات من حصص سيادية مخصّصة بدلًا من شراء الأجهزة. ويحدّد معايير الاستثناء للمجموعات المملوكة للجهات وإجراء طلب تغيير الحصص.'},
-    hist:[{v:'1.1',d:'2025-08-22',n:{en:'Added burst-quota provision for pilots',ar:'إضافة بند حصص الدفعات للتجارب'}},{v:'1.0',d:'2025-06-30',n:{en:'Issued',ar:'صدر'}}] },
-  { no:'AI-2025-011', date:'2025-07-15', status:'ineffect', ver:'1.0', topics:['workforce'],
-    title:{en:'AI Talent & Capability Enablement',ar:'تمكين كفاءات الذكاء الاصطناعي'},
-    summary:{en:'Establishes the central enablement team, the shared specialist pool, the entity AI Lead role, and the training and certification framework available to all federal staff.',ar:'يؤسّس فريق التمكين المركزي، وفريق الاختصاصيين المشترك، ودور قائد الذكاء الاصطناعي في الجهة، وإطار التدريب والاعتماد المتاح لجميع موظفي الاتحاد.'},
-    hist:[{v:'1.0',d:'2025-07-15',n:{en:'Issued',ar:'صدر'}}] },
-  { no:'AI-2025-009', date:'2025-06-05', status:'ineffect', ver:'1.3', topics:['vendors','budget'],
-    title:{en:'Approved Vendor & Platform Framework',ar:'إطار الموردين والمنصّات المعتمدة'},
-    summary:{en:'Defines the approved-vendor model, scope-of-approval rules, central framework agreements for licences, and the exception process for engaging vendors outside the list. Includes the data-handling clearance tied to each approval tier.',ar:'يحدّد نموذج الموردين المعتمدين، وقواعد نطاق الاعتماد، والاتفاقيات الإطارية المركزية للتراخيص، وإجراء الاستثناء للتعاقد مع موردين خارج القائمة. ويشمل تصريح معالجة البيانات المرتبط بكل مستوى اعتماد.'},
-    hist:[{v:'1.3',d:'2025-06-05',n:{en:'Added two sovereign providers',ar:'إضافة مزوّدَين سياديَّين'}},{v:'1.0',d:'2025-03-20',n:{en:'Issued',ar:'صدر'}}] },
-  { no:'AI-2025-003', date:'2025-02-28', status:'ineffect', ver:'1.0', topics:['data'],
-    title:{en:'Data Classification & Residency for AI',ar:'تصنيف البيانات وإقامتها للذكاء الاصطناعي'},
-    summary:{en:'Maps the federal data-classification levels to permitted AI hosting options and model access, and prohibits sending Restricted-and-above data to public model endpoints outside sovereign environments.',ar:'يربط مستويات تصنيف البيانات الاتحادية بخيارات الاستضافة المسموحة ووصول النماذج، ويحظر إرسال البيانات «المقيّدة» فأعلى إلى نقاط نهاية نماذج عامة خارج البيئات السيادية.'},
-    hist:[{v:'1.0',d:'2025-02-28',n:{en:'Issued',ar:'صدر'}}] },
-  { no:'AI-2026-005', date:'2026-06-09', status:'draft', ver:'0.4', topics:['governance','data'],
-    title:{en:'Approved Model Catalogue',ar:'كتالوج النماذج المعتمدة'},
-    summary:{en:'(Draft for entity consultation) Establishes a curated catalogue of approved AI models — sovereign-hosted open models and brokered frontier APIs — with the data classifications each is cleared to process. Open for entity feedback before issuance.',ar:'(مسودة لاستشارة الجهات) يُنشئ كتالوجًا منسّقًا من نماذج الذكاء الاصطناعي المعتمدة — نماذج مفتوحة مستضافة سياديًا وواجهات متقدّمة وسيطة — مع تصنيفات البيانات المسموح لكل منها بمعالجتها. مفتوح لملاحظات الجهات قبل الإصدار.'},
-    hist:[{v:'0.4',d:'2026-06-09',n:{en:'Draft circulated for consultation',ar:'تعميم المسودة للاستشارة'}}] },
-];
-
-const VENDORS = [
-  { name:'Core42', tier:'sovereign', color:'linear-gradient(135deg,#0b49e6,#19bbf1)', initials:'C42',
-    meta:{en:'Sovereign AI cloud · UAE (G42)',ar:'سحابة ذكاء اصطناعي سيادية · الإمارات (G42)'},
-    uses:{en:'Sovereign hosting, managed LLMs, Restricted/Confidential workloads, full agentic stack.',ar:'استضافة سيادية، نماذج لغوية مُدارة، أحمال «مقيّدة/سرّية»، منظومة وكيلة كاملة.'},
-    res:{en:'In-country sovereign — preferred for Restricted and above.',ar:'سيادي داخل الدولة — مفضّل للمصنّف «مقيّد» فأعلى.'},
-    cond:{en:'None — cleared for all classifications.',ar:'لا شيء — معتمد لجميع التصنيفات.'},
-    vehicle:{en:'Central framework agreement',ar:'اتفاقية إطارية مركزية'} },
-  { name:'Microsoft Azure', tier:'approved', color:'linear-gradient(135deg,#0078d4,#33bbf5)', initials:'MS',
-    meta:{en:'Cloud platform · UAE regions',ar:'منصّة سحابية · مناطق الإمارات'},
-    uses:{en:'Azure OpenAI Service, AI Foundry, productivity copilots, general workloads.',ar:'خدمة Azure OpenAI، ومنصّة AI Foundry، ومساعدو الإنتاجية، والأحمال العامة.'},
-    res:{en:'UAE North / Central regions (in-country).',ar:'منطقتا الإمارات الشمالية/الوسطى (داخل الدولة).'},
-    cond:{en:'Restricted data requires sovereign configuration + sign-off.',ar:'تتطلّب البيانات «المقيّدة» إعدادًا سياديًا واعتمادًا.'},
-    vehicle:{en:'Central framework agreement',ar:'اتفاقية إطارية مركزية'} },
-  { name:'Google Cloud', tier:'approved', color:'linear-gradient(135deg,#1a73e8,#34a853)', initials:'GC',
-    meta:{en:'Cloud platform · Vertex AI / Gemini',ar:'منصّة سحابية · Vertex AI / Gemini'},
-    uses:{en:'Vertex AI, Gemini for enterprise, data analytics and BigQuery workloads.',ar:'Vertex AI، Gemini للمؤسسات، وتحليلات البيانات وأحمال BigQuery.'},
-    res:{en:'In-country region where available; else nearest GCC sovereign region by exception.',ar:'منطقة داخل الدولة حيثما توفّرت؛ وإلا أقرب منطقة خليجية سيادية بالاستثناء.'},
-    cond:{en:'Restricted data by exception only, pending in-country region.',ar:'البيانات «المقيّدة» بالاستثناء فقط، بانتظار منطقة داخل الدولة.'},
-    vehicle:{en:'Central framework agreement',ar:'اتفاقية إطارية مركزية'} },
-  { name:'AWS', tier:'approved', color:'linear-gradient(135deg,#232f3e,#ff9900)', initials:'AWS',
-    meta:{en:'Cloud platform · Middle East (UAE) Region',ar:'منصّة سحابية · منطقة الشرق الأوسط (الإمارات)'},
-    uses:{en:'Amazon Bedrock, SageMaker, general and data workloads.',ar:'Amazon Bedrock، SageMaker، والأحمال العامة وأحمال البيانات.'},
-    res:{en:'AWS Middle East (UAE) Region — in-country.',ar:'منطقة AWS الشرق الأوسط (الإمارات) — داخل الدولة.'},
-    cond:{en:'Restricted data requires sovereign configuration + sign-off.',ar:'تتطلّب البيانات «المقيّدة» إعدادًا سياديًا واعتمادًا.'},
-    vehicle:{en:'Central framework agreement',ar:'اتفاقية إطارية مركزية'} },
-  { name:'Oracle', tier:'conditional', color:'linear-gradient(135deg,#c74634,#f80000)', initials:'OR',
-    meta:{en:'Cloud platform · OCI sovereign',ar:'منصّة سحابية · OCI سيادي'},
-    uses:{en:'OCI, database and enterprise application workloads, sovereign cloud option.',ar:'OCI، وأحمال قواعد البيانات وتطبيقات المؤسسات، وخيار السحابة السيادية.'},
-    res:{en:'UAE Government Cloud (sovereign) configuration.',ar:'إعداد السحابة الحكومية الإماراتية (سيادي).'},
-    cond:{en:'Conditional — sovereign tenancy required for government data.',ar:'مشروط — يلزم استئجار سيادي لبيانات الحكومة.'},
-    vehicle:{en:'Framework agreement (in progress)',ar:'اتفاقية إطارية (قيد الإعداد)'} },
-  { name:'e& enterprise', tier:'approved', color:'linear-gradient(135deg,#e60000,#ff5a36)', initials:'e&',
-    meta:{en:'Managed services · UAE',ar:'خدمات مُدارة · الإمارات'},
-    uses:{en:'Hosting, connectivity, managed services and systems integration.',ar:'الاستضافة، والاتصال، والخدمات المُدارة، وتكامل الأنظمة.'},
-    res:{en:'In-country data centres.',ar:'مراكز بيانات داخل الدولة.'},
-    cond:{en:'None for hosting/integration scope.',ar:'لا شيء ضمن نطاق الاستضافة/التكامل.'},
-    vehicle:{en:'Central framework agreement',ar:'اتفاقية إطارية مركزية'} },
-  { name:'du', tier:'approved', color:'linear-gradient(135deg,#5b2d8e,#9b51b0)', initials:'du',
-    meta:{en:'Managed services · UAE',ar:'خدمات مُدارة · الإمارات'},
-    uses:{en:'Hosting, edge, connectivity and managed infrastructure services.',ar:'الاستضافة، والحافة، والاتصال، وخدمات البنية التحتية المُدارة.'},
-    res:{en:'In-country data centres.',ar:'مراكز بيانات داخل الدولة.'},
-    cond:{en:'None for hosting scope.',ar:'لا شيء ضمن نطاق الاستضافة.'},
-    vehicle:{en:'Central framework agreement',ar:'اتفاقية إطارية مركزية'} },
-];
-
-let REQUESTS = [
-  { id:'REQ-1042', mine:true, topic:'infra', status:'answered', date:'2026-06-18',
-    subject:{en:'GPU quota increase for vision pilot',ar:'زيادة حصّة GPU لتجربة الرؤية'},
-    body:{en:'Our document-vision pilot has outgrown its current allocation. Requesting an increase from 4 to 12 GPUs for the next quarter.',ar:'تجاوزت تجربة رؤية المستندات لدينا مخصّصها الحالي. نطلب زيادة من 4 إلى 12 وحدة معالجة للربع القادم.'},
-    response:{en:'Approved. Your allocation is raised to 12 GPUs on the Government AI Cloud, effective immediately, valid for the quarter and renewable on registration of the workload as production. Reference GAC-Q-2291.',ar:'تمت الموافقة. رُفع مخصّصكم إلى 12 وحدة على السحابة الحكومية، نافذًا فورًا، صالحًا للربع وقابلًا للتجديد عند تسجيل الحمل كإنتاج. المرجع GAC-Q-2291.'} },
-  { id:'REQ-1051', mine:true, topic:'vendors', status:'underreview', date:'2026-06-21',
-    subject:{en:'Approval to use Google Vertex AI for analytics',ar:'اعتماد استخدام Google Vertex AI للتحليلات'},
-    body:{en:'We would like to use Vertex AI for an internal analytics workload on Internal-classified data. Confirming residency requirements.',ar:'نرغب في استخدام Vertex AI لحمل تحليلات داخلي على بيانات مصنّفة «داخلية». نؤكّد متطلبات الإقامة.'},
-    response:null },
-  { id:'REQ-1063', mine:true, topic:'continuity', status:'submitted', date:'2026-06-24',
-    subject:{en:'Continuity assessment for existing chatbot project',ar:'تقييم استمرارية مشروع روبوت المحادثة القائم'},
-    body:{en:'Registering our customer-service chatbot (live since 2024) for transition assessment under AI-2025-021.',ar:'نسجّل روبوت خدمة المتعاملين لدينا (يعمل منذ 2024) لتقييم الانتقال وفق القرار AI-2025-021.'},
-    response:null },
-  { id:'REQ-1067', mine:false, topic:'data', status:'submitted', date:'2026-06-24', fromEn:'Federal Tax Authority', fromAr:'الهيئة الاتحادية للضرائب',
-    subject:{en:'Hosting clarification for taxpayer data model',ar:'توضيح الاستضافة لنموذج بيانات دافعي الضرائب'},
-    body:{en:'Confirming that a fraud-detection model on Restricted taxpayer data must run on Core42 sovereign only.',ar:'نؤكّد أنّ نموذج كشف الاحتيال على بيانات دافعي الضرائب «المقيّدة» يجب أن يعمل على Core42 السيادي فقط.'},
-    response:null },
-  { id:'REQ-1066', mine:false, topic:'governance', status:'underreview', date:'2026-06-23', fromEn:'Ministry of Health & Prevention', fromAr:'وزارة الصحة ووقاية المجتمع',
-    subject:{en:'High-autonomy agent for appointment scheduling',ar:'وكيل عالي الاستقلالية لجدولة المواعيد'},
-    body:{en:'Requesting elevated review for an agent that books and reschedules patient appointments autonomously.',ar:'نطلب مراجعة مشدّدة لوكيل يحجز ويعيد جدولة مواعيد المرضى تلقائيًا.'},
-    response:null },
-];
-
 const ENTITIES = [
   {en:'Ministry of Cabinet Affairs',ar:'وزارة شؤون مجلس الوزراء'},
   {en:'Ministry of Finance',ar:'وزارة المالية'},
@@ -1064,11 +1010,9 @@ function renderSignin(){
 ============================================================ */
 const TABS = [
   {id:'home', icon:'home', label:'home'},
-  {id:'mostAsked', icon:'star', label:'mostAsked'},
-  {id:'kb', icon:'book', label:'kb'},
-  {id:'decrees', icon:'doc', label:'decrees'},
-  {id:'requests', icon:'chat', label:'requests'},
-  {id:'vendors', icon:'store', label:'vendors'},
+  {id:'framework', icon:'flow', label:'framework'},
+  {id:'guides', icon:'book', label:'guides'},
+  {id:'faqs', icon:'chat', label:'faqs'},
 ];
 function renderHeader(){
   const ent = isAr()?state.entityAr:state.entity;
@@ -1081,9 +1025,6 @@ function renderHeader(){
       <div class="hsearch hideMobile" data-action="goSearch" title="${esc(t('search'))}">${ic('search')}<input placeholder="${esc(t('search'))}" data-action="goSearch" readonly tabindex="-1"></div>
       <button class="iconbtn onlyMobile" data-action="goSearch" title="${esc(t('search'))}">${ic('search')}</button>
       <button class="iconbtn hideMobile" title="3">${ic('bell')}</button>
-      <div class="adminsw ${state.admin?'on':''}" data-action="toggleAdmin" title="${esc(t('adminMode'))}">
-        <span class="track"><span class="knob"></span></span><span class="lbl">${esc(t('adminMode'))}</span>
-      </div>
       <button class="langtog" data-action="lang" data-arg="${isAr()?'en':'ar'}">${ic('globe')}<span>${isAr()?'English':'العربية'}</span></button>
       <div class="chip" data-action="toggleMenu">
         <span class="av">${esc(initials(state.entity))}</span>
@@ -1097,7 +1038,7 @@ function renderHeader(){
       </div>
     </div>`;
   $('#tabrow').innerHTML = TABS.map(tb=>{
-    const open = tb.id==='requests' ? REQUESTS.filter(r=> state.admin ? !r.mine && r.status!=='answered' : r.mine && r.status!=='answered').length : 0;
+    const open = 0;
     return `<button class="tab ${state.view===tb.id?'active':''}" data-action="nav" data-arg="${tb.id}">
       ${ic(tb.icon)}<span>${esc(t(tb.label))}</span>${open?`<span class="dot">${open}</span>`:''}</button>`;
   }).join('');
@@ -1109,12 +1050,12 @@ function renderFooter(){
       <div class="foot-lk">
         <span class="foot-logo"><img src="${LOGO_URI}" alt="${esc(L(LOGO_ALT))}"></span>
       </div>
-      ${col(L({en:'Guidance',ar:'الإرشادات'}),[{en:'Most asked',ar:'الأكثر تكرارًا',v:'mostAsked'},{en:'Knowledge base',ar:'قاعدة المعرفة',v:'kb'},{en:'Decrees & policies',ar:'القرارات والسياسات',v:'decrees'}])}
-      ${col(L({en:'Programme',ar:'البرنامج'}),[{en:'Approved vendors',ar:'الموردون المعتمدون',v:'vendors'},{en:'Request desk',ar:'مكتب الطلبات',v:'requests'},{en:'Government AI Cloud',ar:'السحابة الحكومية',v:'home'}])}
-      ${col(L({en:'Support',ar:'الدعم'}),[{en:'Contact programme office',ar:'مكتب البرنامج',v:'requests'},{en:'Your AI Lead',ar:'قائد الذكاء لديكم',v:'home'}])}
+      ${col(L({en:'The project',ar:'المشروع'}),[{en:'Strategy',ar:'الاستراتيجية',v:'home'},{en:'The framework',ar:'نظام العمل',v:'framework'}])}
+      ${col(L({en:'Resources',ar:'الموارد'}),[{en:'Guides',ar:'الأدلة',v:'guides'},{en:'FAQs',ar:'الأسئلة الشائعة',v:'faqs'}])}
+      ${col(L({en:'Support',ar:'الدعم'}),[{en:'Search',ar:'البحث',v:'search'},{en:'Ministry of Cabinet Affairs',ar:'وزارة شؤون مجلس الوزراء',v:'home'}])}
     </div>
     <div class="foot-bottom">
-      <span>© 2026 ${esc(L({en:'Federal AI Integration Programme — United Arab Emirates',ar:'برنامج تكامل الذكاء الاصطناعي الاتحادي — دولة الإمارات العربية المتحدة'}))}</span>
+      <span>© 2026 ${esc(L({en:'Agentic AI Assistant Project — United Arab Emirates Government',ar:'مشروع الذكاء الاصطناعي المساعد — حكومة دولة الإمارات العربية المتحدة'}))}</span>
       <span>${esc(t('demoEnv'))}</span>
     </div>
   </div>`;
@@ -1125,8 +1066,8 @@ function renderFooter(){
 ============================================================ */
 function renderView(){
   const v = state.view;
-  const html = v==='home'?viewHome():v==='mostAsked'?viewMostAsked():v==='kb'?viewKB()
-    :v==='decrees'?viewDecrees():v==='requests'?viewRequests():v==='vendors'?viewVendors()
+  const html = v==='home'?viewHome()
+    :v==='framework'?viewFramework():v==='guides'?viewGuides():v==='faqs'?viewFaqs()
     :v==='search'?viewSearch():'';
   $('#main').innerHTML = html;
   $('#main').scrollIntoView({block:'start'});
@@ -1319,20 +1260,7 @@ function viewHome(){
   </div>`;
 }
 
-/* ---- MOST ASKED ---- */
-function viewMostAsked(){
-  const list = state.maTopic==='all'?MOST_ASKED:MOST_ASKED.filter(q=>q.topic===state.maTopic);
-  const chips = [{id:'all',name:t('allTopics')}].concat(TOPICS.map(t=>({id:t.id,name:L(t)})));
-  return `<div class="wrap"><section class="section">
-    <div class="eyebrow">${esc(t('mostAsked'))}</div>
-    <div class="h-lead"><div><h2>${esc(L({en:'Most asked questions',ar:'الأسئلة الأكثر تكرارًا'}))}</h2>
-      <p>${esc(L({en:'Ranked by how often entities ask them. Each answer links to the decree it comes from.',ar:'مرتّبة حسب تكرار طرح الجهات لها. وكل إجابة مرتبطة بالقرار الذي تستند إليه.'}))}</p></div></div>
-    <div class="chips">${chips.map(c=>`<button class="fchip ${state.maTopic===c.id?'on':''}" data-action="filterMA" data-arg="${c.id}">${esc(c.name)}</button>`).join('')}</div>
-    ${list.map((q,i)=>accordion(q, MOST_ASKED.indexOf(q)+1)).join('')}
-  </section></div>`;
-}
 function accordion(q, rank){
-  const decree = DECREES.find(d=>d.no===q.decree);
   return `<div class="acc" data-acc>
     <button class="acc-h" data-action="acc">
       ${rank?`<span class="acc-rank">${rank}</span>`:`<span class="acc-rank">${ic('chat')}</span>`}
@@ -1345,7 +1273,6 @@ function accordion(q, rank){
     </button>
     <div class="acc-body"><div class="ans"><p>${esc(L(q.a))}</p>
       <div class="acc-foot">
-        ${decree?`<span class="ref" data-action="openDecree" data-arg="${decree.no}" style="cursor:pointer">${ic('doc')} ${esc(t('relatedDecree'))}: ${esc(decree.no)}</span>`:''}
         <span class="helpful"><span>${esc(t('wasHelpful'))}</span>
           <button data-action="helpful">${ic('thumb')} ${esc(t('yes'))}</button></span>
       </div>
@@ -1353,31 +1280,257 @@ function accordion(q, rank){
   </div>`;
 }
 
+/* ============================================================
+   FRAMEWORK (نظام العمل)
+============================================================ */
+const FW = {
+  intro:{en:'This framework was prepared to enable ministries and federal entities to implement the Agentic AI Assistant project effectively and in an integrated way — covering its key aspects: concepts, tracks, targets, principles, timeline, prioritisation criteria and governance.',ar:'أُعدّ هذا النظام بهدف تمكين الوزارات والجهات الاتحادية من تطبيق مشروع الذكاء الاصطناعي المساعد بشكل فعّال ومتكامل، ويتناول أبرز الجوانب المتعلقة به: المفاهيم، والمسارات، والمستهدفات، والمبادئ، والبرنامج الزمني، ومعايير الأولويات، والحوكمة.'},
+  version:{en:'First edition · 2026 — Ministry of Cabinet Affairs',ar:'الإصدار الأول · 2026 — وزارة شؤون مجلس الوزراء'},
+  concepts:[
+    {t:{en:'Agentic AI',ar:'الذكاء الاصطناعي المساعد'}, d:{en:'A system able to understand requests, analyse information and execute tasks independently on behalf of a user or another system — charting its own course of action and using available tools to achieve the intended goal.',ar:'نظام قادر على فهم الطلبات وتحليل المعلومات وتنفيذ المهام بصورة مستقلة نيابةً عن المستخدم أو أي نظام آخر، من خلال تحديد مسار عمله بنفسه واستخدام الأدوات المتاحة لتحقيق الهدف المطلوب.'}},
+    {t:{en:'Specialised AI assistants',ar:'مساعدو الذكاء الاصطناعي المتخصصون'}, d:{en:'Agentic AI models and systems serving the needs of a federal entity, designed around its mandates and data.',ar:'نماذج وأنظمة الذكاء الاصطناعي المساعد التي تخدم احتياجات الجهة الاتحادية والتي صُمّمت بناءً على اختصاصاتها وبياناتها.'}},
+    {t:{en:'Shared AI assistants',ar:'مساعدو الذكاء الاصطناعي المشتركون'}, d:{en:'Agentic AI models and systems serving similar needs across all federal entities — such as translation, presentation design, and more.',ar:'نماذج وأنظمة الذكاء الاصطناعي المساعد التي تخدم الاحتياجات المتشابهة في جميع الجهات الاتحادية مثل الترجمة وتصميم العروض وغيرها.'}},
+    {t:{en:'Procedures',ar:'الإجراءات'}, d:{en:'A set of linked steps executed within a defined period by an employee, team, organisational unit or committee — with defined inputs and outputs — related to developing or executing a strategy or policy, or delivering a service.',ar:'مجموعة من الخطوات المرتبطة التي يتم تنفيذها في مدة زمنية معينة من قبل الموظف أو فريق العمل أو الوحدة التنظيمية أو اللجنة المعنية، ولها مدخلات ومخرجات محددة، وتكون متعلقة بتطوير وتنفيذ استراتيجية أو سياسة أو تقديم خدمة معينة.'}},
+    {t:{en:'Operations',ar:'العمليات'}, d:{en:'A set of activities performed — in parallel or in sequence — by an employee, team, organisational unit or committee to execute tasks and complete procedures inside or outside the entity.',ar:'مجموعة من الأنشطة التي يقوم بها الموظف أو فريق العمل أو الوحدة التنظيمية أو اللجنة المعنية، بشكل متوازٍ أو متعاقب، لتنفيذ المهام وإنجاز الإجراءات داخل أو خارج الجهة.'}},
+    {t:{en:'Specialised operations',ar:'العمليات التخصصية'}, d:{en:'Operations tied to the non-service mandates of ministries and federal entities per their establishing legislation — classified into main processes and sub-processes.',ar:'العمليات المرتبطة بالاختصاصات غير الخدمية للوزارات والجهات الاتحادية وفق تشريعات إنشائها، وتُصنّف إلى عمليات رئيسية وعمليات فرعية.'}},
+    {t:{en:'Institutional support operations',ar:'عمليات الدعم المؤسسي'}, d:{en:'Operations that support and enable organisational units without producing a service for individuals or business — including HR, procurement & contracts, finance, administration, legislative affairs, internal audit & governance, IT support, cybersecurity, facilities, and government communication.',ar:'العمليات المرتبطة بتقديم الدعم والمساندة وتمكين عمل الوحدات التنظيمية والتي لا ينتج عنها خدمة للأفراد وقطاع الأعمال، وتشمل: الموارد البشرية، والمشتريات والعقود، والشؤون المالية، والشؤون الإدارية، والشؤون التشريعية، والتدقيق الداخلي والحوكمة المؤسسية، والدعم التقني، والأمن السيبراني، وإدارة المرافق والصيانة، والإعلام والاتصال الحكومي.'}},
+    {t:{en:'Services',ar:'الخدمات'}, d:{en:'A chain of activities performed by the federal entity or others to deliver a service that meets customers’ needs and provides final added value, across in-person, electronic and digital channels.',ar:'سلسلة من الأنشطة التي تقوم بها الجهة الاتحادية أو الجهات الأخرى لتقديم خدمة تلبي احتياجات المتعاملين وتمكّنهم من الحصول على قيمة نهائية مضافة، عبر مختلف قنوات تقديم الخدمة.'}},
+    {t:{en:'Service bundles',ar:'باقات الخدمات'}, d:{en:'A set of interconnected services covering a specific stage of an individual’s or business’s life events.',ar:'مجموعة من الخدمات المترابطة التي تغطي مرحلة معينة من أحداث حياة الفرد أو قطاع الأعمال.'}},
+    {t:{en:'Strategic tasks',ar:'المهام الاستراتيجية'}, d:{en:'Strategic procedures and activities at the national and entity level — including strategies & projects, policies, foresight & strategic intelligence, government performance, structures & governance, global competitiveness, and government innovation.',ar:'الإجراءات والأنشطة الاستراتيجية على المستوى الوطني ومستوى الجهات الاتحادية، وتشمل: الاستراتيجيات والمشاريع، والسياسات، والاستشراف والذكاء الاستراتيجي، والأداء الحكومي، والهياكل والحوكمة، والتنافسية العالمية، والابتكار في العمل الحكومي.'}},
+    {t:{en:'Launch batches',ar:'دفعات الإطلاقات'}, d:{en:'The defined windows in track workplans for major launches and announcements — every 90 days after completing Phase 1 (assessment & preparation).',ar:'الفترات الزمنية المحددة في خطط عمل المسارات للإطلاقات والإعلانات الرئيسية، وتتم كل 90 يوماً بعد إنجاز المرحلة الأولى من التقييم والتهيئة.'}},
+    {t:{en:'National Agentic AI Committee',ar:'اللجنة الوطنية للذكاء الاصطناعي المساعد'}, d:{en:'The committee managing the project at the federal level — approving entity workplans and monitoring their execution and Cabinet decisions — chaired by the Minister of Cabinet Affairs, with government-level track leads as members.',ar:'اللجنة المعنية بإدارة المشروع على مستوى الحكومة الاتحادية واعتماد خطط عمل الجهات ومتابعة تنفيذها والقرارات الصادرة عن مجلس الوزراء، برئاسة وزير شؤون مجلس الوزراء وعضوية رؤساء المسارات على المستوى الحكومي.'}},
+  ],
+  scope:{
+    inn:[
+      {en:'Operations tied directly to the entity’s mandates — the core of its work',ar:'العمليات المرتبطة مباشرة باختصاصات الجهة — جوهر عملها'},
+      {en:'Support and enabling operations of institutional work',ar:'العمليات الداعمة والمساندة للعمل المؤسسي'},
+      {en:'All services provided to individuals and business — digital or traditional',ar:'جميع الخدمات المقدمة للأفراد وقطاع الأعمال — رقمية أو تقليدية'},
+      {en:'Service bundles covering life-event stages',ar:'باقات الخدمات التي تغطي مراحل أحداث الحياة'},
+      {en:'Strategic tasks: strategies, agendas, policies, projects, structures and more',ar:'المهام الاستراتيجية: الاستراتيجيات والأجندات والسياسات والمشاريع والهياكل وغيرها'},
+    ],
+    out:{en:'Operations, tasks, procedures and services determined and approved as unfeasible/not viable for Agentic AI adoption by the National Agentic AI Committee or the relevant government-level track lead.',ar:'العمليات والمهام والإجراءات والخدمات التي سيتم تحديدها واعتمادها بأنها غير قابلة/غير مجدية لتبني الذكاء الاصطناعي المساعد من قبل اللجنة الوطنية أو رئيس المسار المعني على مستوى الحكومة.'},
+    enable:{en:'Enabling entities (e.g. Ministry of Finance and FAHR) support the transformation of operations running on unified federal finance and HR systems; specialised operations remain the direct responsibility of each federal entity. Policies and guides for systems and infrastructure are provided by the AI technologies & data track team.',ar:'تقوم الجهات الحكومية المُمكِّنة (مثل وزارة المالية والهيئة الاتحادية للموارد البشرية الحكومية) بدعم تحوّل العمليات المطبّقة للأنظمة الموحدة للمالية العامة والموارد البشرية، أما العمليات التخصصية فتقع ضمن المسؤولية المباشرة للجهات الاتحادية. وتُزوَّد الجهات بالسياسات والأدلة المرتبطة بالأنظمة والبنية التحتية من فريق مسار تقنيات الذكاء الاصطناعي والبيانات.'},
+  },
+  targets:[
+    {n:'50%', t:{en:'of the entity’s operations, tasks, procedures and services transformed to Agentic AI-powered models',ar:'من العمليات والمهام والإجراءات والخدمات في الجهة الاتحادية محوّلة إلى نماذج مدعومة بالذكاء الاصطناعي المساعد'}, d:{en:'Calculated from the total that is transformable and viable to transform. Entities must define quantified, measurable expected results and impact.',ar:'تُحتسب من إجمالي القابل للتحويل والمجدي تحويله. وعلى الجهات تحديد نتائج وأثر متوقع كمي وواضح وقابل للقياس.'}},
+    {n:'100%', t:{en:'of the entity’s employees trained and qualified on Agentic AI',ar:'من موظفي الجهة الاتحادية مدرَّبون ومؤهَّلون على الذكاء الاصطناعي المساعد'}, d:{en:'In coordination with FAHR, per the programmes the authority designs. Further targets will be defined and communicated later.',ar:'بالتنسيق مع الهيئة الاتحادية للموارد البشرية الحكومية ووفق البرامج التي ستصممها. وستُحدَّد مستهدفات أخرى لاحقاً وتُبلَّغ بها الجهات.'}},
+  ],
+  phases:[
+    {ph:{en:'Phase 1 — Assessment & preparation',ar:'المرحلة الأولى — التقييم والتهيئة'}, dt:{en:'Jun – Aug 2026',ar:'يونيو – أغسطس 2026'}, items:[
+      {en:'Survey existing, in-progress and new AI projects aligned with the tracks; submit to the National Committee.',ar:'مسح وحصر المشاريع القائمة وقيد التنفيذ والجديدة المتبنية للذكاء الاصطناعي المساعد بما يتوافق مع المسارات ورفعها للجنة الوطنية.'},
+      {en:'Survey operations, services and tasks; identify what can transform per approved criteria and the two-year target; submit to the National Committee.',ar:'مسح وحصر العمليات والخدمات والمهام وتحديد القابل للتحول وفق المعايير المعتمدة والمستهدف تحويله خلال عامين، ورفعها للجنة الوطنية.'},
+      {en:'Form the internal team and appoint entity coordinators for each track.',ar:'تشكيل فريق العمل الداخلي وتحديد منسقي الجهة لكل مسار.'},
+      {en:'Coordinate with government-level track leads on each track’s requirements.',ar:'التنسيق مع رؤساء المسارات على المستوى الحكومي لضمان تنفيذ متطلبات كل مسار.'},
+      {en:'Embed FAHR’s Agentic AI programmes into employees’ individual training plans, plus any training the entity needs.',ar:'تضمين خطط التدريب الفردية للموظفين بالبرامج التدريبية التي تطرحها الهيئة الاتحادية للموارد البشرية، وأي برامج لازمة لتمكين الجهة.'},
+      {en:'Prepare detailed workplans and start executing them.',ar:'إعداد خطط العمل التفصيلية والبدء في تنفيذها.'},
+      {en:'Define technical, financial resources and requirements; contract implementation companies if needed.',ar:'تحديد الموارد والمتطلبات الفنية والتقنية والمالية، والتعاقد مع الشركات المنفذة (إن لزم).'},
+      {en:'Set the internal working mechanism for the teams and run the needed workshops and meetings.',ar:'تحديد آلية العمل الداخلية وتنظيم الاجتماعات واللقاءات والورش اللازمة مع الأطراف المعنية.'},
+    ]},
+    {ph:{en:'Phases 2–7 — Develop & launch AI assistants',ar:'المراحل الثانية إلى السابعة — تطوير وإطلاق مساعدي الذكاء الاصطناعي'}, dt:{en:'Sep 2026 – Feb 2028',ar:'سبتمبر 2026 – فبراير 2028'}, items:[
+      {en:'Confirm readiness of tasks, services and operations; define the scope of change and success criteria.',ar:'التأكد من جاهزية المهام والخدمات والعمليات للتحويل وتحديد نطاق التغيير ومعايير النجاح.'},
+      {en:'Design, develop, test, pilot and operate AI assistants per launch batches.',ar:'تصميم وتطوير واختبار وتجربة وتشغيل مساعدي الذكاء الاصطناعي وفق دفعات الإطلاق.'},
+      {en:'Comply with training requirements and provide FAHR the completion data; adjust employee status per FAHR procedures.',ar:'الامتثال لمتطلبات برامج التدريب وتزويد الهيئة بالبيانات اللازمة، وتعديل أوضاع الموظفين وفق إجراءات الهيئة.'},
+      {en:'Coordinate with the AI technologies & data track lead on applying solutions to government systems and platforms.',ar:'التنسيق مع رئيس مسار تقنيات الذكاء الاصطناعي والبيانات بشأن متطلبات التطبيق على الأنظمة والمنصات الحكومية.'},
+      {en:'Continuously assess launched models; monitor changes affecting quality or risk and take corrective action.',ar:'تقييم ومراجعة أداء النماذج المُطلقة باستمرار ورصد أي تغيرات تؤثر على الجودة أو المخاطر واتخاذ الإجراءات التصحيحية.'},
+      {en:'Manage and respond to incidents per approved procedures — rapid containment and learning.',ar:'إدارة الحوادث الناجمة عن النماذج والاستجابة لها وفق الإجراءات المعتمدة بما يضمن سرعة الاحتواء والتعلم.'},
+      {en:'Incorporate employee and community feedback into improvement; address issues.',ar:'تضمين ملاحظات الموظفين وآراء أفراد المجتمع في التطوير والتحسين ومعالجة المشاكل.'},
+      {en:'Report actual results against targets per the Committee’s performance mechanism.',ar:'رفع النتائج الفعلية والمحققة للمستهدفات ومستجدات التنفيذ وفق آلية إدارة الأداء والمتابعة.'},
+    ]},
+    {ph:{en:'Phase 8 — Scaling adoption',ar:'المرحلة الثامنة — التوسع في التطبيق'}, dt:{en:'Mar – May 2028',ar:'مارس – مايو 2028'}, items:[
+      {en:'Review prior-phase outputs, align them with targets and submit the required reports.',ar:'مراجعة مخرجات المراحل السابقة ومواءمتها مع المستهدفات ورفع التقارير اللازمة.'},
+      {en:'Scale Agentic AI adoption inside and outside the entity for full uptake and maximum value.',ar:'التوسع في تطبيق النماذج داخل وخارج الجهة لضمان التبني الكامل وأقصى استفادة.'},
+      {en:'Improve model performance and outputs.',ar:'تحسين أداء ومخرجات نماذج وأنظمة الذكاء الاصطناعي المساعد.'},
+      {en:'Entities’ efforts and results will be assessed and ranked (customer satisfaction, error rates, time reduction, productivity gains, cost reduction, role compliance, output quality…) and the best performers announced.',ar:'سيتم تقييم وتصنيف جهود ونتائج الجهات (رضا المتعاملين، نسب الأخطاء، خفض زمن الإنجاز، زيادة الإنتاجية، خفض التكلفة، الالتزام بتوزيع الأدوار، جودة المخرجات…) والإعلان عن الأفضل في التحول.'},
+    ]},
+  ],
+  criteria:[
+    {ic:'grid', t:{en:'Density & volume',ar:'الكثافة والحجم'}, items:[{en:'Transactions per year',ar:'عدد المعاملات سنوياً'},{en:'Number and nature of beneficiary groups',ar:'عدد وطبيعة الفئات المستفيدة'},{en:'Frequency of use',ar:'تكرار الاستخدام'},{en:'Time taken to execute',ar:'الزمن المستغرق للتنفيذ'},{en:'Degree of reliance and breadth of impact',ar:'مدى الاعتماد عليها ونطاق تأثيرها'}]},
+    {ic:'flow', t:{en:'Complexity level',ar:'مستوى التعقيد'}, items:[{en:'Sensitivity and criticality of outputs',ar:'حساسية وخطورة المخرجات'},{en:'Clarity of inputs and outputs',ar:'وضوح المدخلات والمخرجات'},{en:'Number of steps and procedures',ar:'عدد الخطوات والإجراءات'},{en:'Impact of error and how it is handled',ar:'أثر الخطأ وكيفية معالجته'},{en:'Number of entities or parties involved',ar:'عدد الجهات أو الأطراف المعنية'},{en:'Volume of exceptions and special cases',ar:'حجم الاستثناءات والحالات الخاصة'},{en:'Compliance and governance requirements',ar:'متطلبات الامتثال والحوكمة'}]},
+    {ic:'checkc', t:{en:'Readiness to transform',ar:'الجاهزية للتحول'}, items:[{en:'Clarity and documentation of procedures',ar:'وضوح وتوثيق الإجراءات والأنشطة'},{en:'Data availability and quality',ar:'توفر البيانات وجودتها'},{en:'Digitisation level and automatability',ar:'مستوى الرقمنة وإمكانية الأتمتة'},{en:'Integration with other systems',ar:'التكامل مع الأنظمة الأخرى'},{en:'Clarity of roles and responsibilities',ar:'وضوح الأدوار والمسؤوليات'},{en:'Readiness of relevant policies and legislation',ar:'جاهزية السياسات والتشريعات ذات الصلة'}]},
+    {ic:'scale', t:{en:'Transformability (viability)',ar:'القابلية للتحول (جدوى التحويل)'}, items:[{en:'Necessity of keeping human interaction',ar:'ضرورة الإبقاء على التفاعل البشري'},{en:'Number of decisions and approvals required',ar:'عدد القرارات والاعتمادات اللازمة'}]},
+    {ic:'spark', t:{en:'Expected impact',ar:'مستوى الأثر المتوقع'}, items:[{en:'Expected impact on quality, cost, completion time, customer satisfaction, employee productivity, and more',ar:'الأثر المتوقع على الجودة والتكلفة وزمن الإنجاز ورضا المتعاملين وإنتاجية الموظفين وغيرها'}]},
+  ],
+  criteriaNote:{en:'Operations, tasks and services are classified into priority levels per the assessment — prioritising high-usage, high-readiness, high-impact and low-risk items first. The government-level track lead may amend or add criteria; entities may adopt additional criteria relevant to their work in coordination with the track lead.',ar:'تُصنَّف العمليات والمهام والخدمات إلى مستويات أولوية وفق نتائج التقييم — مع إعطاء الأولوية للأعلى استخداماً وجاهزيةً وأثراً والأقل مخاطر. ويجوز لرئيس المسار تعديل المعايير أو إضافة أخرى، كما يجوز للجهة اعتماد معايير إضافية مرتبطة بطبيعة عملها بالتنسيق مع رئيس المسار.'},
+  gov:{
+    team:{en:'Each entity establishes a governance framework and forms an internal project team chaired by the head of the entity, with the undersecretary or director-general as deputy, and membership of entity leadership (assistant undersecretaries / executive directors), the Chief AI Officer (if any), the director of strategy & future, the government services lead, and heads of relevant units — per the nature of each track.',ar:'تضع كل جهة إطاراً لحوكمة المشروع وتشكّل فريق عمل داخلياً برئاسة رئيس الجهة الاتحادية، وعضوية وكيل الوزارة أو المدير العام (نائباً للرئيس)، وقيادات الجهة من الوكلاء المساعدين أو المدراء التنفيذيين، والرئيس التنفيذي للذكاء الاصطناعي (إن وجد)، ومدير إدارة الاستراتيجية والمستقبل، ومسؤول الخدمات الحكومية، ومسؤولي الإدارات المعنية — وفقاً لطبيعة كل مسار.'},
+    teamRole:{en:'The internal team leads the project in the entity: overseeing execution, approving delivery plans, tracking KPIs, managing challenges, and taking the decisions needed to hit the targets on time.',ar:'يتولى فريق العمل الداخلي قيادة المشروع في الجهة: الإشراف على التنفيذ، واعتماد الخطط التنفيذية، ومتابعة مؤشرات الأداء، وإدارة التحديات، واتخاذ القرارات اللازمة لتحقيق المستهدفات ضمن الإطار الزمني.'},
+    coord:[
+      {en:'Coordinate inside the entity with delivery teams, and outside with government entities and partners when needed.',ar:'التنسيق داخل الجهة مع الفرق المعنية بتنفيذ خطة المسار، وخارجها مع الجهات الحكومية والشركاء (إن لزم).'},
+      {en:'Track execution of the track plan and report progress, results and achievements periodically to the internal team.',ar:'متابعة تنفيذ خطة المسار ورفع تقارير التقدم والنتائج والإنجازات بشكل دوري إلى فريق العمل الداخلي.'},
+      {en:'Monitor risks and challenges and propose suitable solutions.',ar:'متابعة المخاطر والتحديات واقتراح الحلول المناسبة.'},
+      {en:'Propose initiatives to engage employees, individuals and the community in developing solutions and verifying their effectiveness.',ar:'اقتراح المبادرات لإشراك الموظفين والأفراد والمجتمع في تطوير الحلول والتحقق من فاعليتها.'},
+    ],
+  },
+};
+
+const FW_SECS = [
+  {id:'fw-concepts', ic:'book', t:{en:'Concepts',ar:'المفاهيم'}},
+  {id:'fw-scope', ic:'grid', t:{en:'Scope',ar:'النطاق'}},
+  {id:'fw-targets', ic:'star', t:{en:'Targets',ar:'المستهدفات'}},
+  {id:'fw-timeline', ic:'cal', t:{en:'Timeline',ar:'البرنامج الزمني'}},
+  {id:'fw-criteria', ic:'scale', t:{en:'Prioritisation',ar:'معايير الأولويات'}},
+  {id:'fw-gov', ic:'shield', t:{en:'Governance',ar:'الحوكمة'}},
+];
+
+function viewFramework(){
+  return `
+  <section class="fw-hero"><div class="wrap">
+    <div class="eyebrow">${esc(L({en:'The Framework',ar:'نظام العمل'}))}</div>
+    <h1>${esc(L({en:'Working framework of the Agentic AI Assistant project',ar:'نظام عمل مشروع الذكاء الاصطناعي المساعد'}))}</h1>
+    <p class="sub">${esc(L(FW.intro))}</p>
+    <div class="fw-ver">${ic('doc')} ${esc(L(FW.version))}</div>
+    <div class="fw-nav">${FW_SECS.map(sc=>`<button class="fw-navbtn" data-action="scrollTo" data-arg="${sc.id}">${ic(sc.ic)}<span>${esc(L(sc.t))}</span></button>`).join('')}</div>
+  </div></section>
+
+  <div class="wrap">
+
+    <section class="section" id="fw-concepts">
+      <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'Shared language',ar:'اللغة المشتركة'}))}</div><h2>${esc(L({en:'Concepts & definitions',ar:'المفاهيم والمصطلحات'}))}</h2><p>${esc(L({en:'The unified understanding of the project. Tap a term to read its definition.',ar:'الفهم الموحد للمشروع. اضغط أي مصطلح لقراءة تعريفه.'}))}</p></div></div>
+      <div class="prin-grid">
+        ${FW.concepts.map((c,i)=>`<div class="prin" data-action="cardToggle"><div class="prin-h"><span class="prin-n">${ic('book')}</span><span class="prin-t">${esc(L(c.t))}</span>${ic('chev','chev')}</div><div class="prin-d">${esc(L(c.d))}</div></div>`).join('')}
+      </div>
+    </section>
+
+    <section class="section" id="fw-scope">
+      <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'What transforms',ar:'ماذا يشمل التحول'}))}</div><h2>${esc(L({en:'Scope of transformation',ar:'نطاق التحويل'}))}</h2></div></div>
+      <div class="scope-grid">
+        <div class="scope in"><div class="scope-h">${ic('checkc')} ${esc(L({en:'In scope',ar:'ضمن النطاق'}))}</div>
+          ${FW.scope.inn.map(x=>`<div class="trk-obj">${ic('check')}<span>${esc(L(x))}</span></div>`).join('')}
+        </div>
+        <div class="scope out"><div class="scope-h">${ic('close')} ${esc(L({en:'Out of scope',ar:'خارج النطاق'}))}</div>
+          <p>${esc(L(FW.scope.out))}</p>
+        </div>
+      </div>
+      <div class="announce" style="margin-top:16px">${ic('users')}<p>${esc(L(FW.scope.enable))}</p></div>
+    </section>
+
+    <section class="section" id="fw-targets">
+      <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'Two years',ar:'خلال عامين'}))}</div><h2>${esc(L({en:'The entity’s two headline targets',ar:'المستهدفان الرئيسيان للجهة'}))}</h2></div></div>
+      <div class="fw-tgt-grid">
+        ${FW.targets.map(g=>`<div class="fw-tgt"><div class="num">${esc(g.n)}</div><div><b>${esc(L(g.t))}</b><p>${esc(L(g.d))}</p></div></div>`).join('')}
+      </div>
+    </section>
+
+    <section class="section" id="fw-timeline">
+      <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'Jun 2026 → May 2028',ar:'يونيو 2026 ← مايو 2028'}))}</div><h2>${esc(L({en:'What entities must do, phase by phase',ar:'ما المطلوب من الجهات في كل مرحلة'}))}</h2><p>${esc(L({en:'Eight phases: assessment & preparation, six launch phases, then improvement and scaling. Tap a phase to see its obligations.',ar:'ثماني مراحل: التقييم والتهيئة، ثم ست مراحل لإطلاق مساعدي الذكاء الاصطناعي، وانتهاءً بالتحسين والتوسع. اضغط أي مرحلة لعرض متطلباتها.'}))}</p></div></div>
+      ${FW.phases.map((p,i)=>`<div class="acc fw-acc ${i===0?'open':''}" data-acc>
+        <button class="acc-h" data-action="acc">
+          <span class="acc-rank">${i===0?'1':i===1?'2–7':'8'}</span>
+          <span class="acc-q">${esc(L(p.ph))}</span>
+          <span class="acc-meta"><span class="pill hideMobile">${ic('cal')} ${esc(L(p.dt))}</span>${ic('chev','chev')}</span>
+        </button>
+        <div class="acc-body"><div class="ans">
+          ${p.items.map((x,k)=>`<div class="fw-check"><span class="ck">${k+1}</span><span>${esc(L(x))}</span></div>`).join('')}
+        </div></div>
+      </div>`).join('')}
+    </section>
+
+    <section class="section" id="fw-criteria">
+      <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'Choosing what goes first',ar:'اختيار الأولويات'}))}</div><h2>${esc(L({en:'Prioritisation criteria matrix',ar:'مصفوفة معايير اختيار الأولويات'}))}</h2><p>${esc(L({en:'Entities assess operations, tasks and services against five criteria groups. Tap a group to see its factors.',ar:'تُقيّم الجهات العمليات والمهام والخدمات وفق خمس مجموعات من المعايير. اضغط أي مجموعة لعرض عناصرها.'}))}</p></div></div>
+      <div class="crit-grid">
+        ${FW.criteria.map(c=>`<div class="crit" data-action="cardToggle"><div class="crit-h"><span class="crit-i">${ic(c.ic)}</span><b>${esc(L(c.t))}</b><span class="pill">${c.items.length}</span>${ic('chev','chev')}</div><div class="prin-d"><ul class="crit-ul">${c.items.map(x=>`<li>${esc(L(x))}</li>`).join('')}</ul></div></div>`).join('')}
+      </div>
+      <div class="announce" style="margin-top:16px">${ic('scale')}<p>${esc(L(FW.criteriaNote))}</p></div>
+    </section>
+
+    <section class="section" id="fw-gov">
+      <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'Who runs it',ar:'من يقود التنفيذ'}))}</div><h2>${esc(L({en:'Governance within the federal entity',ar:'حوكمة المشروع في الجهة الاتحادية'}))}</h2></div></div>
+      <div class="vm-grid">
+        <div class="vm v-vision"><div class="vm-k">${ic('users')} ${esc(L({en:'Internal project team',ar:'فريق العمل الداخلي'}))}</div><p style="margin:14px 0 10px;color:var(--ink-2)">${esc(L(FW.gov.team))}</p><p style="margin:0;color:var(--ink-2)">${esc(L(FW.gov.teamRole))}</p></div>
+        <div class="vm v-mission"><div class="vm-k">${ic('pin')} ${esc(L({en:'Track coordinators',ar:'منسقو المسارات'}))}</div>
+          <div style="margin-top:14px">${FW.gov.coord.map(x=>`<div class="trk-obj">${ic('check')}<span>${esc(L(x))}</span></div>`).join('')}</div>
+        </div>
+      </div>
+    </section>
+
+  </div>`;
+}
+
+/* ============================================================
+   GUIDES (الأدلة)
+============================================================ */
+const GUIDES = [
+  { id:'ref-ar', lang:'AR', pages:21, ver:'4.1', date:{en:'May 2026',ar:'مايو 2026'},
+    file:'https://raw.githubusercontent.com/azalmulla/website/claude/stoic-hypatia-t17hpi/portal/guides/UAE_Agentic_AI_National_Reference_AR.pdf',
+    title:{en:'Agentic AI — Definitional Guide (Arabic)',ar:'الذكاء الاصطناعي المساعد — دليل تعريفي'},
+    desc:{en:'The official Arabic definitional reference for federal entities: what Generative AI, Agentic AI and multi-agent AI are, and the criteria entities use to classify their systems as Agentic AI systems.',ar:'المرجع التعريفي الرسمي باللغة العربية للجهات الاتحادية: تعريف الذكاء الاصطناعي التوليدي والذكاء الاصطناعي المساعد والذكاء الاصطناعي متعدد المساعدين، والمعايير المعتمدة لتصنيف الأنظمة بوصفها أنظمة ذكاء اصطناعي مساعد.'},
+    toc:[{en:'Scope & purpose',ar:'النطاق والهدف'},{en:'Generative AI',ar:'الذكاء الاصطناعي التوليدي'},{en:'AI agents',ar:'وكلاء الذكاء الاصطناعي'},{en:'Multi-agent frameworks',ar:'الأطر متعددة المساعدين'},{en:'Comparative analysis',ar:'التحليل المقارن'},{en:'Illustrative application',ar:'تطبيق توضيحي'},{en:'Self-assessment',ar:'التقييم الذاتي'},{en:'FAQs',ar:'الأسئلة الشائعة'}] },
+  { id:'ref-en', lang:'EN', pages:34, ver:'5.1', date:{en:'May 2026',ar:'مايو 2026'},
+    file:'https://raw.githubusercontent.com/azalmulla/website/claude/stoic-hypatia-t17hpi/portal/guides/UAE_Agentic_AI_National_Reference_EN.pdf',
+    title:{en:'UAE Agentic AI — National Reference (English)',ar:'المرجع الوطني للذكاء الاصطناعي المساعد (إنجليزي)'},
+    desc:{en:'The official English national reference: definitions and capabilities of Generative AI, AI agents and multi-agent frameworks; a comparative analysis; an illustrative application (driving-licence renewal); a self-assessment; and FAQs.',ar:'المرجع الوطني الرسمي باللغة الإنجليزية: تعريفات وقدرات الذكاء الاصطناعي التوليدي ووكلاء الذكاء الاصطناعي والأطر متعددة المساعدين؛ وتحليل مقارن؛ وتطبيق توضيحي (تجديد رخصة القيادة)؛ وتقييم ذاتي؛ وأسئلة شائعة.'},
+    toc:[{en:'Scope & purpose',ar:'النطاق والهدف'},{en:'Generative AI — capabilities & limits',ar:'الذكاء الاصطناعي التوليدي — القدرات والحدود'},{en:'AI agents — the four properties',ar:'وكلاء الذكاء الاصطناعي — الخصائص الأربع'},{en:'Multi-agent frameworks & orchestration',ar:'الأطر متعددة المساعدين والتنسيق'},{en:'Comparative analysis',ar:'التحليل المقارن'},{en:'Illustrative application: driving licence renewal',ar:'تطبيق توضيحي: تجديد رخصة القيادة'},{en:'Self-assessment',ar:'التقييم الذاتي'},{en:'Frequently asked questions',ar:'الأسئلة الشائعة'}] },
+];
+
+function viewGuides(){
+  return `<div class="wrap"><section class="section">
+    <div class="eyebrow">${esc(L({en:'Guides',ar:'الأدلة'}))}</div>
+    <div class="h-lead"><div><h2>${esc(L({en:'Official guides & references',ar:'الأدلة والمراجع الرسمية'}))}</h2>
+      <p>${esc(L({en:'The approved national references for the Agentic AI Assistant project. Open a guide in your browser or download it as PDF.',ar:'المراجع الوطنية المعتمدة لمشروع الذكاء الاصطناعي المساعد. افتح الدليل في المتصفح أو حمّله بصيغة PDF.'}))}</p></div></div>
+    <div class="guide-grid">
+      ${GUIDES.map(g=>`<div class="gcard">
+        <div class="ghead">
+          <div class="gcover"><span>PDF</span>${esc(g.lang)}</div>
+          <div><h3>${esc(L(g.title))}</h3>
+            <div class="gmeta"><span class="pill">${ic('doc')} ${g.pages} ${esc(L({en:'pages',ar:'صفحة'}))}</span><span class="pill">${esc(L({en:'Version',ar:'الإصدار'}))} ${esc(g.ver)}</span><span class="pill">${ic('cal')} ${esc(L(g.date))}</span></div>
+          </div>
+        </div>
+        <p class="gdesc">${esc(L(g.desc))}</p>
+        <div class="trk-lbl">${esc(L({en:'Inside this guide',ar:'محتويات الدليل'}))}</div>
+        <div class="gtoc">${g.toc.map((x,i)=>`<span class="chipx"><b>${i+1}</b> ${esc(L(x))}</span>`).join('')}</div>
+        <div class="gfoot">
+          <a class="btn primary" href="${esc(g.file)}" target="_blank" rel="noopener">${ic('doc')} ${esc(L({en:'Open guide',ar:'فتح الدليل'}))}</a>
+          <a class="btn ghost" href="${esc(g.file)}" download>${ic('upload')} ${esc(L({en:'Download PDF',ar:'تنزيل PDF'}))}</a>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="announce" style="margin-top:22px">${ic('bell')}<p>${esc(L({en:'More guides — policies, technical standards and track playbooks — will be published here as they are issued.',ar:'سيتم نشر المزيد من الأدلة — السياسات والمعايير التقنية وأدلة المسارات — هنا فور صدورها.'}))}</p></div>
+  </section></div>`;
+}
+
+/* ============================================================
+   FAQS
+============================================================ */
+function viewFaqs(){
+  const list = state.maTopic==='all'?allQA():allQA().filter(q=>q.topic===state.maTopic);
+  const chips = [{id:'all',name:t('allTopics')}].concat(TOPICS.map(tp=>({id:tp.id,name:L(tp)})));
+  return `<div class="wrap"><section class="section">
+    <div class="eyebrow">${esc(L({en:'FAQs',ar:'الأسئلة الشائعة'}))}</div>
+    <div class="h-lead"><div><h2>${esc(L({en:'Frequently asked questions',ar:'الأسئلة الأكثر تكراراً'}))}</h2>
+      <p>${esc(L({en:'The questions entities ask most about the project — answered. Filter by topic or use search.',ar:'الأسئلة التي تطرحها الجهات حول المشروع — مُجابة. صفِّ حسب الموضوع أو استخدم البحث.'}))}</p></div></div>
+    <div class="chips" style="margin-bottom:18px">${chips.map(c=>`<button class="chip-f ${state.maTopic===c.id?'active':''}" data-action="filterMA" data-arg="${c.id}">${esc(c.name)}</button>`).join('')}</div>
+    ${list.map((q,i)=>accordion(q, state.maTopic==='all'&&q.asked? i+1 : 0)).join('')}
+  </section></div>`;
+}
+
 /* ---- SEARCH ---- */
 function searchResultsHTML(q){
   const term=(q||'').trim().toLowerCase();
-  if(!term) return `<div class="card" style="text-align:center;color:var(--muted);padding:34px">${ic('search')}<div style="margin-top:10px">${esc(L({en:'Start typing to search decrees, questions and vendors.',ar:'ابدأ الكتابة للبحث في القرارات والأسئلة والموردين.'}))}</div></div>`;
+  if(!term) return `<div class="card" style="text-align:center;color:var(--muted);padding:34px">${ic('search')}<div style="margin-top:10px">${esc(L({en:'Start typing to search the framework, guides and FAQs.',ar:'ابدأ الكتابة للبحث في نظام العمل والأدلة والأسئلة الشائعة.'}))}</div></div>`;
   const has=(...vals)=>vals.some(v=>v&&String(v).toLowerCase().includes(term));
-  const decrees=DECREES.filter(d=>has(d.no,d.title.en,d.title.ar,d.summary.en,d.summary.ar,...d.topics.map(topicName)));
   const faqs=allQA().filter(x=>has(x.q.en,x.q.ar,x.a.en,x.a.ar,topicName(x.topic)));
-  const vendors=VENDORS.filter(v=>has(v.name,v.meta.en,v.meta.ar,v.uses.en,v.uses.ar,t(v.tier)));
-  const total=decrees.length+faqs.length+vendors.length;
+  const fw=[
+    ...FW.concepts.map(c=>({sec:'fw-concepts',t:c.t,d:c.d})),
+    ...FW.criteria.map(c=>({sec:'fw-criteria',t:c.t,d:{en:c.items.map(x=>x.en).join(' · '),ar:c.items.map(x=>x.ar).join(' · ')}})),
+    ...FW.phases.map(p=>({sec:'fw-timeline',t:p.ph,d:{en:p.items.map(x=>x.en).join(' '),ar:p.items.map(x=>x.ar).join(' ')}})),
+  ].filter(x=>has(x.t.en,x.t.ar,x.d.en,x.d.ar));
+  const gds=GUIDES.filter(g=>has(g.title.en,g.title.ar,g.desc.en,g.desc.ar,...g.toc.map(x=>x.en),...g.toc.map(x=>x.ar)));
+  const total=faqs.length+fw.length+gds.length;
   if(!total) return `<div class="card" style="text-align:center;color:var(--muted);padding:34px">${ic('search')}<div style="margin-top:10px">${esc(L({en:'No results for',ar:'لا نتائج لـ'}))} “${esc(q)}”.</div></div>`;
   const sec=(title,count,inner)=> count?`<div class="h-lead" style="margin:18px 0 12px"><h3 style="font-size:1.1rem">${esc(title)} <span style="color:var(--muted);font-weight:600">(${count})</span></h3></div>${inner}`:'';
-  const dHtml=decrees.map(d=>`<div class="rowcard" data-action="openDecree" data-arg="${d.no}" style="margin-bottom:11px">
-      <div class="lead">${ic('doc')}</div>
-      <div class="mid"><div class="ttl">${esc(L(d.title))}</div>
-        <div class="meta"><span class="tag">${esc(d.no)}</span><span>${ic('cal')} ${fmtDate(d.date)}</span>${d.topics.map(tp=>`<span class="pill">${esc(topicName(tp))}</span>`).join('')}</div></div>
-      <div class="end"><span class="st ${statusClass(d.status)}">${esc(t(d.status))}</span>${ic('chev','chev')}</div></div>`).join('');
+  const fwHtml=fw.map(x=>`<div class="rowcard" data-action="goFw" data-arg="${x.sec}" style="margin-bottom:11px">
+      <div class="lead">${ic('flow')}</div>
+      <div class="mid"><div class="ttl">${esc(L(x.t))}</div><div class="meta"><span>${esc(L({en:'The Framework',ar:'نظام العمل'}))}</span></div></div>
+      <div class="end">${ic('chev','chev')}</div></div>`).join('');
+  const gHtml=gds.map(g=>`<div class="rowcard" data-action="nav" data-arg="guides" style="margin-bottom:11px">
+      <div class="lead">${ic('book')}</div>
+      <div class="mid"><div class="ttl">${esc(L(g.title))}</div><div class="meta"><span>${g.pages} ${esc(L({en:'pages',ar:'صفحة'}))} · PDF</span></div></div>
+      <div class="end">${ic('chev','chev')}</div></div>`).join('');
   const fHtml=faqs.map(x=>accordion(x,0)).join('');
-  const vHtml=vendors.map(v=>`<div class="rowcard" data-action="nav" data-arg="vendors" style="margin-bottom:11px">
-      <div class="lead" style="background:${v.color};color:#fff;font-weight:800;font-family:Sora;font-size:.8rem">${esc(v.initials)}</div>
-      <div class="mid"><div class="ttl">${esc(v.name)}</div><div class="meta"><span>${esc(L(v.meta))}</span></div></div>
-      <div class="end"><span class="st ${statusClass(v.tier)}">${esc(t(v.tier))}</span>${ic('chev','chev')}</div></div>`).join('');
   return `<div style="font-size:.85rem;color:var(--muted);margin-bottom:6px">${total} ${esc(L({en:'results',ar:'نتيجة'}))}</div>`
-    + sec(L({en:'Decrees & policies',ar:'القرارات والسياسات'}),decrees.length,dHtml)
-    + sec(L({en:'Questions',ar:'الأسئلة'}),faqs.length,fHtml)
-    + sec(L({en:'Vendors',ar:'الموردون'}),vendors.length,vHtml);
+    + sec(L({en:'The framework',ar:'نظام العمل'}),fw.length,fwHtml)
+    + sec(L({en:'Guides',ar:'الأدلة'}),gds.length,gHtml)
+    + sec(L({en:'FAQs',ar:'الأسئلة الشائعة'}),faqs.length,fHtml);
 }
 function viewSearch(){
   return `<div class="wrap"><section class="section">
@@ -1389,221 +1542,13 @@ function viewSearch(){
   </section></div>`;
 }
 
-/* ---- KNOWLEDGE BASE ---- */
-function viewKB(){
-  if(state.kbCat==='all'){
-    return `<div class="wrap"><section class="section">
-      <div class="eyebrow">${esc(t('kb'))}</div>
-      <div class="h-lead"><div><h2>${esc(L({en:'Knowledge base',ar:'قاعدة المعرفة'}))}</h2>
-        <p>${esc(L({en:'Browse guidance by topic. Pick a category to see its questions and answers.',ar:'تصفّح الإرشادات حسب الموضوع. اختر فئة لعرض أسئلتها وأجوبتها.'}))}</p></div></div>
-      <div class="grid g-3">
-        ${CATS.map(c=>{const n=countCat(c.id);return `<div class="card hover catcard" data-action="filterKB" data-arg="${c.id}">
-          <div class="ic">${ic(c.icon)}</div>
-          <div><h3>${esc(L(c.name))}</h3><p>${esc(L(c.desc))}</p><div class="cnt">${n} ${esc(L({en:'articles',ar:'مقالات'}))} ${ic('arrow')}</div></div>
-        </div>`}).join('')}
-      </div>
-    </section></div>`;
-  }
-  const cat = CATS.find(c=>c.id===state.kbCat);
-  const items = allQA().filter(x=>x.topic===state.kbCat);
-  return `<div class="wrap"><section class="section">
-    <button class="btn ghost sm" data-action="filterKB" data-arg="all" style="margin-bottom:18px">${ic('arrow')} ${esc(L({en:'All categories',ar:'كل الفئات'}))}</button>
-    <div class="h-lead"><div><div class="eyebrow">${esc(t('kb'))}</div><h2 style="margin-top:8px">${esc(L(cat.name))}</h2><p>${esc(L(cat.desc))}</p></div></div>
-    ${items.map(q=>accordion(q,0)).join('')}
-  </section></div>`;
-}
 function allQA(){ return MOST_ASKED.concat(KB_EXTRA); }
-function countCat(id){ return allQA().filter(x=>x.topic===id).length; }
-
-/* ---- DECREES ---- */
-function viewDecrees(){
-  return `<div class="wrap"><section class="section">
-    <div class="eyebrow">${esc(t('decrees'))}</div>
-    <div class="h-lead"><div><h2>${esc(L({en:'Decrees & policies',ar:'القرارات والسياسات'}))}</h2>
-      <p>${esc(L({en:'Every AI decree governing federal entities — searchable, version-tracked, and kept current.',ar:'كل قرار للذكاء الاصطناعي ينظّم الجهات الاتحادية — قابل للبحث ومتابعة الإصدارات ومحدّث باستمرار.'}))}</p></div>
-      ${state.admin?`<button class="btn primary" data-action="openUpload">${ic('upload')} ${esc(t('uploadDecree'))}</button>`:''}
-    </div>
-    ${state.admin?`<div class="adminbar"><div class="ic">${ic('shield')}</div>
-      <div><b>${esc(L({en:'Issuing Office — administrator view',ar:'مكتب الإصدار — عرض المشرف'}))}</b>
-      <p>${esc(L({en:'You can publish a new decree or push an updated version. Entities see changes instantly.',ar:'يمكنك نشر قرار جديد أو دفع نسخة محدّثة. وترى الجهات التغييرات فورًا.'}))}</p></div>
-      <button class="btn primary" data-action="openUpload">${ic('plus')} ${esc(L({en:'New',ar:'جديد'}))}</button></div>`:''}
-    <div class="searchbar hideMobile" style="margin-bottom:22px;max-width:none" data-action="goSearch">${ic('search')}<input placeholder="${esc(t('searchAll'))}" data-action="goSearch" readonly></div>
-    ${DECREES.map(d=>`<div class="rowcard" data-action="openDecree" data-arg="${d.no}" style="margin-bottom:11px">
-      <div class="lead">${ic('doc')}</div>
-      <div class="mid"><div class="ttl">${esc(L(d.title))}</div>
-        <div class="meta"><span class="tag">${esc(d.no)}</span><span>${ic('cal')} ${esc(t('effective'))} ${fmtDate(d.date)}</span><span>${esc(t('version'))} ${esc(d.ver)}</span>
-          ${d.topics.map(tp=>`<span class="pill">${esc(topicName(tp))}</span>`).join('')}</div></div>
-      <div class="end"><span class="st ${statusClass(d.status)}">${esc(t(d.status))}</span>${state.admin?`<button class="del-btn" data-action="deleteDecree" data-arg="${d.no}" title="${esc(L({en:'Remove decree',ar:'إزالة القرار'}))}">${ic('trash')}</button>`:''}${ic('chev','chev')}</div></div>`).join('')}
-  </section></div>`;
-}
-
-/* ---- REQUESTS ---- */
-function viewRequests(){
-  const mine = REQUESTS.filter(r=>r.mine);
-  const queue = REQUESTS.filter(r=>!r.mine);
-  const cats = TOPICS.map(t=>`<option value="${t.id}">${esc(L(t))}</option>`).join('');
-  const form = `<div class="panel">
-      <h3>${esc(L({en:'Ask a question',ar:'اطرح سؤالاً'}))}</h3>
-      <p class="desc">${esc(L({en:'Submit a question to the programme office. You will get an official response and can track its status.',ar:'قدّم سؤالاً إلى مكتب البرنامج. ستحصل على رد رسمي ويمكنك متابعة حالته.'}))}</p>
-      <form data-form="request">
-        <div class="field"><label>${esc(L({en:'Topic',ar:'الموضوع'}))}</label><select name="topic">${cats}</select></div>
-        <div class="field"><label>${esc(L({en:'Subject',ar:'الموضوع المختصر'}))}</label><input name="subject" required placeholder="${esc(L({en:'e.g. GPU quota for a new pilot',ar:'مثال: حصّة GPU لتجربة جديدة'}))}"></div>
-        <div class="field"><label>${esc(L({en:'Details',ar:'التفاصيل'}))}</label><textarea name="body" required placeholder="${esc(L({en:'Describe your question or scenario…',ar:'صف سؤالك أو الحالة…'}))}"></textarea></div>
-        <div class="field"><div class="dropzone">${ic('upload')}<div>${esc(L({en:'Attach a document (optional)',ar:'إرفاق مستند (اختياري)'}))}</div></div></div>
-        <button class="btn primary block" type="submit">${ic('chat')} ${esc(L({en:'Submit request',ar:'إرسال الطلب'}))}</button>
-      </form>
-    </div>`;
-  const myList = `<div>
-      <div class="h-lead"><h2 style="font-size:1.3rem">${esc(t('myRequests'))}</h2></div>
-      ${mine.length?mine.map(ticket).join(''):emptyState()}
-    </div>`;
-  const adminQueue = `<div>
-      <div class="adminbar"><div class="ic">${ic('shield')}</div>
-        <div><b>${esc(L({en:'Issuing Office — incoming queue',ar:'مكتب الإصدار — الطلبات الواردة'}))}</b>
-        <p>${esc(L({en:'Respond to entities and promote common questions to the public FAQ.',ar:'ردّ على الجهات وحوّل الأسئلة الشائعة إلى الأسئلة العامة.'}))}</p></div></div>
-      ${queue.map(r=>ticket(r,true)).join('')}
-    </div>`;
-  return `<div class="wrap"><section class="section">
-    <div class="eyebrow">${esc(t('requests'))}</div>
-    <div class="h-lead"><div><h2>${esc(L({en:'Request desk',ar:'مكتب الطلبات'}))}</h2>
-      <p>${esc(L({en:'For anything not covered by the guidance — your entity-specific questions, handled directly.',ar:'لكل ما لا تغطّيه الإرشادات — أسئلة جهتكم الخاصة، تُعالَج مباشرة.'}))}</p></div></div>
-    <div class="req-grid">
-      ${state.admin? adminQueue : form}
-      ${state.admin? form : myList}
-    </div>
-  </section></div>`;
-}
-function ticket(r, admin){
-  const from = r.mine? '' : `<span class="pill">${ic('pin')} ${esc(isAr()?r.fromAr:r.fromEn)}</span>`;
-  return `<div class="ticket">
-    <div class="tt"><div><b>${esc(L(r.subject))}</b>
-      <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <span class="tid">${esc(r.id)}</span><span class="pill">${esc(topicName(r.topic))}</span>${from}<span style="font-size:.76rem;color:var(--muted)">${fmtDate(r.date)}</span></div></div>
-      <span class="st ${statusClass(r.status)}">${esc(t(r.status))}</span></div>
-    <p style="font-size:.88rem;color:var(--ink-2);margin:12px 0 0">${esc(L(r.body))}</p>
-    ${r.response?`<div class="resp"><div class="rl">${esc(t('officialResponse'))}</div>${esc(L(r.response))}</div>`:''}
-    ${admin&&!r.response?`<div class="acc-foot"><button class="btn primary sm" data-action="respond" data-arg="${r.id}">${ic('check')} ${esc(t('respond'))}</button>
-      <button class="btn ghost sm" data-action="promote" data-arg="${r.id}">${ic('star')} ${esc(t('promoteFaq'))}</button></div>`:''}
-  </div>`;
-}
-function emptyState(){return `<div class="card" style="text-align:center;color:var(--muted);padding:34px">${ic('chat')}<div style="margin-top:8px">${esc(L({en:'No requests yet. Submit one to get started.',ar:'لا طلبات بعد. قدّم طلبًا للبدء.'}))}</div></div>`;}
-
-/* ---- VENDORS ---- */
-function viewVendors(){
-  return `<div class="wrap"><section class="section">
-    <div class="eyebrow">${esc(t('vendors'))}</div>
-    <div class="h-lead"><div><h2>${esc(L({en:'Approved vendors & platforms',ar:'الموردون والمنصّات المعتمدة'}))}</h2>
-      <p>${esc(L({en:'The providers you can engage, what each is cleared for, and where data may live. Choose any approved vendor that fits — or request one that is not yet listed.',ar:'المزوّدون الذين يمكنكم التعاقد معهم، ونطاق اعتماد كلٍّ منهم، وأين يمكن أن تقيم البيانات. اختر أي مورد معتمد يناسبك — أو اطلب موردًا غير مدرج بعد.'}))}</p></div></div>
-    <div class="grid g-3">
-      ${VENDORS.map(v=>`<div class="card hover vcard">
-        <div class="vhead">
-          <div class="vlogo" style="background:${v.color}">${esc(v.initials)}</div>
-          <div><h3>${esc(v.name)}</h3><div class="vmeta">${esc(L(v.meta))}</div></div>
-        </div>
-        <div><span class="st ${statusClass(v.tier)}">${esc(t(v.tier))}</span></div>
-        <div class="vdiv"></div>
-        <div class="vrow">${ic('check')}<div><b>${esc(t('approvedUses'))}:</b> ${esc(L(v.uses))}</div></div>
-        <div class="vrow">${ic('pin')}<div><b>${esc(t('dataResidency'))}:</b> ${esc(L(v.res))}</div></div>
-        <div class="vrow">${ic('shield')}<div><b>${esc(t('conditions'))}:</b> ${esc(L(v.cond))}</div></div>
-        <div class="vdiv"></div>
-        <div class="vmeta">${ic('doc','')} ${esc(t('contractVehicle'))}: ${esc(L(v.vehicle))}</div>
-      </div>`).join('')}
-      <div class="card vcard" style="border-style:dashed;justify-content:center;align-items:center;text-align:center;color:var(--muted)">
-        ${ic('plus')}<div style="font-weight:600;color:var(--ink)">${esc(L({en:'Vendor not listed?',ar:'مورد غير مدرج؟'}))}</div>
-        <div style="font-size:.85rem">${esc(L({en:'Request that it be assessed and added.',ar:'اطلب تقييمه وإضافته.'}))}</div>
-        <button class="btn soft sm" data-action="nav" data-arg="requests">${esc(L({en:'Request vendor onboarding',ar:'طلب اعتماد مورد'}))}</button>
-      </div>
-    </div>
-  </section></div>`;
-}
 
 /* ============================================================
    MODALS
 ============================================================ */
 function openModal(html){ $('#modalHost').innerHTML = `<div class="modal wide">${html}</div>`; $('#overlay').classList.add('show'); }
 function closeModal(){ $('#overlay').classList.remove('show'); $('#modalHost').innerHTML=''; }
-
-function openDecree(no){
-  const d = DECREES.find(x=>x.no===no); if(!d) return;
-  const rel = allQA().filter(q=>q.decree===no).slice(0,3);
-  openModal(`
-    <div class="modal-h"><div><div style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><span class="tag">${esc(d.no)}</span><span class="st ${statusClass(d.status)}">${esc(t(d.status))}</span></div>
-      <h3>${esc(L(d.title))}</h3></div>
-      <button class="x" data-action="closeModal">${ic('close')}</button></div>
-    <div class="modal-b">
-      <div class="kv"><span class="k">${esc(t('effective'))}</span><span class="v">${fmtDate(d.date)}</span></div>
-      <div class="kv"><span class="k">${esc(t('version'))}</span><span class="v">${esc(d.ver)}</span></div>
-      <div class="kv"><span class="k">${esc(L({en:'Topics',ar:'المواضيع'}))}</span><span class="v">${d.topics.map(topicName).join('، ')}</span></div>
-      <h4 style="margin:20px 0 8px;font-size:1rem">${esc(t('summary'))}</h4>
-      <p style="margin:0;color:var(--ink-2)">${esc(L(d.summary))}</p>
-      <h4 style="margin:22px 0 12px;font-size:1rem">${esc(t('versionHistory'))}</h4>
-      <div class="timeline">${d.hist.map(h=>`<div class="tline"><div class="pt"></div><div class="tx"><b>${esc(t('version'))} ${esc(h.v)} — ${esc(L(h.n))}</b><span>${fmtDate(h.d)}</span></div></div>`).join('')}</div>
-      ${rel.length?`<h4 style="margin:22px 0 10px;font-size:1rem">${esc(t('relatedFaqs'))}</h4>
-        ${rel.map(q=>`<div class="rowcard" style="margin-bottom:8px" data-action="closeAndAsk"><div class="lead">${ic('chat')}</div><div class="mid"><div class="ttl" style="font-size:.9rem;font-weight:600">${esc(L(q.q))}</div></div>${ic('arrow','chev')}</div>`).join('')}`:''}
-    </div>
-    <div class="modal-foot">
-      <button class="btn ghost" data-action="closeModal">${esc(t('cancel'))}</button>
-      <button class="btn primary" data-action="toast" data-arg="${esc(L({en:'Download started (demo)',ar:'بدأ التنزيل (عرض)'}))}">${ic('doc')} ${esc(t('download'))}</button>
-    </div>`);
-}
-
-function openDeleteDecree(no){
-  const d = DECREES.find(x=>x.no===no); if(!d) return;
-  openModal(`
-    <div class="modal-h"><div><div style="display:flex;gap:10px;align-items:center;margin-bottom:8px"><span class="tag">${esc(d.no)}</span><span class="st ${statusClass(d.status)}">${esc(t(d.status))}</span></div>
-      <h3>${esc(L({en:'Remove this decree?',ar:'إزالة هذا القرار؟'}))}</h3></div>
-      <button class="x" data-action="closeModal">${ic('close')}</button></div>
-    <div class="modal-b">
-      <div class="confirm-warn">${ic('trash')}<div>
-        <b>${esc(L(d.title))}</b>
-        <p>${esc(L({en:'This permanently removes the decree for all entities and cannot be undone. Answers that cite it will no longer link to it.',ar:'سيؤدي هذا إلى إزالة القرار نهائيًا لدى جميع الجهات ولا يمكن التراجع عنه، ولن تعود الإجابات التي تستند إليه مرتبطةً به.'}))}</p>
-      </div></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn ghost" data-action="closeModal">${esc(t('cancel'))}</button>
-      <button class="btn danger" data-action="confirmDeleteDecree" data-arg="${esc(d.no)}">${ic('trash')} ${esc(L({en:'Delete decree',ar:'حذف القرار'}))}</button>
-    </div>`);
-}
-
-function openUpload(){
-  const cats = TOPICS.map(t=>`<option value="${t.id}">${esc(L(t))}</option>`).join('');
-  openModal(`
-    <div class="modal-h"><div><div class="eyebrow">${esc(L({en:'Issuing Office',ar:'مكتب الإصدار'}))}</div><h3 style="margin-top:6px">${esc(t('uploadDecree'))}</h3></div>
-      <button class="x" data-action="closeModal">${ic('close')}</button></div>
-    <form data-form="decree"><div class="modal-b">
-      <div class="grid g-2">
-        <div class="field"><label>${esc(L({en:'Decree number',ar:'رقم القرار'}))}</label><input name="no" value="AI-2026-0" required></div>
-        <div class="field"><label>${esc(L({en:'Effective date',ar:'تاريخ السريان'}))}</label><input name="date" type="date" value="2026-06-25" required></div>
-      </div>
-      <div class="field"><label>${esc(L({en:'Title (English)',ar:'العنوان (إنجليزي)'}))}</label><input name="titleEn" required placeholder="${esc(L({en:'e.g. Approved Model Catalogue',ar:'مثال: كتالوج النماذج المعتمدة'}))}"></div>
-      <div class="field"><label>${esc(L({en:'Title (Arabic)',ar:'العنوان (عربي)'}))}</label><input name="titleAr" dir="rtl" placeholder="عنوان القرار"></div>
-      <div class="grid g-2">
-        <div class="field"><label>${esc(L({en:'Topic',ar:'الموضوع'}))}</label><select name="topic">${cats}</select></div>
-        <div class="field"><label>${esc(L({en:'Status',ar:'الحالة'}))}</label><select name="status"><option value="ineffect">${esc(t('ineffect'))}</option><option value="draft">${esc(t('draft'))}</option></select></div>
-      </div>
-      <div class="field"><label>${esc(t('summary'))}</label><textarea name="summary" required placeholder="${esc(L({en:'Short summary of what this decree establishes…',ar:'ملخّص موجز لما يقرّره هذا القرار…'}))}"></textarea></div>
-      <div class="field"><div class="dropzone">${ic('upload')}<div>${esc(L({en:'Upload signed PDF (optional in demo)',ar:'رفع PDF موقّع (اختياري في العرض)'}))}</div></div></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn ghost" type="button" data-action="closeModal">${esc(t('cancel'))}</button>
-      <button class="btn primary" type="submit">${ic('check')} ${esc(t('publish'))}</button>
-    </div></form>`);
-}
-
-function respond(id){
-  const r = REQUESTS.find(x=>x.id===id); if(!r) return;
-  openModal(`
-    <div class="modal-h"><div><div class="tag">${esc(r.id)}</div><h3 style="margin-top:8px">${esc(L(r.subject))}</h3></div>
-      <button class="x" data-action="closeModal">${ic('close')}</button></div>
-    <form data-form="respond" data-id="${id}"><div class="modal-b">
-      <p style="margin:0 0 16px;color:var(--ink-2);background:var(--soft);padding:12px 14px;border-radius:10px;font-size:.88rem">${esc(L(r.body))}</p>
-      <div class="field"><label>${esc(t('officialResponse'))}</label><textarea name="text" required placeholder="${esc(L({en:'Write the official response…',ar:'اكتب الرد الرسمي…'}))}"></textarea></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn ghost" type="button" data-action="closeModal">${esc(t('cancel'))}</button>
-      <button class="btn primary" type="submit">${ic('check')} ${esc(t('sendResponse'))}</button>
-    </div></form>`);
-}
 
 /* ============================================================
    TOAST
@@ -1636,27 +1581,17 @@ document.addEventListener('click', e=>{
   switch(a){
     case 'lang': state.lang=arg; applyLang(); state.menuOpen=false; if(state.signedIn) render(); else renderSignin(); break;
     case 'nav': state.view=arg; state.menuOpen=false; renderHeader(); renderView(); break;
-    case 'navAsk': state.view='mostAsked'; state.maTopic='all'; renderHeader(); renderView();
-      setTimeout(()=>{const accs=document.querySelectorAll('[data-acc]'); if(accs[arg]) accs[arg].classList.add('open');},40); break;
-    case 'toggleAdmin': state.admin=!state.admin; state.menuOpen=false; render(); showToast(state.admin?L({en:'Administrator mode on',ar:'تم تفعيل وضع المشرف'}):L({en:'Entity user mode',ar:'وضع مستخدم الجهة'})); break;
     case 'toggleMenu': state.menuOpen=!state.menuOpen; renderHeader(); break;
     case 'signin': doSignin(); break;
     case 'signout': state.signedIn=false; state.menuOpen=false; $('#app').classList.remove('show'); $('#signin').classList.remove('hide'); renderSignin(); break;
     case 'filterMA': state.maTopic=arg; renderView(); break;
-    case 'filterKB': state.kbCat=arg; renderView(); break;
-    case 'openDecree': openDecree(arg); break;
-    case 'openUpload': openUpload(); break;
-    case 'deleteDecree': if(state.admin) openDeleteDecree(arg); break;
-    case 'confirmDeleteDecree': if(state.admin){ DECREES=DECREES.filter(d=>d.no!==arg); closeModal(); renderView(); showToast(L({en:'Decree removed — '+arg,ar:'تم حذف القرار — '+arg})); } break;
-    case 'respond': respond(arg); break;
-    case 'promote': showToast(L({en:'Promoted to public FAQ',ar:'تم التحويل إلى الأسئلة العامة'})); break;
     case 'helpful': showToast(L({en:'Thanks for your feedback',ar:'شكرًا لملاحظتك'})); break;
     case 'closeModal': closeModal(); break;
-    case 'closeAndAsk': closeModal(); state.view='mostAsked'; renderHeader(); renderView(); break;
     case 'toast': showToast(arg); break;
     case 'goSearch': state.view='search'; renderHeader(); renderView(); break;
     case 'selTrack': state.homeTrack=arg; renderView(); break;
     case 'selPhase': state.homePhase=arg; renderView(); break;
+    case 'goFw': state.view='framework'; renderHeader(); renderView(); setTimeout(()=>{const el=document.getElementById(arg); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});},60); break;
     case 'scrollTo': { const el=document.getElementById(arg); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); break; }
   }
 });
@@ -1673,28 +1608,6 @@ document.addEventListener('input', e=>{
     const hr = $('#heroResults'), hb = $('#homeBody');
     if(hr) hr.innerHTML = term ? searchResultsHTML(state.q) : '';
     if(hb) hb.style.display = term ? 'none' : '';
-  }
-});
-
-document.addEventListener('submit', e=>{
-  e.preventDefault(); const f=e.target; const fd=new FormData(f);
-  if(f.dataset.form==='request'){
-    const id='REQ-'+(1068+REQUESTS.filter(r=>r.mine).length);
-    REQUESTS.unshift({id, mine:true, topic:fd.get('topic'), status:'submitted', date:'2026-06-25',
-      subject:{en:fd.get('subject'),ar:fd.get('subject')}, body:{en:fd.get('body'),ar:fd.get('body')}, response:null});
-    renderHeader(); renderView(); showToast(L({en:'Request submitted — '+id,ar:'تم إرسال الطلب — '+id}));
-  }
-  if(f.dataset.form==='decree'){
-    DECREES.unshift({ no:fd.get('no'), date:fd.get('date'), status:fd.get('status'), ver:'1.0',
-      topics:[fd.get('topic')], title:{en:fd.get('titleEn'),ar:fd.get('titleAr')||fd.get('titleEn')},
-      summary:{en:fd.get('summary'),ar:fd.get('summary')},
-      hist:[{v:'1.0',d:fd.get('date'),n:{en:'Published',ar:'نُشر'}}] });
-    closeModal(); renderView(); showToast(L({en:'Decree published — entities notified',ar:'تم نشر القرار — وإشعار الجهات'}));
-  }
-  if(f.dataset.form==='respond'){
-    const r=REQUESTS.find(x=>x.id===f.dataset.id);
-    if(r){ r.response={en:fd.get('text'),ar:fd.get('text')}; r.status='answered'; }
-    closeModal(); renderHeader(); renderView(); showToast(L({en:'Response sent',ar:'تم إرسال الرد'}));
   }
 });
 
