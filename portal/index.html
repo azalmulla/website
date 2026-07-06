@@ -539,7 +539,7 @@ html[lang="ar"] .si-lockup .en{letter-spacing:.02em}
 .prin-h .chev{transition:.2s;color:var(--muted-2)}
 .prin.open .prin-h .chev{transform:rotate(180deg)}
 .prin-d{max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .25s ease,padding .35s ease;font-size:.88rem;color:var(--ink-2);line-height:1.65}
-.prin.open .prin-d,.crit.open .prin-d{max-height:900px;opacity:1;padding:2px 0 18px}
+.prin.open .prin-d,.crit.open .prin-d,.gdrop.open .prin-d{max-height:900px;opacity:1;padding:2px 0 18px}
 /* roadmap */
 .road{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .phase{position:relative;text-align:start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.16s;display:flex;flex-direction:column;gap:4px}
@@ -722,6 +722,17 @@ html,body{overflow-x:clip}
 #main>.wrap>.section:nth-of-type(even){background:var(--soft);box-shadow:0 0 0 100vmax var(--soft);clip-path:inset(0 -100vmax)}
 #main>.wrap>.section:nth-of-type(even) .card,#main>.wrap>.section:nth-of-type(even) .trk-panel,#main>.wrap>.section:nth-of-type(even) .tgt,#main>.wrap>.section:nth-of-type(even) .prin,#main>.wrap>.section:nth-of-type(even) .crit,#main>.wrap>.section:nth-of-type(even) .phase:not(.active),#main>.wrap>.section:nth-of-type(even) .news-item,#main>.wrap>.section:nth-of-type(even) .gcard,#main>.wrap>.section:nth-of-type(even) .trk-tab:not(.active),#main>.wrap>.section:nth-of-type(even) .ben,#main>.wrap>.section:nth-of-type(even) .rowcard,#main>.wrap>.section:nth-of-type(even) .acc{background:#fff}
 #main>.wrap>.section:nth-of-type(even) .vm,#main>.wrap>.section:nth-of-type(even) .scope,#main>.wrap>.section:nth-of-type(even) .panel,#main>.wrap>.section:nth-of-type(even) .fw-tgt,#main>.wrap>.section:nth-of-type(even) .phase-detail{background:#fff}
+
+/* guide contents dropdown */
+.gdrop{border:1px solid var(--line);border-radius:12px;padding:0 14px;cursor:pointer;transition:.16s;background:var(--soft)}
+.gdrop:hover{border-color:#cdd8ea}
+.gdrop-h{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:12px 0;font-weight:700;font-size:.86rem;color:var(--ink);text-align:start;cursor:pointer}
+.gdrop-h .ico{width:17px;height:17px;color:var(--blue-deep)}
+.gdrop-h .pill{margin-inline-start:auto}
+.gdrop-h .chev{transition:.2s;color:var(--muted-2)}
+.gdrop.open .gdrop-h .chev{transform:rotate(180deg)}
+.gdrop .prin-d .gtoc{padding-bottom:14px}
+@media(max-width:1150px){.guide-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1529,6 +1540,12 @@ const GUIDES = [
     title:{en:'Agentic AI — A National Definitional and Assessment Reference (English)',ar:'المرجع الوطني للذكاء الاصطناعي المساعد (إنجليزي)'},
     desc:{en:'The official English national reference: definitions and capabilities of Generative AI, AI agents and multi-agent frameworks; a comparative analysis; an illustrative application (driving-licence renewal); a self-assessment; and FAQs.',ar:'المرجع الوطني الرسمي باللغة الإنجليزية: تعريفات وقدرات الذكاء الاصطناعي التوليدي ووكلاء الذكاء الاصطناعي والأطر متعددة المساعدين؛ وتحليل مقارن؛ وتطبيق توضيحي (تجديد رخصة القيادة)؛ وتقييم ذاتي؛ وأسئلة شائعة.'},
     toc:[{en:'Scope & purpose',ar:'النطاق والهدف'},{en:'Generative AI — capabilities & limits',ar:'الذكاء الاصطناعي التوليدي — القدرات والحدود'},{en:'AI agents — the four properties',ar:'وكلاء الذكاء الاصطناعي — الخصائص الأربع'},{en:'Multi-agent frameworks & orchestration',ar:'الأطر متعددة المساعدين والتنسيق'},{en:'Comparative analysis',ar:'التحليل المقارن'},{en:'Illustrative application: driving licence renewal',ar:'تطبيق توضيحي: تجديد رخصة القيادة'},{en:'Self-assessment',ar:'التقييم الذاتي'},{en:'Frequently asked questions',ar:'الأسئلة الشائعة'}] },
+
+  { id:'fw-guide', lang:'AR', pages:13, ver:'1', date:{en:'July 2026',ar:'يوليو 2026'},
+    file:'https://raw.githubusercontent.com/azalmulla/website/claude/stoic-hypatia-t17hpi/portal/guides/Agentic_AI_Project_Framework_AR.pdf',
+    title:{en:'Working Framework of the Agentic AI Project (Arabic)',ar:'نظام عمل مشروع الذكاء الاصطناعي المساعد'},
+    desc:{en:'The official working framework issued by the Ministry of Cabinet Affairs: concepts, tracks, scope, targets, the 14 principles, the two-year timeline, prioritisation criteria and entity governance. Also browsable on The Framework tab.',ar:'نظام العمل الرسمي الصادر عن وزارة شؤون مجلس الوزراء: المفاهيم، والمسارات، والنطاق، والمستهدفات، والمبادئ الأربعة عشر، والبرنامج الزمني، ومعايير الأولويات، وحوكمة الجهات. ومتاح للتصفح أيضاً في تبويب نظام العمل.'},
+    toc:[{en:'Foreword',ar:'تمهيد'},{en:'Concepts',ar:'المفاهيم'},{en:'Project tracks',ar:'مسارات المشروع'},{en:'Key targets',ar:'المستهدفات الرئيسية'},{en:'General principles',ar:'المبادئ العامة'},{en:'Implementation timeline',ar:'البرنامج الزمني للتنفيذ'},{en:'Prioritisation criteria',ar:'معايير اختيار الأولويات'},{en:'Governance',ar:'الحوكمة'}] },
 ];
 
 function viewGuides(){
@@ -1545,8 +1562,10 @@ function viewGuides(){
           </div>
         </div>
         <p class="gdesc">${esc(L(g.desc))}</p>
-        <div class="trk-lbl">${esc(L({en:'Inside this guide',ar:'محتويات الدليل'}))}</div>
-        <div class="gtoc">${g.toc.map((x,i)=>`<span class="chipx"><b>${i+1}</b> ${esc(L(x))}</span>`).join('')}</div>
+        <div class="gdrop" data-action="cardToggle">
+          <button class="gdrop-h" type="button">${ic('book')} ${esc(L({en:'Inside this guide',ar:'محتويات الدليل'}))} <span class="pill">${g.toc.length}</span>${ic('chev','chev')}</button>
+          <div class="prin-d"><div class="gtoc">${g.toc.map((x,i)=>`<span class="chipx"><b>${i+1}</b> ${esc(L(x))}</span>`).join('')}</div></div>
+        </div>
         <div class="gfoot">
           <a class="btn primary" href="${esc(g.file)}" target="_blank" rel="noopener">${ic('doc')} ${esc(L({en:'Open guide',ar:'فتح الدليل'}))}</a>
           <a class="btn ghost" href="${esc(g.file)}" download>${ic('upload')} ${esc(L({en:'Download PDF',ar:'تنزيل PDF'}))}</a>
