@@ -966,6 +966,19 @@ const HOME = {
   ],
 };
 
+/* ---- content edits (copy review, July 2026) ---- */
+HOME.journey[5].t.en = 'Agentic AI';
+// objectives reordered: "new system" first, then "capabilities"
+HOME.objectives = [HOME.objectives[1], HOME.objectives[0], HOME.objectives[2]];
+HOME.objectives[1].d.en = 'Prepare every employee to work in an environment supported by AI Agents.';
+HOME.objectives[1].d.ar = 'تأهيل جميع الموظفين للعمل في بيئة مدعومة بمساعدي الذكاء الاصطناعي';
+// target 2: 100% -> 80,000 employees; drop the ">=" prefixes
+HOME.targets[1].n = 80000; HOME.targets[1].s = '';
+delete HOME.targets[3].pre; delete HOME.targets[4].pre;
+HOME.tracks[1].obj[0].en = 'Set smooth procedures to adopt AI Agents and to contract with developer companies.';
+HOME.phases[1].d.en = 'Confirm readiness of tasks, operations and services for transformation; complete requirements on government systems and platforms; develop, pilot and run the first batch of AI Agents.';
+HOME.phases[2].d.en = 'Launch AI‑Agents batches every 3 months by priority; continuously assess and review the performance of launched models to ensure effectiveness and fit.';
+
 /* ============================================================
    PUBLIC SITE CONFIG
 ============================================================ */
@@ -986,15 +999,13 @@ const NAV = [
 function renderChrome(){
   $('#utilrow').innerHTML = `
     <span class="uflag"><i class="fr"></i><i class="fg"></i><i class="fw"></i><i class="fb"></i></span>
-    <span class="uttl">${esc(L({en:'The United Arab Emirates — official public page of the Agentic AI Assistant Project',ar:'دولة الإمارات العربية المتحدة — الصفحة العامة الرسمية لمشروع الذكاء الاصطناعي المساعد'}))}</span>
     <span class="uspacer"></span>
     <button class="ulang" data-action="lang">${ic('globe')} ${isAr()?'English':'العربية'}</button>`;
   $('#toprow').innerHTML = `
     <div class="brand" data-action="top" role="button" tabindex="0" aria-label="${esc(L(LOGO_ALT))}">
       <img class="brand-logo" src="${LOGO_URI}" alt="${esc(L(LOGO_ALT))}">
     </div>
-    <span class="spacer"></span>
-    <button class="btn primary sm hideMobile" data-action="scrollTo" data-arg="sec-roadmap">${ic('cal')} ${esc(L({en:'The transformation roadmap',ar:'خطة التحول'}))}</button>`;
+    <span class="spacer"></span>`;
   renderTabs();
 }
 function renderTabs(){
@@ -1009,14 +1020,9 @@ function renderMain(){
     <div class="wrap shero-in shero-wide">
       <div class="shero-grid">
         <div>
-          <div class="eyebrow">${esc(L({en:'United Arab Emirates · Federal Government Project · July 2026',ar:'دولة الإمارات العربية المتحدة · مشروع الحكومة الاتحادية · يوليو 2026'}))}</div>
-          <h1>${L({en:'A new era of government work, powered by the <span class="hl">Agentic AI Assistant</span>',ar:'مرحلة جديدة من العمل الحكومي بقيادة <span class="hl">الذكاء الاصطناعي المساعد</span>'})}</h1>
+          <h1>${L({en:'A new era of government work, powered by <span class="hl">Agentic AI</span>',ar:'مرحلة جديدة من العمل الحكومي مدعومة <span class="hl">بالذكاء الاصطناعي المساعد</span>'})}</h1>
           <p class="sub">${esc(L({en:'The UAE federal government is transforming half of its sectors, services and operations to Agentic AI models by 2028 — faster services, smarter decisions and greater impact for everyone who lives, works or does business in the UAE.',ar:'تعمل حكومة دولة الإمارات على تحويل نصف قطاعاتها وخدماتها وعملياتها إلى نماذج الذكاء الاصطناعي المساعد بحلول 2028 — خدمات أسرع وقرارات أذكى وأثر أعظم لكل من يعيش أو يعمل أو يستثمر في الدولة.'}))}</p>
           <div class="shero-tag"><span>${esc(L({en:'Faster',ar:'أسرع'}))}</span><i>·</i><span>${esc(L({en:'Smarter',ar:'أذكى'}))}</span><i>·</i><span>${esc(L({en:'Greater impact',ar:'أعظم أثراً'}))}</span></div>
-          <div class="shero-cta">
-            <button class="btn primary" data-action="scrollTo" data-arg="sec-vision">${esc(L({en:'Explore the strategy',ar:'استكشف الاستراتيجية'}))} ${ic('arrow')}</button>
-            <button class="btn ghost" data-action="scrollTo" data-arg="sec-roadmap">${ic('cal')} ${esc(L({en:'The transformation roadmap',ar:'خطة التحول'}))}</button>
-          </div>
         </div>
         <figure class="shero-photo">
           <img src="${HERO_IMG}" alt="${esc(L({en:'The UAE Cabinet in session, chaired by His Highness Sheikh Mohammed bin Rashid Al Maktoum',ar:'مجلس وزراء دولة الإمارات في جلسته برئاسة صاحب السمو الشيخ محمد بن راشد آل مكتوم'}))}">
@@ -1040,8 +1046,8 @@ function renderMain(){
         ${HOME.journey.map(j=>`<div class="jitem ${j.now?'now':''}"><div class="jline"></div><div class="jdot"></div><div class="jyear">${esc(j.y)}</div><div class="jt">${esc(L(j.t))}</div></div>`).join('')}
       </div>
       <figure class="shero-photo jphoto">
-        <img src="${JOURNEY_IMG}" alt="${esc(L({en:'Launch ceremony of the first batch of Agentic AI assistants in the UAE Government',ar:'حفل إطلاق المجموعة الأولى من الذكاء الاصطناعي المساعد في حكومة دولة الإمارات'}))}">
-        <figcaption class="cap">${esc(L({en:'Launch of the first batch of Agentic AI assistants in the UAE Government',ar:'إطلاق المجموعة الأولى من الذكاء الاصطناعي المساعد في حكومة دولة الإمارات'}))}</figcaption>
+        <img src="${JOURNEY_IMG}" alt="${esc(L({en:'Launch ceremony of the first batch of Agentic AI Agents in the UAE Government',ar:'حفل إطلاق المجموعة الأولى من الذكاء الاصطناعي المساعد في حكومة دولة الإمارات'}))}">
+        <figcaption class="cap">${esc(L({en:'Launch of the first batch of Agentic AI Agents in the UAE Government',ar:'إطلاق المجموعة الأولى من الذكاء الاصطناعي المساعد في حكومة دولة الإمارات - مايو 2026'}))}</figcaption>
       </figure>
     </section>
 
@@ -1123,7 +1129,7 @@ function renderFoot(){
     <div class="fgrid">
       <div class="foot-lk">
         <span class="foot-logo"><img src="${LOGO_URI}" alt="${esc(L(LOGO_ALT))}"></span>
-        <div class="en">${esc(L({en:'AGENTIC AI ASSISTANT PROJECT · UAE FEDERAL GOVERNMENT',ar:'مشروع الذكاء الاصطناعي المساعد · حكومة دولة الإمارات'}))}</div>
+        <div class="en">${esc(L({en:'AGENTIC AI PROJECT · UAE FEDERAL GOVERNMENT',ar:'مشروع الذكاء الاصطناعي المساعد · حكومة دولة الإمارات'}))}</div>
       </div>
       <div>
         <h4>${esc(L({en:'Explore',ar:'استكشف'}))}</h4>
@@ -1142,7 +1148,7 @@ function renderFoot(){
       </div>
     </div>
     <div class="foot-bottom">
-      <span>${esc(L({en:'© 2026 United Arab Emirates — Agentic AI Assistant Project',ar:'© 2026 دولة الإمارات العربية المتحدة — مشروع الذكاء الاصطناعي المساعد'}))}</span>
+      <span>${esc(L({en:'© 2026 United Arab Emirates — Agentic AI Project',ar:'© 2026 دولة الإمارات العربية المتحدة — مشروع الذكاء الاصطناعي المساعد'}))}</span>
       <span>${esc(L({en:'Faster · Smarter · Greater impact',ar:'أسرع · أذكى · أعظم أثراً'}))}</span>
     </div>
   </div>`;
@@ -1168,7 +1174,7 @@ function initCounts(){
       const step=now=>{
         const p=Math.min(1,(now-t0)/900);
         const eased=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
-        el.textContent=Math.round(to*eased)+suf;
+        el.textContent=Math.round(to*eased).toLocaleString('en-US')+suf;
         if(p<1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
