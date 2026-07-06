@@ -704,6 +704,9 @@ html[dir="rtl"] .hero-sb{padding:.35em 1.1em .35em .35em}
 .totop{position:fixed;inset-inline-end:22px;bottom:22px;z-index:120;width:46px;height:46px;border-radius:50%;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;box-shadow:0 10px 24px rgba(1,72,194,.35);opacity:0;pointer-events:none;transform:translateY(8px);transition:.25s}
 .totop.show{opacity:1;pointer-events:auto;transform:none}
 .totop svg{width:20px;height:20px}
+
+.ask-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:22px;align-items:start;scroll-margin-top:128px}
+@media(max-width:900px){.ask-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -976,64 +979,6 @@ const TOPICS = [
   {id:'workforce', en:'Workforce', ar:'الكفاءات', icon:'users'},
 ];
 const topicName = id => { const x=TOPICS.find(t=>t.id===id); return x?L(x):id; };
-
-const MOST_ASKED = [
-  { topic:'infra', asked:312, decree:'AI-2025-014',
-    q:{en:'Will the government provide the servers and GPUs we need, or must each entity procure its own infrastructure?',
-       ar:'هل ستوفّر الحكومة الخوادم ووحدات معالجة الرسوميات (GPU) التي نحتاجها، أم يجب على كل جهة شراء بنيتها التحتية الخاصة؟'},
-    a:{en:'Compute is provided centrally by default. Entities access GPU capacity through the Government AI Cloud — a shared, sovereign environment hosted inside the UAE — rather than buying their own hardware. Standard workloads (inference, fine-tuning, and agentic pilots) run on allocated quotas you request through this portal. Entities should not procure dedicated GPU servers independently; entity-owned clusters are permitted only by exception for classified or latency-critical workloads, with prior approval from the Programme Office. Compute is funded from the central allocation, not your entity capex.',
-       ar:'تُوفَّر القدرة الحوسبية مركزيًا بشكل افتراضي. تحصل الجهات على وحدات معالجة الرسوميات من خلال السحابة الحكومية للذكاء الاصطناعي — وهي بيئة سيادية مشتركة مستضافة داخل الدولة — بدلًا من شراء أجهزتها الخاصة. تعمل الأحمال القياسية (الاستدلال والضبط الدقيق والتجارب الوكيلة) ضمن حصص مخصّصة تُطلب عبر هذه البوابة. لا ينبغي للجهات شراء خوادم GPU مستقلة؛ ولا يُسمح بالمجموعات المملوكة للجهة إلا استثناءً للأحمال السرّية أو الحسّاسة للزمن، وبموافقة مسبقة من مكتب البرنامج. وتُموَّل الحوسبة من المخصّص المركزي وليس من ميزانية جهتكم الرأسمالية.'} },
-  { topic:'vendors', asked:287, decree:'AI-2025-009',
-    q:{en:'Can we work with any technology company (Microsoft, Google, AWS…), or are we restricted to specific approved vendors?',
-       ar:'هل يمكننا العمل مع أي شركة تقنية (مايكروسوفت، جوجل، أمازون…)، أم أننا مقيّدون بموردين معتمدين محدّدين؟'},
-    a:{en:'You select from the Approved Vendors & Platforms list. Microsoft Azure, Google Cloud, AWS, and Oracle are approved at the cloud-platform layer, and sovereign/local providers (Core42, e& enterprise, du) are approved for hosting and managed services. Approval is scoped: a vendor cleared for general workloads is not automatically cleared for sensitive or citizen data. You are free to choose among approved vendors on fit and value — there is no single mandated provider — but engaging a vendor outside the list, or using one outside its cleared scope, requires an exception request. Data classified Restricted or above must remain in sovereign, in-country environments.',
-       ar:'تختارون من قائمة الموردين والمنصات المعتمدة. منصّات مايكروسوفت أزور وجوجل كلاود وأمازون AWS وأوراكل معتمدة على مستوى المنصّة السحابية، كما أنّ المزوّدين السياديين/المحليين (Core42، e& enterprise، du) معتمدون للاستضافة والخدمات المُدارة. والاعتماد محدّد النطاق: فالمورد المعتمد للأحمال العامة ليس معتمدًا تلقائيًا للبيانات الحسّاسة أو بيانات المتعاملين. لكم حرية الاختيار بين الموردين المعتمدين وفق الملاءمة والقيمة — فلا يوجد مزوّد وحيد إلزامي — أمّا التعاقد مع مورد خارج القائمة أو استخدامه خارج نطاقه المُصرّح به فيتطلّب طلب استثناء. ويجب أن تبقى البيانات المصنّفة «مقيّدة» فأعلى داخل بيئات سيادية داخل الدولة.'} },
-  { topic:'continuity', asked:241, decree:'AI-2025-021',
-    q:{en:'We already have AI projects under way. Do we have to discard them, or can we continue?',
-       ar:'لدينا مشاريع ذكاء اصطناعي قائمة بالفعل. هل يجب التخلّي عنها أم يمكننا الاستمرار؟'},
-    a:{en:'You do not discard work in progress. Existing projects continue under a transition pathway: register each active AI initiative through this portal within the onboarding window, and it is assessed against the new standards (data residency, approved vendors, security, model governance). Most projects continue with minor adjustments; only components that conflict with mandatory controls — for example sensitive data hosted outside sovereign environments — must be remediated on an agreed timeline. Projects already in production are prioritised for review so service continuity is preserved. No compliant project is cancelled because of the programme.',
-       ar:'لا يتم التخلّي عن الأعمال الجارية. تستمرّ المشاريع القائمة ضمن مسار انتقالي: سجّلوا كل مبادرة ذكاء اصطناعي نشطة عبر هذه البوابة خلال فترة الانضمام، وسيتم تقييمها وفق المعايير الجديدة (إقامة البيانات، والموردون المعتمدون، والأمن، وحوكمة النماذج). وتستمرّ معظم المشاريع مع تعديلات طفيفة؛ ولا يلزم سوى معالجة المكوّنات التي تتعارض مع الضوابط الإلزامية — مثل استضافة بيانات حسّاسة خارج البيئات السيادية — وفق جدول زمني متّفق عليه. وتحظى المشاريع في مرحلة الإنتاج بأولوية المراجعة حفاظًا على استمرارية الخدمة. ولا يُلغى أي مشروع متوافق بسبب البرنامج.'} },
-  { topic:'data', asked:198, decree:'AI-2025-003',
-    q:{en:'Where must our data and AI models be hosted, and can we use public cloud regions?',
-       ar:'أين يجب استضافة بياناتنا ونماذجنا، وهل يمكننا استخدام مناطق السحابة العامة؟'},
-    a:{en:'Hosting follows data classification. Public and Internal data may run in approved public-cloud regions located inside the UAE. Restricted, Confidential, and Secret data must stay within sovereign, in-country environments (the Government AI Cloud or an approved sovereign provider) and may not be sent to public model endpoints abroad. Each system records its data classification at registration, which determines the eligible hosting options shown to you.',
-       ar:'تتبع الاستضافة تصنيف البيانات. يجوز تشغيل البيانات «العامة» و«الداخلية» في مناطق سحابة عامة معتمدة داخل الدولة. أمّا البيانات «المقيّدة» و«السرّية» و«السرّية للغاية» فيجب أن تبقى داخل بيئات سيادية في الدولة (السحابة الحكومية للذكاء الاصطناعي أو مزوّد سيادي معتمد) ولا يجوز إرسالها إلى نقاط نهاية نماذج عامة في الخارج. ويسجّل كل نظام تصنيف بياناته عند التسجيل، وهو ما يحدّد خيارات الاستضافة المتاحة لكم.'} },
-  { topic:'budget', asked:176, decree:'AI-2025-009',
-    q:{en:'Who pays for compute and software licences — the central programme or our own budget?',
-       ar:'من يتحمّل تكلفة الحوسبة والتراخيص — البرنامج المركزي أم ميزانيتنا الخاصة؟'},
-    a:{en:'Central compute (GPU capacity on the Government AI Cloud) is funded from the programme allocation. Platform and model licences are procured through central framework agreements so all entities benefit from government pricing rather than negotiating individually. Your entity budget covers entity-specific application development, integration, and change management. Procuring licences or compute outside these vehicles is discouraged and needs justification.',
-       ar:'تُموّل الحوسبة المركزية (سعة GPU على السحابة الحكومية) من مخصّص البرنامج. وتُشترى تراخيص المنصّات والنماذج عبر اتفاقيات إطارية مركزية كي تستفيد جميع الجهات من الأسعار الحكومية بدلًا من التفاوض الفردي. وتغطّي ميزانية جهتكم تطوير التطبيقات الخاصة بكم والتكامل وإدارة التغيير. ولا يُحبّذ شراء التراخيص أو الحوسبة خارج هذه الآليات ويحتاج إلى مبرّر.'} },
-  { topic:'governance', asked:154, decree:'AI-2026-002',
-    q:{en:'Can we deploy autonomous “agentic” systems that take actions, not just chatbots?',
-       ar:'هل يمكننا نشر أنظمة «وكيلة» مستقلة تتّخذ إجراءات، وليست مجرّد روبوتات محادثة؟'},
-    a:{en:'Yes, within guardrails. Agentic systems are permitted under a tiered model: low-risk actions (drafting, retrieval, internal routing) need standard approval; irreversible or citizen-facing actions require human-in-the-loop confirmation, scoped permissions, and full audit logging. High-autonomy use cases go through an elevated review. Every agent must have a named accountable owner, a defined action boundary, and a kill-switch. These controls are set out in the Agentic AI Governance decree.',
-       ar:'نعم، ضمن ضوابط. يُسمح بالأنظمة الوكيلة وفق نموذج متدرّج: الإجراءات منخفضة المخاطر (الصياغة والاسترجاع والتوجيه الداخلي) تحتاج موافقة قياسية؛ أمّا الإجراءات غير القابلة للتراجع أو الموجَّهة للمتعاملين فتتطلّب تأكيدًا بشريًا ضمن الحلقة، وصلاحيات محدّدة النطاق، وتسجيلًا كاملًا للعمليات. وتمرّ حالات الاستقلالية العالية بمراجعة مشدّدة. ويجب أن يكون لكل وكيل مالك مسؤول مُسمّى، وحدود إجراء واضحة، ومفتاح إيقاف. وهذه الضوابط منصوص عليها في قرار حوكمة الذكاء الاصطناعي الوكيل.'} },
-  { topic:'governance', asked:138, decree:'AI-2025-018',
-    q:{en:'What approvals do we need before deploying an AI system to production?',
-       ar:'ما الموافقات المطلوبة قبل نشر نظام ذكاء اصطناعي في بيئة الإنتاج؟'},
-    a:{en:'Three sign-offs, all handled through this portal: (1) a data-classification sign-off, (2) a security review, and (3) a model risk assessment covering bias, accuracy, and fallback behaviour. Standard, low-risk pilots are fast-tracked and typically cleared within days; high-risk or citizen-facing systems take a fuller review. You receive a single go-live approval reference once all three are complete.',
-       ar:'ثلاث موافقات، تُدار جميعها عبر هذه البوابة: (1) اعتماد تصنيف البيانات، (2) المراجعة الأمنية، (3) تقييم مخاطر النموذج الذي يشمل التحيّز والدقّة وسلوك الحلول الاحتياطية. وتُعالَج التجارب القياسية منخفضة المخاطر بمسار سريع وتُعتمد عادةً خلال أيام؛ أمّا الأنظمة عالية المخاطر أو الموجَّهة للمتعاملين فتخضع لمراجعة أوفى. وتحصلون على مرجع اعتماد إطلاق واحد بعد اكتمال الثلاثة.'} },
-  { topic:'workforce', asked:121, decree:'AI-2025-011',
-    q:{en:'Do we need to hire AI specialists ourselves, or is there shared capacity we can draw on?',
-       ar:'هل نحتاج إلى توظيف اختصاصيي ذكاء اصطناعي بأنفسنا، أم توجد قدرات مشتركة يمكننا الاستعانة بها؟'},
-    a:{en:'Both options exist, and most entities use a mix. A central enablement team and a shared specialist pool support complex builds, architecture reviews, and onboarding. Each entity designates an AI Lead as the single point of contact, and staff get access to structured training and certification tracks. You are not expected to build a large in-house AI team from scratch to begin — start with the shared capacity and grow your own capability over time.',
-       ar:'كلا الخيارين متاح، ويستخدم معظم الجهات مزيجًا منهما. يدعم فريق تمكين مركزي وفريق اختصاصيين مشترك عمليات البناء المعقّدة ومراجعات البنية والانضمام. وتعيّن كل جهة «قائدًا للذكاء الاصطناعي» كنقطة تواصل واحدة، ويحصل الموظفون على مسارات تدريب واعتماد منظّمة. ولا يُتوقّع منكم بناء فريق ذكاء اصطناعي داخلي كبير من الصفر للبدء — ابدؤوا بالقدرة المشتركة ثم طوّروا قدراتكم تدريجيًا.'} },
-];
-
-const KB_EXTRA = [
-  { topic:'infra', q:{en:'How do we request a GPU quota increase for a growing workload?',ar:'كيف نطلب زيادة حصّة GPU لحمل عمل متنامٍ؟'},
-    a:{en:'Raise a request through the Request Desk with your projected utilisation and model size. Increases for registered, compliant workloads are typically granted within one review cycle; bursts for short pilots can be approved temporarily.',ar:'ارفعوا طلبًا عبر مكتب الطلبات مرفقًا بالاستخدام المتوقّع وحجم النموذج. وتُمنح الزيادات للأحمال المسجّلة والمتوافقة عادةً خلال دورة مراجعة واحدة؛ ويمكن اعتماد دفعات مؤقتة للتجارب القصيرة.'} },
-  { topic:'vendors', q:{en:'A vendor we like is not on the approved list. Can we request that it be added?',ar:'مورد نفضّله غير مدرج في القائمة المعتمدة. هل يمكننا طلب إضافته؟'},
-    a:{en:'Yes. Submit a vendor-onboarding request with the use case and data classification. The vendor is assessed for sovereignty, security posture, and contractual terms. Until approved, it may not handle government data.',ar:'نعم. قدّموا طلب اعتماد مورد مع حالة الاستخدام وتصنيف البيانات. ويُقيَّم المورد من حيث السيادة والوضع الأمني والشروط التعاقدية. وإلى حين اعتماده لا يجوز له معالجة بيانات حكومية.'} },
-  { topic:'continuity', q:{en:'Our project uses a vendor that is approved only conditionally. What happens?',ar:'يستخدم مشروعنا موردًا معتمدًا بشكل مشروط. ماذا يحدث؟'},
-    a:{en:'It can continue while you meet the stated conditions (for example, moving sensitive data to a sovereign region). The portal shows the exact conditions and a remediation deadline; no interruption is required if you are on track.',ar:'يمكن أن يستمرّ ما دمتم تستوفون الشروط المذكورة (مثل نقل البيانات الحسّاسة إلى منطقة سيادية). وتعرض البوابة الشروط الدقيقة ومهلة المعالجة؛ ولا يلزم أي انقطاع إذا كنتم ملتزمين بالمسار.'} },
-  { topic:'data', q:{en:'Can we use a public frontier model (e.g. via an API) for non-sensitive tasks?',ar:'هل يمكننا استخدام نموذج عام متقدّم (عبر واجهة برمجية) للمهام غير الحسّاسة؟'},
-    a:{en:'Yes, for Public and Internal data, through approved model access brokered by the Government AI Cloud gateway, which adds logging and data-loss controls. Restricted data must use sovereign-hosted models only.',ar:'نعم، للبيانات «العامة» و«الداخلية»، عبر وصول معتمد للنماذج تتوسّطه بوّابة السحابة الحكومية التي تضيف التسجيل وضوابط منع تسرّب البيانات. أمّا البيانات «المقيّدة» فتستخدم النماذج المستضافة سياديًا فقط.'} },
-  { topic:'workforce', q:{en:'Is training available for non-technical staff and leadership?',ar:'هل يتوفّر تدريب للموظفين غير التقنيين والقيادات؟'},
-    a:{en:'Yes. Tracks range from executive AI literacy and governance for leadership to applied tracks for analysts and developers. Enrolment is requested through your entity AI Lead.',ar:'نعم. تتراوح المسارات من الثقافة القيادية بالذكاء الاصطناعي والحوكمة للقيادات إلى مسارات تطبيقية للمحلّلين والمطوّرين. ويُطلب التسجيل عبر قائد الذكاء الاصطناعي في جهتكم.'} },
-  { topic:'budget', q:{en:'Does using the central compute allocation reduce our annual IT budget?',ar:'هل يقلّل استخدام المخصّص المركزي للحوسبة من ميزانيتنا السنوية لتقنية المعلومات؟'},
-    a:{en:'No. Central compute is additive and does not draw from your existing IT budget. It is intended to remove the capex barrier to starting AI projects, so your budget can focus on delivery and adoption.',ar:'لا. الحوسبة المركزية إضافية ولا تُخصم من ميزانية تقنية المعلومات الحالية لديكم. والهدف إزالة عائق الإنفاق الرأسمالي لبدء مشاريع الذكاء الاصطناعي، كي تركّز ميزانيتكم على التنفيذ والتبنّي.'} },
-];
 
 const ENTITIES = [
   {en:'Ministry of Cabinet Affairs',ar:'وزارة شؤون مجلس الوزراء'},
@@ -1604,15 +1549,46 @@ function viewGuides(){
 /* ============================================================
    FAQS
 ============================================================ */
+let QUESTIONS = [];
 function viewFaqs(){
-  const list = state.maTopic==='all'?allQA():allQA().filter(q=>q.topic===state.maTopic);
-  const chips = [{id:'all',name:t('allTopics')}].concat(TOPICS.map(tp=>({id:tp.id,name:L(tp)})));
+  const cats = TOPICS.map(tp=>`<option value="${tp.id}">${esc(L(tp))}</option>`).join('');
   return `<div class="wrap"><section class="section">
     <div class="eyebrow">${esc(L({en:'FAQs',ar:'الأسئلة الشائعة'}))}</div>
     <div class="h-lead"><div><h2>${esc(L({en:'Frequently asked questions',ar:'الأسئلة الأكثر تكراراً'}))}</h2>
-      <p>${esc(L({en:'The questions entities ask most about the project — answered. Filter by topic or use search.',ar:'الأسئلة التي تطرحها الجهات حول المشروع — مُجابة. صفِّ حسب الموضوع أو استخدم البحث.'}))}</p></div></div>
-    <div class="chips" style="margin-bottom:18px">${chips.map(c=>`<button class="chip-f ${state.maTopic===c.id?'active':''}" data-action="filterMA" data-arg="${c.id}">${esc(c.name)}</button>`).join('')}</div>
-    ${list.map((q,i)=>accordion(q, state.maTopic==='all'&&q.asked? i+1 : 0)).join('')}
+      <p>${esc(L({en:'Common questions from federal entities will be published here. Have a question now? Ask the programme team below.',ar:'ستُنشر هنا الأسئلة الشائعة الواردة من الجهات الاتحادية. لديكم سؤال الآن؟ اطرحوه على فريق المشروع أدناه.'}))}</p></div>
+      <button class="btn primary" data-action="scrollTo" data-arg="askbox">${ic('chat')} ${esc(L({en:'Ask a question',ar:'اطرح سؤالاً'}))}</button>
+    </div>
+
+    <div class="card" style="text-align:center;color:var(--muted);padding:44px 24px;margin-bottom:26px">
+      ${ic('chat')}
+      <div style="margin-top:12px;font-weight:700;color:var(--ink)">${esc(L({en:'FAQs are being prepared',ar:'جارٍ إعداد الأسئلة الشائعة'}))}</div>
+      <div style="margin-top:6px;font-size:.9rem">${esc(L({en:'Answers to the most frequent questions will be published here soon.',ar:'ستُنشر إجابات الأسئلة الأكثر تكراراً هنا قريباً.'}))}</div>
+    </div>
+
+    <div class="ask-grid" id="askbox">
+      <div class="panel">
+        <h3>${esc(L({en:'Ask a question',ar:'اطرح سؤالاً'}))}</h3>
+        <p class="desc">${esc(L({en:'Submit a query to the programme team — e.g. regarding infrastructure, vendors, training or governance. You will be answered through your entity coordinator.',ar:'أرسل استفسارك إلى فريق المشروع — مثل استفسار حول البنية التحتية أو الموردين أو التدريب أو الحوكمة. وستصلكم الإجابة عبر منسق جهتكم.'}))}</p>
+        <form data-form="ask">
+          <div class="field"><label>${esc(L({en:'Query topic',ar:'موضوع الاستفسار'}))}</label><select name="topic">${cats}</select></div>
+          <div class="field"><label>${esc(L({en:'Subject',ar:'الموضوع المختصر'}))}</label><input name="subject" required placeholder="${esc(L({en:'e.g. Query regarding infrastructure readiness',ar:'مثال: استفسار حول جاهزية البنية التحتية'}))}"></div>
+          <div class="field"><label>${esc(L({en:'Your question',ar:'سؤالك'}))}</label><textarea name="body" required placeholder="${esc(L({en:'Describe your question or scenario…',ar:'صف سؤالك أو الحالة…'}))}"></textarea></div>
+          <button class="btn primary block" type="submit">${ic('chat')} ${esc(L({en:'Submit question',ar:'إرسال السؤال'}))}</button>
+          <p class="si-note" style="margin-top:10px">${esc(L({en:'Submitted on behalf of',ar:'يُرسل باسم'}))}: <b>${esc(isAr()?state.entityAr:state.entity)}</b></p>
+        </form>
+      </div>
+      <div>
+        <div class="h-lead" style="margin-bottom:14px"><h3 style="font-size:1.1rem">${esc(L({en:'Your submitted questions',ar:'أسئلتكم المرسلة'}))}</h3></div>
+        ${QUESTIONS.length? QUESTIONS.map(qq=>`<div class="ticket">
+            <div class="tt"><div><b>${esc(qq.subject)}</b>
+              <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                <span class="tid">${esc(qq.id)}</span><span class="pill">${esc(topicName(qq.topic))}</span><span style="font-size:.76rem;color:var(--muted)">${fmtDate(qq.date)}</span></div></div>
+              <span class="st info">${esc(L({en:'Submitted',ar:'مُرسل'}))}</span></div>
+            <p style="font-size:.88rem;color:var(--ink-2);margin:12px 0 0">${esc(qq.body)}</p>
+          </div>`).join('')
+        : `<div class="card" style="text-align:center;color:var(--muted);padding:34px">${ic('chat')}<div style="margin-top:8px">${esc(L({en:'No questions yet. Your submitted questions will appear here.',ar:'لا أسئلة بعد. ستظهر أسئلتكم المرسلة هنا.'}))}</div></div>`}
+      </div>
+    </div>
   </section></div>`;
 }
 
@@ -1655,7 +1631,7 @@ function viewSearch(){
   </section></div>`;
 }
 
-function allQA(){ return MOST_ASKED.concat(KB_EXTRA); }
+function allQA(){ return []; }
 
 /* ============================================================
    MODALS
@@ -1697,7 +1673,6 @@ document.addEventListener('click', e=>{
     case 'toggleMenu': state.menuOpen=!state.menuOpen; renderHeader(); break;
     case 'signin': doSignin(); break;
     case 'signout': state.signedIn=false; state.menuOpen=false; $('#app').classList.remove('show'); $('#signin').classList.remove('hide'); renderSignin(); break;
-    case 'filterMA': state.maTopic=arg; renderView(); break;
     case 'helpful': showToast(L({en:'Thanks for your feedback',ar:'شكرًا لملاحظتك'})); break;
     case 'closeModal': closeModal(); break;
     case 'toast': showToast(arg); break;
@@ -1726,6 +1701,18 @@ document.addEventListener('input', e=>{
     const hr = $('#heroResults'), hb = $('#homeBody');
     if(hr) hr.innerHTML = term ? searchResultsHTML(state.q) : '';
     if(hb) hb.style.display = term ? 'none' : '';
+  }
+});
+
+document.addEventListener('submit', e=>{
+  e.preventDefault(); const f=e.target;
+  if(f.dataset.form==='ask'){
+    const fd=new FormData(f);
+    QUESTIONS.unshift({ id:'Q-'+String(1001+QUESTIONS.length), topic:fd.get('topic'),
+      subject:fd.get('subject'), body:fd.get('body'), date:'2026-07-06' });
+    renderView();
+    showToast(L({en:'Question submitted — the programme team will respond',ar:'تم إرسال السؤال — وسيرد فريق المشروع'}));
+    setTimeout(()=>{const el=document.getElementById('askbox'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});},80);
   }
 });
 
