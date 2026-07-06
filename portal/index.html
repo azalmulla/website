@@ -118,6 +118,9 @@ h1,h2{color:var(--blue-deep)}
 .h-lead h2,.shero h1,.fw-hero h1{color:var(--blue-deep)}
 html[lang="ar"] h1,html[lang="ar"] h2,html[lang="ar"] h3,html[lang="ar"] h4{font-family:'Alexandria','Noto Kufi Arabic',sans-serif; letter-spacing:0}
 html[lang="ar"] .hero p.sub,html[lang="ar"] .acc-body .ans p,html[lang="ar"] .panel .desc,html[lang="ar"] .h-lead p,html[lang="ar"] .ticket p{line-height:1.95}
+html[lang="ar"] h1,html[lang="ar"] h2,html[lang="ar"] h3{line-height:1.55}
+html[lang="ar"] .shero h1{line-height:1.6}
+html[lang="ar"] .fw-hero h1{line-height:1.6}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer}
 ::selection{background:#cfe3ff}
@@ -711,6 +714,14 @@ html[dir="rtl"] .hero-sb{padding:.35em 1.1em .35em .35em}
 .n-date span{font-size:.78rem;font-weight:600;color:var(--muted)}
 .n-body h3{font-size:1.02rem;color:var(--ink)}
 .n-body p{margin:7px 0 0;font-size:.9rem;color:var(--ink-2);line-height:1.65}
+
+/* ===== section bands & separators ===== */
+#main>.wrap>.section{position:relative}
+#main>.wrap>.section:not(:first-child)::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;height:1px;background:var(--line)}
+html,body{overflow-x:clip}
+#main>.wrap>.section:nth-of-type(even){background:var(--soft);box-shadow:0 0 0 100vmax var(--soft);clip-path:inset(0 -100vmax)}
+#main>.wrap>.section:nth-of-type(even) .card,#main>.wrap>.section:nth-of-type(even) .trk-panel,#main>.wrap>.section:nth-of-type(even) .tgt,#main>.wrap>.section:nth-of-type(even) .prin,#main>.wrap>.section:nth-of-type(even) .crit,#main>.wrap>.section:nth-of-type(even) .phase:not(.active),#main>.wrap>.section:nth-of-type(even) .news-item,#main>.wrap>.section:nth-of-type(even) .gcard,#main>.wrap>.section:nth-of-type(even) .trk-tab:not(.active),#main>.wrap>.section:nth-of-type(even) .ben,#main>.wrap>.section:nth-of-type(even) .rowcard,#main>.wrap>.section:nth-of-type(even) .acc{background:#fff}
+#main>.wrap>.section:nth-of-type(even) .vm,#main>.wrap>.section:nth-of-type(even) .scope,#main>.wrap>.section:nth-of-type(even) .panel,#main>.wrap>.section:nth-of-type(even) .fw-tgt,#main>.wrap>.section:nth-of-type(even) .phase-detail{background:#fff}
 </style>
 </head>
 <body>
@@ -1120,11 +1131,11 @@ function renderView(){
         <button class="btn ghost sm" data-action="helpful">${esc(t('no'))}</button></span></div>
       <div class="pf-upd">${ic('cal')} ${esc(L({en:'Last updated: July 2026',ar:'آخر تحديث: يوليو 2026'}))}</div>
     </div></div>` : '';
+  const changed = renderView._last !== v; renderView._last = v;
   $('#main').innerHTML = crumbs + html + pagefoot;
-  $('#main').scrollIntoView({block:'start'});
-  window.scrollTo({top:0});
+  if(changed){ window.scrollTo({top:0}); }
   if(v==='search'){ const sb=$('#searchBox'); if(sb){ sb.focus(); const n=sb.value.length; try{sb.setSelectionRange(n,n);}catch(_){} } }
-  if(v==='home') animateCounters();
+  if(v==='home' && changed) animateCounters();
 }
 function animateCounters(){
   document.querySelectorAll('.count').forEach(el=>{
@@ -1753,7 +1764,7 @@ function doSignin(){
   const ei = +($('#si-entity')?.value||0);
   state.entity = ENTITIES[ei].en; state.entityAr = ENTITIES[ei].ar;
   state.admin = ($('#si-role')?.value==='admin');
-  state.signedIn = true; state.view='home';
+  state.signedIn = true; state.view='home'; renderView._last = null;
   $('#signin').classList.add('hide'); $('#app').classList.add('show');
   applyLang(); render();
 }
