@@ -89,9 +89,9 @@
 </style>
 <style>
 :root{
-  --blue-deep:#0B49E6; --blue:#1180F2; --cyan:#19BBF1;
-  --grad:linear-gradient(165deg,#0B49E6 0%,#1180F2 52%,#19BBF1 100%);
-  --grad-v:linear-gradient(180deg,#0B49E6 0%,#19BBF1 100%);
+  --blue-deep:#0148C2; --blue:#0062FD; --cyan:#00C2F9;
+  --grad:linear-gradient(165deg,#0148C2 0%,#0062FD 52%,#00C2F9 100%);
+  --grad-v:linear-gradient(180deg,#0062FD 0%,#00C2F9 100%);
   --grad-soft:linear-gradient(135deg,#eef4ff 0%,#e9f8ff 100%);
   --ink:#0A0E1A; --ink-2:#39414f; --muted:#6b7486; --muted-2:#97a0b0;
   --line:#e6ecf5; --line-2:#eef2f8;
@@ -114,6 +114,8 @@ body{
 }
 html[lang="ar"] body, html[lang="ar"]{font-family:'Noto Kufi Arabic','Tajawal',system-ui,sans-serif;line-height:1.7}
 h1,h2,h3,h4{font-family:'Sora',sans-serif; color:var(--ink); margin:0; line-height:1.18; letter-spacing:-.01em}
+h1,h2{color:var(--blue-deep)}
+.h-lead h2,.shero h1,.fw-hero h1{color:var(--blue-deep)}
 html[lang="ar"] h1,html[lang="ar"] h2,html[lang="ar"] h3,html[lang="ar"] h4{font-family:'Alexandria','Noto Kufi Arabic',sans-serif; letter-spacing:0}
 html[lang="ar"] .hero p.sub,html[lang="ar"] .acc-body .ans p,html[lang="ar"] .panel .desc,html[lang="ar"] .h-lead p,html[lang="ar"] .ticket p{line-height:1.95}
 a{color:inherit;text-decoration:none}
@@ -643,6 +645,65 @@ button,[data-action]{cursor:pointer}
 .fw-hero{padding:48px 0 34px}
 .shero-cta{margin-top:28px}
 .shero-stats{margin-top:38px}
+
+/* ===== u.ae-inspired chrome ===== */
+.utilbar{background:#101418;color:#cfd6e2}
+.utilrow{display:flex;align-items:center;gap:12px;min-height:38px;font-size:.76rem}
+.uflag{display:inline-flex;width:26px;height:17px;border-radius:2px;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+.uflag i{display:block}
+.uflag .fr{width:26%;height:100%;background:#EF3340}
+.uflag .fg,.uflag .fw,.uflag .fb{position:relative;width:74%;height:100%}
+.uflag{position:relative}
+.uflag .fg{position:absolute;inset-inline-start:26%;top:0;width:74%;height:33.4%;background:#009739}
+.uflag .fw{position:absolute;inset-inline-start:26%;top:33.3%;width:74%;height:33.4%;background:#fff}
+.uflag .fb{position:absolute;inset-inline-start:26%;top:66.6%;width:74%;height:33.4%;background:#141414}
+.uttl{font-weight:600;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uspacer{flex:1}
+.ufs{display:inline-flex;gap:2px}
+.ufs button{background:none;border:1px solid rgba(255,255,255,.22);color:#cfd6e2;border-radius:6px;padding:2px 7px;font-size:.72rem;font-weight:700;transition:.15s}
+.ufs button:hover{background:rgba(255,255,255,.12);color:#fff}
+.ulang{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:6px;padding:3px 10px;font-size:.78rem;font-weight:700;transition:.15s}
+.ulang:hover{background:rgba(255,255,255,.12)}
+.ulang .ico{width:14px;height:14px}
+@media(max-width:760px){.uttl{display:none}}
+/* header search — u.ae pill */
+.hsearch{min-width:300px;border-radius:999px;padding:.3em .3em .3em 1em;gap:.6em}
+html[dir="rtl"] .hsearch{padding:.3em 1em .3em .3em}
+.hsearch input{font-size:.88rem}
+.hs-btn{flex:none;width:34px;height:34px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center}
+.hs-btn .ico{width:16px;height:16px}
+.hs-btn.big{width:44px;height:44px}
+/* tabs — bolder u.ae nav */
+.tabs{border-top:1px solid var(--line)}
+.tab{font-weight:700}
+/* breadcrumbs */
+.crumbs{display:flex;align-items:center;gap:8px;padding:14px 0 0;font-size:.82rem;color:var(--muted)}
+.crumbs a{color:var(--blue);font-weight:600;cursor:pointer}
+.crumbs a:hover{text-decoration:underline}
+.crumbs b{color:var(--ink-2);font-weight:600}
+.crumbs .sep{color:var(--muted-2)}
+/* hero search-first */
+.shero-search{max-width:640px;margin:28px auto 0}
+.hero-sb{max-width:none;border-radius:999px;padding:.35em .35em .35em 1.1em;box-shadow:var(--sh-md)}
+html[dir="rtl"] .hero-sb{padding:.35em 1.1em .35em .35em}
+.hero-sb input{font-size:1rem}
+.pop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px;font-size:.82rem;color:var(--muted)}
+.pop-chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:.35em .95em;font-size:.8rem;font-weight:600;color:var(--blue-deep);transition:.15s}
+.pop-chip:hover{border-color:var(--blue);background:var(--soft)}
+/* flatter cards (u.ae hairline style) */
+.card{box-shadow:none}
+.card.hover:hover{border-color:var(--blue);box-shadow:0 10px 26px rgba(1,72,194,.10)}
+/* page feedback */
+.pgfoot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:8px;padding:22px 0 40px}
+.pf-q{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.pf-q b{color:var(--ink);font-size:.95rem}
+.pf-q span{display:inline-flex;gap:8px}
+.pf-upd{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;color:var(--muted)}
+.pf-upd .ico{width:15px;height:15px}
+/* scroll to top */
+.totop{position:fixed;inset-inline-end:22px;bottom:22px;z-index:120;width:46px;height:46px;border-radius:50%;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;box-shadow:0 10px 24px rgba(1,72,194,.35);opacity:0;pointer-events:none;transform:translateY(8px);transition:.25s}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+.totop svg{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -653,6 +714,7 @@ button,[data-action]{cursor:pointer}
 <!-- ============ APP ============ -->
 <div class="app" id="app">
   <header class="top">
+    <div class="utilbar"><div class="wrap utilrow" id="utilrow"></div></div>
     <div class="wrap">
       <div class="toprow" id="toprow"></div>
     </div>
@@ -661,6 +723,8 @@ button,[data-action]{cursor:pointer}
   <main id="main"></main>
   <footer class="foot" id="foot"></footer>
 </div>
+
+<button class="totop" id="totop" title="Back to top" aria-label="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
 
 <div class="overlay" id="overlay"><div id="modalHost"></div></div>
 <div class="toast" id="toast"></div>
@@ -1042,16 +1106,24 @@ const TABS = [
 ];
 function renderHeader(){
   const ent = isAr()?state.entityAr:state.entity;
+  $('#utilrow').innerHTML = `
+    <div class="uflag" aria-hidden="true"><i class="fr"></i><i class="fg"></i><i class="fw"></i><i class="fb"></i></div>
+    <span class="uttl">${esc(L({en:'The official portal of the Agentic AI Assistant project — UAE Government',ar:'البوابة الرسمية لمشروع الذكاء الاصطناعي المساعد — حكومة دولة الإمارات'}))}</span>
+    <span class="uspacer"></span>
+    <span class="ufs" role="group" aria-label="Text size">
+      <button data-action="fontSize" data-arg="-" title="${esc(L({en:'Decrease text size',ar:'تصغير الخط'}))}">A−</button>
+      <button data-action="fontSize" data-arg="0" title="${esc(L({en:'Reset text size',ar:'إعادة تعيين الخط'}))}">A</button>
+      <button data-action="fontSize" data-arg="+" title="${esc(L({en:'Increase text size',ar:'تكبير الخط'}))}">A+</button>
+    </span>
+    <button class="ulang" data-action="lang" data-arg="${isAr()?'en':'ar'}">${ic('globe')}<span>${isAr()?'English':'العربية'}</span></button>`;
   $('#toprow').innerHTML = `
     <div class="brand" data-action="nav" data-arg="home">
       <img class="brand-logo" src="${LOGO_URI}" alt="${esc(L(LOGO_ALT))}">
     </div>
     <div class="spacer"></div>
     <div class="tools">
-      <div class="hsearch hideMobile" data-action="goSearch" title="${esc(t('search'))}">${ic('search')}<input placeholder="${esc(t('search'))}" data-action="goSearch" readonly tabindex="-1"></div>
+      <div class="hsearch hideMobile" data-action="goSearch" title="${esc(t('search'))}"><input placeholder="${esc(L({en:'What are you looking for?',ar:'عمّ تبحث؟'}))}" data-action="goSearch" readonly tabindex="-1"><span class="hs-btn">${ic('search')}</span></div>
       <button class="iconbtn onlyMobile" data-action="goSearch" title="${esc(t('search'))}">${ic('search')}</button>
-      <button class="iconbtn hideMobile" title="3">${ic('bell')}</button>
-      <button class="langtog" data-action="lang" data-arg="${isAr()?'en':'ar'}">${ic('globe')}<span>${isAr()?'English':'العربية'}</span></button>
       <div class="chip" data-action="toggleMenu">
         <span class="av">${esc(initials(state.entity))}</span>
         <span class="who"><b>${esc(ent)}</b><span>${state.admin?esc(L({en:'Administrator',ar:'مشرف'})):esc(L({en:'Entity user',ar:'مستخدم جهة'}))}</span></span>
@@ -1095,7 +1167,15 @@ function renderView(){
   const html = v==='home'?viewHome()
     :v==='framework'?viewFramework():v==='guides'?viewGuides():v==='faqs'?viewFaqs()
     :v==='search'?viewSearch():'';
-  $('#main').innerHTML = html;
+  const tab = TABS.find(x=>x.id===v);
+  const crumbs = v!=='home' ? `<div class="wrap"><nav class="crumbs" aria-label="Breadcrumb"><a data-action="nav" data-arg="home">${esc(t('home'))}</a><span class="sep">›</span><b>${esc(tab?t(tab.label):t('search'))}</b></nav></div>` : '';
+  const pagefoot = (v==='framework'||v==='guides'||v==='faqs') ? `<div class="wrap"><div class="pgfoot">
+      <div class="pf-q"><b>${esc(L({en:'Was this page helpful?',ar:'هل كانت هذه الصفحة مفيدة؟'}))}</b>
+        <span><button class="btn ghost sm" data-action="helpful">${ic('thumb')} ${esc(t('yes'))}</button>
+        <button class="btn ghost sm" data-action="helpful">${esc(t('no'))}</button></span></div>
+      <div class="pf-upd">${ic('cal')} ${esc(L({en:'Last updated: July 2026',ar:'آخر تحديث: يوليو 2026'}))}</div>
+    </div></div>` : '';
+  $('#main').innerHTML = crumbs + html + pagefoot;
   $('#main').scrollIntoView({block:'start'});
   window.scrollTo({top:0});
   if(v==='search'){ const sb=$('#searchBox'); if(sb){ sb.focus(); const n=sb.value.length; try{sb.setSelectionRange(n,n);}catch(_){} } }
@@ -1200,9 +1280,14 @@ function viewHome(){
       <h1>${esc(L({en:'Strategy of the ',ar:'استراتيجية مشروع '}))}<span class="hl">${esc(L({en:'Agentic AI Assistant',ar:'الذكاء الاصطناعي المساعد'}))}</span>${esc(L({en:' Project',ar:''}))}</h1>
       <p class="sub">${esc(L({en:'A new era of government work, powered by the Agentic AI Assistant — to build the best government and nation in the world.',ar:'مرحلة جديدة من تطوير العمل الحكومي ترتكز على توظيف الذكاء الاصطناعي المساعد — لبناء أفضل حكومة ودولة في العالم.'}))}</p>
       <div class="shero-tag">${['سرعةً','ذكاءً','أثراً'].length?'':''}<span>${esc(L({en:'Faster',ar:'أسرع'}))}</span><i>·</i><span>${esc(L({en:'Smarter',ar:'أذكى'}))}</span><i>·</i><span>${esc(L({en:'Greater impact',ar:'أعظم أثراً'}))}</span></div>
-      <div class="shero-cta">
-        <button class="btn primary" data-action="scrollTo" data-arg="sec-tracks">${esc(L({en:'Explore the 5 tracks',ar:'استكشف المسارات الخمسة'}))} ${ic('arrow')}</button>
-        <button class="btn ghost" data-action="scrollTo" data-arg="sec-roadmap">${esc(L({en:'View the roadmap',ar:'عرض خطة التحول'}))}</button>
+      <div class="shero-search">
+        <div class="searchbar hero-sb">${ic('search')}<input id="heroSearch" placeholder="${esc(L({en:'What are you looking for?',ar:'عمّ تبحث؟'}))}" value="${esc(state.q)}" autocomplete="off"><span class="hs-btn big">${ic('search')}</span></div>
+        <div class="pop"><span>${esc(L({en:'Popular:',ar:'الأكثر بحثاً:'}))}</span>
+          <button class="pop-chip" data-action="nav" data-arg="framework">${esc(L({en:'The framework',ar:'نظام العمل'}))}</button>
+          <button class="pop-chip" data-action="nav" data-arg="guides">${esc(L({en:'Guides',ar:'الأدلة'}))}</button>
+          <button class="pop-chip" data-action="nav" data-arg="faqs">${esc(L({en:'FAQs',ar:'الأسئلة الشائعة'}))}</button>
+          <button class="pop-chip" data-action="scrollTo" data-arg="sec-roadmap">${esc(L({en:'The roadmap',ar:'خطة التحول'}))}</button>
+        </div>
       </div>
       <div class="shero-stats">
         <div><b>2</b><span>${esc(L({en:'years to transform',ar:'عاما للتحول'}))}</span></div>
@@ -1213,7 +1298,9 @@ function viewHome(){
     </div>
   </section>
 
-  <div class="wrap">
+  <div class="wrap"><section class="section" id="heroResults" style="padding:${state.q.trim()?'26px 0':'0'}">${state.q.trim()?searchResultsHTML(state.q):''}</section></div>
+
+  <div class="wrap" id="homeBody" style="${state.q.trim()?'display:none':''}">
 
     <section class="section" id="sec-journey">
       <div class="h-lead"><div><div class="eyebrow">${esc(L({en:'The journey',ar:'المسيرة'}))}</div><h2>${esc(L({en:'Two decades of digital leadership',ar:'عقدان من الريادة الرقمية'}))}</h2><p>${esc(L(HOME.journeyIntro))}</p></div></div>
@@ -1615,6 +1702,7 @@ document.addEventListener('click', e=>{
     case 'closeModal': closeModal(); break;
     case 'toast': showToast(arg); break;
     case 'goSearch': state.view='search'; renderHeader(); renderView(); break;
+    case 'fontSize': { state.fs = arg==='0'?0:Math.max(-1,Math.min(2,(state.fs||0)+(arg==='+'?1:-1))); document.documentElement.style.fontSize = (16*(1+state.fs*0.07))+'px'; break; }
     case 'selTrack': state.homeTrack=arg; renderView(); break;
     case 'selPhase': state.homePhase=arg; renderView(); break;
     case 'goFw': state.view='framework'; renderHeader(); renderView(); setTimeout(()=>{const el=document.getElementById(arg); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});},60); break;
@@ -1622,6 +1710,10 @@ document.addEventListener('click', e=>{
   }
 });
 $('#overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
+
+window.addEventListener('scroll', ()=>{ const b=$('#totop'); if(b) b.classList.toggle('show', window.scrollY>560); }, {passive:true});
+document.addEventListener('DOMContentLoaded', ()=>{});
+$('#totop').addEventListener('click', ()=>window.scrollTo({top:0,behavior:'smooth'}));
 
 document.addEventListener('input', e=>{
   if(e.target && e.target.id==='searchBox'){
