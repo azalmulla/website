@@ -25,6 +25,11 @@ const CATS = {
 };
 const COMMITTEES = { national: 'اللجنة الوطنية', ministry: 'لجنة الوزارة' };
 const STATUS = { pending: 'معلّق', progress: 'قيد التنفيذ', done: 'منجز' };
+const ICON = {
+  user: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+  note: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12l-4 4H4z"/><path d="M16 20v-4h4M8 9h8M8 13h5"/></svg>',
+  check: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+};
 const STATUS_NEXT = { pending: 'progress', progress: 'done', done: 'pending' };
 
 /* ---------------- utils ---------------- */
@@ -191,30 +196,42 @@ function viewDashboard() {
   const upcoming = evs.filter((e) => evEnd(e) >= today);
   const p = state.project;
 
+  const nowMs = Date.now();
+  const stepsHtml = stages.length ? `<ol class="steps">${stages.map((s, i) => {
+    const st = s === cur ? 'now' : (uaeMidnight(s.end) <= nowMs ? 'done' : 'next');
+    return `<li class="step ${st}">
+      <span class="step-badge">${st === 'done' ? ICON.check : i + 1}</span>
+      <span class="step-t">${esc(s.name)}</span>
+      <span class="step-d">${fmtDate(s.start)} — ${fmtDate(s.end)}</span>
+    </li>`;
+  }).join('')}</ol>` : '';
+
   const stageHtml = cur ? `
-    <div class="hero-top">
-      <div>
-        <div class="eyebrow">المرحلة الحالية للمشروع</div>
-        <h2>${esc(cur.name)}</h2>
-        <div class="range">${fmtDate(cur.start)} — ${fmtDate(cur.end)}</div>
+    <div>
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow">المرحلة الحالية للمشروع</div>
+          <h2>${esc(cur.name)}</h2>
+          <div class="range">${fmtDate(cur.start)} — ${fmtDate(cur.end)}</div>
+        </div>
+        <button class="btn sm" data-act="edit-stages">تعديل المراحل</button>
       </div>
-      <button class="btn sm edit" data-act="edit-stages">تعديل المراحل</button>
+      <div class="countdown" id="countdown">
+        ${['يوم', 'ساعة', 'دقيقة', 'ثانية'].map((l, i) => `<div class="cd-unit"><b data-cd="${i}">--</b><span>${l}</span></div>`).join('')}
+      </div>
+      <div class="cd-label" id="cdLabel"></div>
+      <div class="bar" style="margin-top:10px"><i id="stageBar" style="width:0"></i></div>
+      <div class="bar-meta"><span id="stagePct"></span><span>تنتهي ${fmtDate(cur.end)}</span></div>
     </div>
-    <div class="countdown" id="countdown">
-      ${['يوم', 'ساعة', 'دقيقة', 'ثانية'].map((l, i) => `<div class="cd-unit"><b data-cd="${i}">--</b><span>${l}</span></div>`).join('')}
+    <div class="hero-side">
+      <div><h3>مراحل المشروع</h3>${stepsHtml}</div>
+      ${p.target ? `<div class="target">
+        <div class="t">${esc(p.targetLabel || 'الهدف العام')} · الموعد المستهدف <b>${fmtDate(p.target)}</b></div>
+        <div class="bar"><i id="targetBar" style="width:0"></i></div>
+        <div class="bar-meta"><span id="targetPct"></span><span id="targetLeft"></span></div>
+      </div>` : ''}
     </div>
-    <div class="cd-label" id="cdLabel"></div>
-    <div class="bar" style="margin-top:8px"><i id="stageBar" style="width:0"></i></div>
-    <div class="bar-meta"><span id="stagePct"></span><span>تنتهي ${fmtDate(cur.end)}</span></div>
-    <div class="stages-track">
-      ${stages.map((s) => `<span class="stage-pill ${s === cur ? 'now' : (uaeMidnight(s.end) <= Date.now() ? 'done' : '')}">${esc(s.name)}</span>`).join('')}
-    </div>
-    ${p.target ? `<div class="target">
-      <div class="t">${esc(p.targetLabel || 'الهدف العام')} · الموعد المستهدف ${fmtDate(p.target)}</div>
-      <div class="bar"><i id="targetBar" style="width:0"></i></div>
-      <div class="bar-meta"><span id="targetPct"></span><span id="targetLeft"></span></div>
-    </div>` : ''}
-  ` : `<div class="hero-top"><div><h2>لم تُحدَّد مراحل المشروع بعد</h2></div><button class="btn sm edit" data-act="edit-stages">إضافة المراحل</button></div>`;
+  ` : `<div class="hero-top"><div><h2>لم تُحدَّد مراحل المشروع بعد</h2></div><button class="btn sm" data-act="edit-stages">إضافة المراحل</button></div>`;
 
   const openList = open.slice(0, 8).map((i) => `
     <li>
@@ -225,7 +242,7 @@ function viewDashboard() {
         <div class="li-meta">
           <span class="chip"><span class="dot" style="--c:var(--c-${i.meeting.committee})"></span>${esc(COMMITTEES[i.meeting.committee])} · ${esc(meetingShort(i.meeting))}</span>
           <button class="status ${i.status}" data-act="cycle-status" data-mid="${i.meeting.id}" data-iid="${i.id}" title="تغيير الحالة">${STATUS[i.status]}</button>
-          ${i.due ? `<span class="chip">الاستحقاق ${fmtDate(i.due)}</span>` : ''}
+          ${i.due ? `<span class="chip gold">الاستحقاق ${fmtDate(i.due)}</span>` : ''}
         </div>
       </div>
     </li>`).join('');
@@ -233,7 +250,7 @@ function viewDashboard() {
   const upList = upcoming.slice(0, 6).map((e) => {
     const n = dayDiff(today, e.date);
     const { d, m } = parse(e.date);
-    return `<li data-act="edit-event" data-eid="${e.id}" style="cursor:pointer">
+    return `<li class="clickable" data-act="edit-event" data-eid="${e.id}">
       <div class="datebox"><b>${d}</b><span>${MONTHS[m - 1]}</span></div>
       <div class="li-main">
         <div class="li-title">${esc(e.title)}</div>
@@ -256,7 +273,7 @@ function viewDashboard() {
   <section class="dash-cols">
     <div class="card">
       <div class="card-h"><h2>البنود المعلّقة من الاجتماعات <span class="count">${open.length}</span></h2><a class="link" href="#minutes">عرض المحاضر ←</a></div>
-      <div class="card-b">${open.length ? `<ul class="list">${openList}</ul>${open.length > 8 ? `<div style="text-align:center;padding-top:8px"><a class="link" href="#minutes">+ ${open.length - 8} بنود أخرى</a></div>` : ''}` : '<div class="empty">لا توجد بنود معلّقة — أحسنت 👏</div>'}</div>
+      <div class="card-b">${open.length ? `<ul class="list">${openList}</ul>${open.length > 8 ? `<div style="text-align:center;padding-top:8px"><a class="link" href="#minutes">+ ${open.length - 8} بنود أخرى</a></div>` : ''}` : '<div class="empty">لا توجد بنود معلّقة. تم إنجاز جميع التوجيهات.</div>'}</div>
     </div>
     <div class="card">
       <div class="card-h"><h2>الأحداث القادمة <span class="count">${upcoming.length}</span></h2><button class="btn sm primary" data-act="add-event">+ حدث</button></div>
@@ -270,7 +287,7 @@ function viewDashboard() {
     ${newsCard('أخبار الذكاء الاصطناعي المساعد في الإمارات', 'UAE', news.uae)}
     ${newsCard('أخبار Agentic AI عالمياً', 'Global', news.global)}
   </section>
-  <p style="color:var(--muted);font-size:12px;margin:10px 2px 0">تُحدَّث الأخبار تلقائياً يومياً الساعة 7:00 صباحاً بتوقيت الإمارات (أحدث 3 أخبار، وتبقى السابقة إن لم يوجد جديد)${news.updatedAt ? ` · آخر تحديث ${fmtDate(new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(news.updatedAt)))}` : ''}.</p>
+  <p class="section-note">تُحدَّث الأخبار تلقائياً يومياً الساعة 7:00 صباحاً بتوقيت الإمارات (أحدث 3 أخبار، وتبقى السابقة إن لم يوجد جديد)${news.updatedAt ? ` · آخر تحديث ${fmtDate(new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(news.updatedAt)))}` : ''}.</p>
   `;
 }
 
@@ -359,7 +376,7 @@ function viewCalendar() {
     visible.forEach((e) => (byMonth[ymOf(e.date)] ||= []).push(e));
     const body = Object.keys(byMonth).sort().map((m) => `
       <div class="timeline-month">
-        <h3><span>${fmtYM(m)}</span><span class="num">${byMonth[m].length}</span></h3>
+        <h3>${fmtYM(m)}<span class="num">${byMonth[m].length}</span></h3>
         <div class="card">${byMonth[m].map((e) => `
           <div class="tl-row ${e.date > today ? 'future' : ''}" data-act="edit-event" data-eid="${e.id}">
             <div class="tl-day">${parse(e.date).d}${e.endDate ? '–' + parse(e.endDate).d : ''}</div>
@@ -476,8 +493,8 @@ function viewMinutes() {
           <div style="min-width:0">
             <div class="topic">${esc(it.topic)}</div>
             <div class="dir">${esc(it.directive)}</div>
-            <div class="owners">${it.owners ? `<span>👤 ${esc(it.owners)}</span>` : ''}${it.due ? `<span class="chip">الاستحقاق ${fmtDate(it.due)}</span>` : ''}${it.doneDate && it.status === 'done' ? `<span class="chip" style="color:var(--ok)">أُنجز ${fmtDate(it.doneDate)}</span>` : ''}</div>
-            ${it.note ? `<div class="note">📝 ${esc(it.note)}</div>` : ''}
+            <div class="owners">${it.owners ? `<span style="display:inline-flex;gap:6px;align-items:center">${ICON.user}${esc(it.owners)}</span>` : ''}${it.due ? `<span class="chip gold">الاستحقاق ${fmtDate(it.due)}</span>` : ''}${it.doneDate && it.status === 'done' ? `<span class="chip" style="color:var(--ok)">أُنجز ${fmtDate(it.doneDate)}</span>` : ''}</div>
+            ${it.note ? `<div class="note">${ICON.note}<span>${esc(it.note)}</span></div>` : ''}
           </div>
           <div class="item-actions">
             <button class="status ${it.status}" data-act="cycle-status" data-mid="${m.id}" data-iid="${it.id}" title="اضغط لتغيير الحالة">${STATUS[it.status]}</button>
@@ -584,7 +601,7 @@ function meetingModal(m) {
       field('عنوان الاجتماع', inp('title', m.title, 'placeholder="يُولَّد تلقائياً إن تُرك فارغاً"')) +
       `<div class="row2">${field('التاريخ', inp('date', m.date, 'type="date" required'))}${field('الوقت', inp('time', m.time || '', 'type="time"'))}</div>` +
       field('الحضور', area('attendees', m.attendees || '')) +
-      (isNew ? `<label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" name="addEvent" checked> إضافة الاجتماع إلى تقويم الأحداث</label>` : ''),
+      (isNew ? `<label class="check-line"><input type="checkbox" class="tick" name="addEvent" id="f-addEvent" checked> إضافة الاجتماع إلى تقويم الأحداث</label>` : ''),
     del: isNew ? null : () => { state.meetings = state.meetings.filter((x) => x.id !== m.id); commit('تم حذف الاجتماع'); },
     onSave(d) {
       const num = d.number ? Number(d.number) : null;
