@@ -21,4 +21,8 @@ Edits made in the browser are saved locally. To save them to the repo (visible o
 3. Settings → Actions → General → Workflow permissions → **Read and write**.
 4. Optional: run "Daily agentic AI news" manually once from the Actions tab.
 
-Local preview: `python3 -m http.server` then open http://localhost:8000.
+## Run on your Mac (localhost)
+1. Clone the repo once (e.g. with GitHub Desktop → Clone `azalmulla/website`).
+2. Double-click `start.command` (first time: right-click → Open). It pulls the latest changes and opens http://localhost:8000.
+
+Keep using port 8000 — the browser stores your edits per address.
