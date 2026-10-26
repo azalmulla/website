@@ -31,4 +31,4 @@ Keep using port 8000 — the browser stores your edits per address.
 ## Workspace (AI drafting)
 - Opened from its claude.ai link, the workspace uses the viewer's own Claude plan (no key needed).
 - On localhost, add a Claude API key in ⚙ settings (stored on that device only; usage is billed to the API account). Calls use the official `@anthropic-ai/sdk` loaded from jsDelivr, model `claude-opus-5-5`.
-- Minutes templates live in `assets/templates/`. Any past minutes `.docx` can be uploaded as a template in the workspace: the title, date, time, attendees and the directives table are replaced, everything else (logo, fonts, layout) is kept.
+- The default minutes template is `assets/templates/minutes-national.docx`, embedded as `minutes-template.js` (regenerate it after editing the .docx; the command is in that file). Any past minutes `.docx` can be uploaded as a template in the workspace: the title, date, time, attendees and the directives table are replaced, everything else (logo, fonts, layout) is kept.

@@ -840,9 +840,11 @@ async function generateMinutes() {
 async function loadTemplate(c) {
   const custom = ls.get('aai.tpl.' + c);
   if (custom && custom.b64) return Uint8Array.from(atob(custom.b64), (ch) => ch.charCodeAt(0)).buffer;
-  const res = await fetch(`assets/templates/minutes-${c}.docx`);
-  if (!res.ok) throw new Error('template');
-  return res.arrayBuffer();
+  if (!window.AAI_MINUTES_TEMPLATE) await new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = 'assets/templates/minutes-template.js';
+    s.onload = res; s.onerror = () => rej(new Error('template')); document.head.appendChild(s);
+  });
+  return Uint8Array.from(atob(window.AAI_MINUTES_TEMPLATE), (ch) => ch.charCodeAt(0)).buffer;
 }
 async function buildMinutesDocx(r, c) {
   const JSZip = await loadJSZip();
