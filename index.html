@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة متابعة الذكاء الاصطناعي المساعد</title>
-<meta name="description" content="لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات: تقويم الأحداث، متابعة محاضر الاجتماعات، والأخبار.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات: مراحل المشروع، متابعة توجيهات محاضر الاجتماعات، والأخبار.">
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
@@ -24,8 +25,8 @@
     </a>
     <nav class="tabs" role="tablist">
       <a href="#dashboard" data-tab="dashboard">الرئيسية</a>
-      <a href="#calendar" data-tab="calendar">تقويم الأحداث</a>
-      <a href="#minutes" data-tab="minutes">متابعة محاضر الاجتماعات</a>
+      <a href="#minutes" data-tab="minutes">محاضر الاجتماعات</a>
+      <a href="#workspace" data-tab="workspace">مساحة العمل</a>
     </nav>
     <div class="top-actions">
       <span id="syncBadge" class="sync-badge" hidden></span>
@@ -40,9 +41,11 @@
   <div class="loading">جارٍ التحميل…</div>
 </main>
 
-<footer class="foot wrap">
-  <span>مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات</span>
-  <a href="workflow-form.html">نموذج خطة عمل الجهات الاتحادية ←</a>
+<footer class="foot-band">
+  <div class="foot wrap">
+    <span>مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات</span>
+    <a href="workflow-form.html">نموذج خطة عمل الجهات الاتحادية ←</a>
+  </div>
 </footer>
 
 <dialog id="modal"><form method="dialog" id="modalForm"></form></dialog>

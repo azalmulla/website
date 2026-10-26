@@ -6,6 +6,7 @@ Static site (no build step) for tracking the UAE Government Agentic AI project.
 |---|---|
 | `index.html#dashboard` | Stage countdown, pending meeting directives, upcoming events, UAE + global agentic AI news |
 | `index.html#calendar` | تقويم الأحداث — month grid / timeline, add & edit events |
+| `index.html#workspace` | مساحة العمل — Claude drafts meeting minutes from typed notes or photos into the committee's Word template |
 | `index.html#minutes` | متابعة محاضر الاجتماعات — National Committee & Ministry Committee, tick items done / in progress |
 | `workflow-form.html` | Previous federal workflow form |
 
@@ -26,3 +27,8 @@ Edits made in the browser are saved locally. To save them to the repo (visible o
 2. Double-click `start.command` (first time: right-click → Open). It pulls the latest changes and opens http://localhost:8000.
 
 Keep using port 8000 — the browser stores your edits per address.
+
+## Workspace (AI drafting)
+- Opened from its claude.ai link, the workspace uses the viewer's own Claude plan (no key needed).
+- On localhost, add a Claude API key in ⚙ settings (stored on that device only; usage is billed to the API account). Calls use the official `@anthropic-ai/sdk` loaded from jsDelivr, model `claude-opus-5-5`.
+- The default minutes template is `assets/templates/minutes-national.docx`, embedded as `minutes-template.js` (regenerate it after editing the .docx; the command is in that file). Any past minutes `.docx` can be uploaded as a template in the workspace: the title, date, time, attendees and the directives table are replaced, everything else (logo, fonts, layout) is kept.
