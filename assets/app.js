@@ -667,7 +667,9 @@ function viewMinutesOutput() {
       <div class="skel"><i></i><i></i><i></i><i></i><i></i></div>
     </div>`;
   }
-  if (ws.status === 'error') return `<div class="card out-card"><div class="err-box"><b>تعذّر إنشاء المحضر</b><p>${esc(ws.error)}</p></div></div>`;
+  if (ws.status === 'error') return `<div class="card out-card"><div class="err-box"><b>تعذّر إنشاء المحضر</b><p>${esc(ws.error)}</p>
+    ${ws.errorDetail ? `<details open><summary>تفاصيل تقنية</summary><code dir="ltr">${esc(ws.errorDetail)}</code></details>` : ''}
+    <p class="err-src">المحرّك: ${engine() === 'claude' ? 'حسابك في Claude (claude.ai)' : engine() === 'api' ? 'Claude API (مفتاح محفوظ على هذا الجهاز)' : 'غير متصل'}</p></div></div>`;
   const r = ws.result;
   if (!r) return `<div class="out-empty">${ICON.doc}<p>سيظهر المحضر هنا بقالب ${COMMITTEES[ws.committee]}، وتستطيع تعديل أي خانة قبل التنزيل.</p></div>`;
   return `
@@ -747,7 +749,9 @@ async function imageToBase64(file) {
 }
 
 async function runWithSDK(prompt, signal, onProgress) {
-  const { default: Anthropic } = await import(SDK_URL);
+  let Anthropic;
+  try { ({ default: Anthropic } = await import(SDK_URL)); }
+  catch (e) { throw { userMsg: 'تعذّر تحميل مكتبة Claude من الإنترنت (cdn.jsdelivr.net). تحقق من الاتصال أو من حظر الشبكة لهذا الموقع.', detail: String(e && e.message || e) }; }
   const client = new Anthropic({ apiKey: ls.get(LS_KEY), dangerouslyAllowBrowser: true });
   const content = [];
   for (const im of ws.images) content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: await imageToBase64(im.file) } });
@@ -769,13 +773,15 @@ async function runWithSDK(prompt, signal, onProgress) {
   } catch (e) {
     if (e && e.userMsg) throw e;
     if (e instanceof Anthropic.APIUserAbortError) throw { cancelled: true };
-    if (e instanceof Anthropic.AuthenticationError) throw { userMsg: 'مفتاح Claude API غير صالح. حدّثه من الإعدادات.' };
-    if (e instanceof Anthropic.PermissionDeniedError) throw { userMsg: 'مفتاح API لا يملك صلاحية استخدام هذا النموذج.' };
-    if (e instanceof Anthropic.RateLimitError) throw { userMsg: 'تم تجاوز حد الاستخدام مؤقتاً. حاول بعد دقيقة.' };
-    if (e instanceof Anthropic.BadRequestError) throw { userMsg: 'رفض Claude الطلب. تحقق من الصور (JPG أو PNG) وحجم الملاحظات.' };
-    if (e instanceof Anthropic.APIConnectionError) throw { userMsg: 'تعذّر الاتصال بـ Claude. تحقق من الإنترنت.' };
-    if (e instanceof Anthropic.APIError) throw { userMsg: `خطأ من خدمة Claude (${e.status}). حاول مرة أخرى.` };
-    throw e;
+    const detail = e instanceof Anthropic.APIError ? `${e.status || ''} ${(e.error && e.error.error && e.error.error.message) || e.message}`.trim() : String(e && e.message || e);
+    if (e instanceof Anthropic.BadRequestError && /credit balance/i.test(detail)) throw { userMsg: 'رصيد حساب Claude API غير كافٍ. أضف رصيداً من console.anthropic.com ثم Billing.', detail };
+    if (e instanceof Anthropic.AuthenticationError) throw { userMsg: 'مفتاح Claude API غير صالح. حدّثه من الإعدادات.', detail };
+    if (e instanceof Anthropic.PermissionDeniedError) throw { userMsg: 'مفتاح API لا يملك صلاحية استخدام هذا النموذج.', detail };
+    if (e instanceof Anthropic.RateLimitError) throw { userMsg: 'تم تجاوز حد الاستخدام مؤقتاً. حاول بعد دقيقة.', detail };
+    if (e instanceof Anthropic.BadRequestError) throw { userMsg: 'رفضت خدمة Claude الطلب. التفاصيل أدناه.', detail };
+    if (e instanceof Anthropic.APIConnectionError) throw { userMsg: 'تعذّر الاتصال بـ Claude. تحقق من الإنترنت.', detail };
+    if (e instanceof Anthropic.APIError) throw { userMsg: `خطأ من خدمة Claude (${e.status}). حاول مرة أخرى.`, detail };
+    throw { userMsg: 'حدث خطأ غير متوقع أثناء الاتصال بـ Claude.', detail };
   }
 }
 
@@ -802,7 +808,7 @@ async function runWithSample(prompt, signal, onProgress) {
       prompt_too_large: 'الملاحظات طويلة جداً. قسّمها وحاول مرة أخرى.',
       session_expired: 'انتهت الجلسة. سجّل الدخول إلى claude.ai مرة أخرى.',
     }[code];
-    throw { userMsg: msg || 'تعذّر الاتصال بـ Claude. حاول مرة أخرى.' };
+    throw { userMsg: msg || 'تعذّر الاتصال بـ Claude. حاول مرة أخرى.', detail: `${code || 'unknown'}: ${(e && e.message) || ''}` };
   }
 }
 
@@ -818,7 +824,7 @@ async function generateMinutes() {
     const prompt = buildMinutesPrompt();
     const text = eng === 'claude' ? await runWithSample(prompt, ws.ctl.signal, onProgress) : await runWithSDK(prompt, ws.ctl.signal, onProgress);
     const data = parseJSONLoose(text);
-    if (!data || !Array.isArray(data.items) || !data.items.length) throw { userMsg: 'لم يُرجع Claude محضراً صالحاً. حاول مرة أخرى أو وضّح الملاحظات.' };
+    if (!data || !Array.isArray(data.items) || !data.items.length) throw { userMsg: 'لم يُرجع Claude محضراً صالحاً. حاول مرة أخرى أو وضّح الملاحظات.', detail: text.slice(0, 600) };
     ws.result = {
       title: minutesTitle(),
       date_text: minutesDateText(data),
@@ -830,7 +836,7 @@ async function generateMinutes() {
     ws.status = 'done';
   } catch (e) {
     if (e && e.cancelled) { ws.status = 'idle'; }
-    else { console.error(e); ws.status = 'error'; ws.error = (e && e.userMsg) || 'حدث خطأ غير متوقع. حاول مرة أخرى.'; }
+    else { console.error(e); ws.status = 'error'; ws.error = (e && e.userMsg) || 'حدث خطأ غير متوقع. حاول مرة أخرى.'; ws.errorDetail = (e && e.detail) || (e && e.message) || (e && !e.userMsg ? String(e) : ''); }
   }
   ws.ctl = null;
   render();

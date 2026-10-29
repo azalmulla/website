@@ -395,6 +395,10 @@ details.att p{margin:6px 0 0;line-height:1.9;max-width:90ch}
 @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
 .err-box{color:var(--danger);background:var(--danger-bg);border-radius:var(--r-lg);padding:14px 16px}
 .err-box p{margin:4px 0 0}
+.err-box details{margin-top:10px;color:var(--fg-2)}
+.err-box summary{cursor:pointer;font-weight:600}
+.err-box code{display:block;margin-top:6px;padding:8px 10px;border-radius:var(--r-sm);background:var(--surface);color:var(--fg);font-size:12.5px;white-space:pre-wrap;word-break:break-word;text-align:left}
+.err-src{font-size:12.5px;color:var(--muted)}
 /* paper preview: a white document page in both themes, like the Word file */
 .paper{--paper:#FFFFFF;--paper-ink:#111111;--paper-line:#9A9A9A;--paper-gold:#BB8A33;--paper-head:#F2EBDD;
   background:var(--paper);color:var(--paper-ink);border-radius:6px;padding:36px 34px 40px;box-shadow:0 1px 3px rgba(0,0,0,.12),0 18px 40px -18px rgba(0,0,0,.3);
