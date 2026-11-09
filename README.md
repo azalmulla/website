@@ -7,6 +7,9 @@ Static site (no build step) for tracking the UAE Government Agentic AI project.
 | `index.html#dashboard` | Stage countdown, pending meeting directives, upcoming events, UAE + global agentic AI news |
 | `index.html#calendar` | تقويم الأحداث — month grid / timeline, add & edit events |
 | `index.html#workspace` | مساحة العمل — Claude drafts meeting minutes from typed notes or photos into the committee's Word template |
+| `index.html#launches` | الإطلاقات والإعلانات — launch calendar with a status pipeline (planned → announced), by month or by status |
+| `index.html#archive` | أرشيف الفعاليات — past events by month with photo galleries |
+| `index.html#ideas` | بنك الأفكار والمشاريع — ideas/projects exported to the one-slide Project Template (.pptx) |
 | `index.html#minutes` | متابعة محاضر الاجتماعات — National Committee & Ministry Committee, tick items done / in progress |
 | `workflow-form.html` | Previous federal workflow form |
 
@@ -32,3 +35,7 @@ Keep using port 8000 — the browser stores your edits per address.
 - Opened from its claude.ai link, the workspace uses the viewer's own Claude plan (no key needed).
 - On localhost, add a Claude API key in ⚙ settings (stored on that device only; usage is billed to the API account). Calls use the official `@anthropic-ai/sdk` loaded from jsDelivr, model `claude-opus-5-5`.
 - Default minutes templates: `assets/templates/minutes-national.docx` and `minutes-ministry.docx` (built from each committee's own minutes, content removed). They are embedded in `minutes-template.js`; run `python3 scripts/embed-templates.py` after editing either. Any past minutes `.docx` can be uploaded as a template in the workspace: the title, date, time, attendees and the directives table are replaced, everything else (logo, fonts, layout) is kept.
+
+## Templates and photos
+- `assets/templates/project-template.pptx` (ideas bank export) and `committee-template.pptx` (National Committee meeting deck, images downscaled) are embedded by `scripts/embed-templates.py` like the minutes templates.
+- Event and idea photos: on the claude.ai link they go to the page's asset store; locally they are kept in the browser (IndexedDB) and, when GitHub sync is on, uploaded to `assets/photos/`.
