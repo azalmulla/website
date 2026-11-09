@@ -7,7 +7,7 @@
 'use strict';
 
 const TZ = 'Asia/Dubai';
-const SCHEMA = 4;
+const SCHEMA = 5;
 const LS_STATE = 'aai.state.v1';
 const LS_GH = 'aai.github.v1';
 const LS_UI = 'aai.ui.v2';
@@ -146,6 +146,7 @@ function migrate(local, remote) {
   const have = new Set(remote.meetings.map((m) => m.id)), haveKey = new Set(remote.meetings.filter((m) => m.items.length).map(key));
   (local.meetings || []).forEach((m) => { if (!have.has(m.id) && (m.items || []).length && !haveKey.has(key(m))) remote.meetings.push(m); });
   ['launches', 'ideas'].forEach((k) => { if ((local[k] || []).length) remote[k] = local[k]; });
+  if (local.deck) remote.deck = local.deck;
   const lev = new Map((local.events || []).map((e) => [e.id, e]));
   (remote.events || []).forEach((e) => { const o = lev.get(e.id); if (o && (o.photos || []).length) e.photos = o.photos; });
   const rids = new Set((remote.events || []).map((e) => e.id));
@@ -569,7 +570,7 @@ const LS_DRAFT = 'aai.ws.draft.v1';
 const COMMITTEE_FULL = { national: 'اللجنة الوطنية للذكاء الاصطناعي المساعد', ministry: 'لجنة الذكاء الاصطناعي المساعد في وزارة شؤون مجلس الوزراء' };
 const TASKS = [
   { id: 'minutes', icon: 'doc', t: 'إصدار محضر اجتماع', d: 'من ملاحظاتك المكتوبة أو صورها إلى محضر رسمي بقالب اللجنة' },
-  { id: 'deck', icon: 'deck', t: 'إعداد عرض تقديمي', d: 'شرائح بهوية المشروع', soon: true },
+  { id: 'committee', icon: 'deck', t: 'عرض اجتماع اللجنة الوطنية', d: 'العرض المعتمد لكل اجتماع: الأجندة، تقويم الإطلاقات، الأرقام والنقاط' },
   { id: 'news', icon: 'news', t: 'صياغة خبر صحفي', d: 'خبر إطلاق بأسلوب الإعلام الحكومي', soon: true },
   { id: 'brief', icon: 'brief', t: 'ملخص تنفيذي', d: 'موجز للقيادات عن مستجدات المشروع', soon: true },
 ];
@@ -642,7 +643,7 @@ function viewWorkspace() {
   </div>`;
 
   if (!task) return head + picker + `<div class="ws-empty">${ICON.spark}<p>اختر مهمة من القائمة أعلاه للبدء.</p></div>`;
-  return head + picker + viewMinutesTask(eng);
+  return head + picker + (task.id === 'committee' ? viewDeckTask(eng) : viewMinutesTask(eng));
 }
 
 function viewMinutesTask(eng) {
@@ -1349,6 +1350,224 @@ async function exportIdea(id) {
   catch (e) { console.error(e); toast(e.message === 'jszip' ? 'تعذّر تحميل أداة الملفات. تحقق من الإنترنت.' : 'تعذّر تجهيز القالب'); }
 }
 
+/* ---------------- national committee meeting deck ---------------- */
+// Fills the committee's own PowerPoint (assets/templates/committee-template.pptx):
+// cover, agenda table, launches calendar statuses (from the launches tracker),
+// first-batch summary figures, points to consider and the FedAI headline figures.
+const DECK_DEFAULT_FEDAI_SUB = 'وجاري العمل على استكمال الربط لبقية الوزارات والجهات الاتحادية';
+const TRACKS = { ops: 'مسار العمليات والدعم المؤسسي', strategic: 'مسار العمل الحكومي الاستراتيجي', services: 'مسار الخدمات الحكومية' };
+const minutesWord = (n) => { n = +n; return n === 1 ? 'دقيقة' : n === 2 ? 'دقيقتان' : n >= 3 && n <= 10 ? 'دقائق' : 'دقيقة'; };
+function deckWorking() {
+  if (!ws.deck) {
+    ws.deck = JSON.parse(JSON.stringify(state.deck || { agenda: [], points: ['', '', ''], batch: {}, fedai: {} }));
+    ws.deck.fedai ||= {}; ws.deck.fedai.sub ??= DECK_DEFAULT_FEDAI_SUB;
+    ['ops', 'strategic', 'services'].forEach((k) => { ws.deck.batch ||= {}; ws.deck.batch[k] ||= {}; });
+    while ((ws.deck.points || []).length < 3) (ws.deck.points ||= []).push('');
+  }
+  if (!ws.dnum) ws.dnum = String(meetingsOf('national').reduce((n, m) => Math.max(n, m.items.length ? m.number || 0 : 0), 0) + 1);
+  if (!ws.ddate) ws.ddate = todayStr();
+  return ws.deck;
+}
+const dIn = (path, val, attrs = '') => `<input data-deck="${path}" value="${esc(val ?? '')}" ${attrs}>`;
+
+function viewDeckTask(eng) {
+  const d = deckWorking();
+  const total = d.agenda.reduce((n, r) => n + (+r.minutes || 0), 0);
+  return `
+  <div class="deck-grid">
+  <section class="ws-form card">
+    <div class="ws-step"><span class="sn">1</span><h3>الاجتماع</h3></div>
+    <div class="ws-fields">
+      <div class="field"><label for="dk-num">رقم الاجتماع</label><input id="dk-num" data-wsd="dnum" type="number" min="1" value="${esc(ws.dnum)}"></div>
+      <div class="field"><label for="dk-date">التاريخ</label><input id="dk-date" data-wsd="ddate" type="date" value="${esc(ws.ddate)}"></div>
+      <div class="field"><label>المدة التقديرية (دقيقة)</label>${dIn('duration', d.duration || total, 'type="number" min="0"')}</div>
+    </div>
+
+    <div class="ws-step"><span class="sn">2</span><h3>أجندة الاجتماع</h3><small class="muted-t">مجموع الفقرات: ${total} دقيقة</small></div>
+    <div class="agenda">${d.agenda.map((r, i) => `
+      <div class="ag-row">
+        <span class="ag-i">${i + 1}</span>
+        ${dIn(`agenda.${i}.topic`, r.topic, 'placeholder="الفقرة"')}
+        ${dIn(`agenda.${i}.sub`, r.sub, 'placeholder="تفاصيل (اختياري)"')}
+        ${dIn(`agenda.${i}.presenter`, r.presenter, 'placeholder="المتحدث"')}
+        ${dIn(`agenda.${i}.minutes`, r.minutes, 'type="number" min="0" placeholder="د"')}
+        <button class="icon-btn sm" data-act="dk-rm" data-i="${i}" aria-label="حذف الفقرة">✕</button>
+      </div>`).join('')}
+      ${d.agenda.length > 7 ? '<small class="warn-t">جدول الأجندة في العرض يتسع لسبع فقرات تقريباً؛ قد تحتاج إلى تصغير الخط في PowerPoint.</small>' : ''}
+      <button class="link" data-act="dk-addrow">+ إضافة فقرة</button>
+    </div>
+
+    <div class="ws-step"><span class="sn">3</span><h3>نقاط للأخذ بعين الاعتبار</h3>${eng ? `<button class="btn sm" data-act="dk-suggest">${ICON.spark} اقترح من المحاضر والإطلاقات</button>` : ''}</div>
+    ${[0, 1, 2].map((i) => `<div class="field"><textarea data-deck="points.${i}" rows="2" aria-label="النقطة ${i + 1}">${esc(d.points[i] || '')}</textarea></div>`).join('')}
+
+    <div class="ws-step"><span class="sn">4</span><h3>ملخص إطلاقات الدفعة</h3></div>
+    <div class="batch-tbl"><div></div><b>عدد الجهات</b><b>المستهدف العام</b><b>مستهدف الدفعة</b><b>نسبة الإنجاز %</b><b>الجاهز / أُطلق</b>
+      ${Object.entries(TRACKS).map(([k, v]) => `<span>${v}</span>${['entities', 'target', 'batch', 'pct', 'ready'].map((f) => dIn(`batch.${k}.${f}`, (d.batch[k] || {})[f], 'inputmode="numeric"')).join('')}`).join('')}
+    </div>
+    <div class="field"><label>الجهات التي لم تسلّم دفعات الإطلاق</label><textarea data-deck="notDelivered" rows="2">${esc(d.notDelivered || '')}</textarea></div>
+
+    <div class="ws-step"><span class="sn">5</span><h3>المنظومة التقنية الوطنية (FedAI)</h3></div>
+    <div class="field"><label>العنوان</label>${dIn('fedai.headline', d.fedai.headline)}</div>
+    <div class="field"><label>السطر الثاني</label>${dIn('fedai.sub', d.fedai.sub)}</div>
+    <div class="ws-fields five">
+      <div class="field"><label>إجمالي الجهات</label>${dIn('fedai.total', d.fedai.total)}</div>
+      <div class="field"><label>نسبة الربط %</label>${dIn('fedai.pct', d.fedai.pct)}</div>
+      <div class="field"><label>تم الربط</label>${dIn('fedai.connected', d.fedai.connected)}</div>
+      <div class="field"><label>جاري الربط</label>${dIn('fedai.inProgress', d.fedai.inProgress)}</div>
+      <div class="field"><label>يمكنها الاستفادة</label>${dIn('fedai.eligible', d.fedai.eligible)}</div>
+    </div>
+    <div class="ws-go"><button class="btn primary gen" data-act="dk-build">${ICON.deck} إنشاء العرض (PowerPoint)</button></div>
+  </section>
+  <aside class="deck-side card">
+    <h3>ما يتضمّنه العرض</h3>
+    <ol class="deck-list">
+      <li><b>الغلاف</b> · الاجتماع ${ORD[+ws.dnum] || ws.dnum} · ${ws.ddate ? `${dowOf(ws.ddate)}، ${fmtDate(ws.ddate)}` : ''}</li>
+      <li><b>الأجندة</b> · ${d.agenda.length} فقرات</li>
+      <li><b>تقويم الإطلاقات</b> · تُحدَّث حالات البطاقات من صفحة الإطلاقات (${state.launches.filter((l) => l.status === 'announced').length} من ${state.launches.length} أُعلن)</li>
+      <li><b>ملخص إطلاقات الدفعة</b> · أرقام المسارات الثلاثة</li>
+      <li><b>نقاط للأخذ بعين الاعتبار</b></li>
+      <li><b>مستجدات المسارات</b> · شرائح فواصل يضيف بعدها كل مسار عرضه</li>
+      <li><b>FedAI</b> · العنوان والأرقام (قوائم الجهات تُعدَّل في PowerPoint)</li>
+    </ol>
+    <p class="muted-t">يُبنى العرض على تصميم عرض اللجنة الأصلي. تُحفظ هذه البيانات لتكون نقطة البداية في الاجتماع القادم.</p>
+  </aside>
+  </div>`;
+}
+
+async function loadCommitteeTemplate() {
+  if (!window.AAI_COMMITTEE_TEMPLATE) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'assets/templates/committee-template.js'; s.onload = res; s.onerror = () => rej(new Error('template')); document.head.appendChild(s); });
+  return Uint8Array.from(atob(window.AAI_COMMITTEE_TEMPLATE), (c) => c.charCodeAt(0));
+}
+const normTitle = (t) => String(t || '').replace(/[ـ‎‏‪-‮]/g, '').replace(/\s+/g, ' ').trim().split(' ').map((w) => [...w].sort().join('')).sort().join(' ');
+
+async function buildCommitteeDeck(d, num, date) {
+  const JSZip = await loadJSZip();
+  const zip = await JSZip.loadAsync(await loadCommitteeTemplate());
+  const A = 'http://schemas.openxmlformats.org/drawingml/2006/main', P = 'http://schemas.openxmlformats.org/presentationml/2006/main';
+  const load = async (n) => new DOMParser().parseFromString(await zip.file(`ppt/slides/slide${n}.xml`).async('string'), 'application/xml');
+  const save = (n, doc) => zip.file(`ppt/slides/slide${n}.xml`, new XMLSerializer().serializeToString(doc));
+  const spMap = (doc) => { const m = {}; [...doc.getElementsByTagNameNS(P, 'sp')].forEach((sp) => { const c = sp.getElementsByTagNameNS(P, 'cNvPr')[0]; if (c) m[c.getAttribute('id')] = sp; }); return m; };
+  const paras = (el) => [...el.getElementsByTagNameNS(A, 'p')];
+  const setP = (p, text, split) => {
+    if (!p) return; let ts = [...p.getElementsByTagNameNS(A, 't')];
+    if (!ts.length) { const r = p.ownerDocument.createElementNS(A, 'a:r'); const t = p.ownerDocument.createElementNS(A, 'a:t'); r.appendChild(t); p.insertBefore(r, p.getElementsByTagNameNS(A, 'endParaRPr')[0] || null); ts = [t]; }
+    if (split && ts.length > 1) { const i = text.indexOf(' '); ts[0].textContent = i > 0 ? text.slice(0, i + 1) : text; ts[1].textContent = i > 0 ? text.slice(i + 1) : ''; ts.slice(2).forEach((t) => { t.textContent = ''; }); return; }
+    ts[0].textContent = text; ts.slice(1).forEach((t) => { t.textContent = ''; });
+  };
+  const setSp = (m, id, idx, text, split) => { const sp = m[id]; if (sp) setP(paras(sp)[idx], String(text ?? ''), split); };
+  const report = { launches: 0 };
+
+  // 1 cover
+  let doc = await load(1); let m = spMap(doc);
+  setSp(m, '15', 0, `اجتماع اللجنة الوطنية ${ORD[+num] || num}`);
+  setSp(m, '16', 0, date ? `${dowOf(date)}، ${fmtDate(date)}` : '');
+  save(1, doc);
+
+  // 2 agenda
+  doc = await load(2); m = spMap(doc);
+  const dur = [...doc.getElementsByTagNameNS(P, 'sp')].find((sp) => /المدة التقديرية/.test(sp.textContent));
+  if (dur) setP(paras(dur).find((p) => /المدة التقديرية/.test(p.textContent)), `المدة التقديرية للاجتماع – ${d.duration || d.agenda.reduce((n, r) => n + (+r.minutes || 0), 0)} دقيقة`);
+  const tbl = doc.getElementsByTagNameNS(A, 'tbl')[0];
+  if (tbl) {
+    const rows = [...tbl.getElementsByTagNameNS(A, 'tr')];
+    const tOpen = rows[0], tSimple = rows[1], tSub = rows[2] || rows[1];
+    rows.forEach((r) => r.parentNode.removeChild(r));
+    d.agenda.filter((r) => r.topic || r.presenter).forEach((r, i) => {
+      const tr = (i === 0 ? tOpen : r.sub ? tSub : tSimple).cloneNode(true);
+      const tcs = [...tr.getElementsByTagNameNS(A, 'tc')];
+      const pres = r.presenter + (r.minutes ? ` – ${r.minutes} ${minutesWord(r.minutes)}` : '');
+      setP(paras(tcs[0])[0], pres); paras(tcs[0]).slice(1).forEach((p) => setP(p, ''));
+      const ps = paras(tcs[1]); setP(ps[0], r.topic || '');
+      if (ps[1]) setP(ps[1], r.sub || ''); ps.slice(2).forEach((p) => setP(p, ''));
+      tbl.appendChild(tr);
+    });
+  }
+  save(2, doc);
+
+  // 4 launches calendar: update the status label, its colour and the month badge of each matching card
+  doc = await load(4);
+  const geo = [...doc.getElementsByTagNameNS(P, 'sp')].map((sp) => {
+    const off = sp.getElementsByTagNameNS(A, 'off')[0], ext = sp.getElementsByTagNameNS(A, 'ext')[0];
+    return off && ext ? { sp, x: +off.getAttribute('x'), y: +off.getAttribute('y'), w: +ext.getAttribute('cx'), h: +ext.getAttribute('cy'), text: sp.textContent.trim() } : null;
+  }).filter(Boolean);
+  const FILL = { announced: '00B050', ready: 'FFC000', prep: 'FFC000', scheduled: '0062FD', planned: '7F7F7F' };
+  const setFill = (sp, hex) => {
+    const spPr = sp.getElementsByTagNameNS(P, 'spPr')[0]; const sf = spPr && [...spPr.children].find((c) => c.localName === 'solidFill'); if (!sf) return;
+    while (sf.firstChild) sf.removeChild(sf.firstChild);
+    const c = sp.ownerDocument.createElementNS(A, 'a:srgbClr'); c.setAttribute('val', hex); sf.appendChild(c);
+  };
+  state.launches.forEach((l) => {
+    const t = geo.find((g) => g.text && normTitle(g.text) === normTitle(l.title)); if (!t) return;
+    report.launches++;
+    const note = geo.find((g) => g !== t && g.h < 260000 && Math.abs(g.x - t.x) < 120000 && g.y > t.y && g.y < t.y + 1100000 && g.text);
+    if (note) {
+      const label = l.status === 'announced' ? '✓ تم الإعلان' : (l.note || (l.date ? `موعد الإطلاق ${fmtDate(l.date)}` : LSTN[l.status]));
+      setP(paras(note.sp)[0], label); setFill(note.sp, FILL[l.status] || 'FFC000');
+    }
+    const badge = geo.find((g) => g !== t && g.h < 320000 && g.y < t.y && g.y > t.y - 600000 && Math.abs((g.x + g.w) - (t.x + t.w)) < 200000);
+    if (badge) setP(paras(badge.sp)[0], l.month ? MONTHS[+l.month.slice(5, 7) - 1] : 'للتحديد');
+  });
+  save(4, doc);
+
+  // 5 first-batch summary
+  doc = await load(5); m = spMap(doc);
+  const B = d.batch || {}, ids = { ops: ['150', '125', '67', '33', '15'], strategic: ['160', '131', '4', '36', '19'], services: ['156', '135', '37', '39', '21'] };
+  Object.entries(ids).forEach(([k, [ent, tgt, bat, pct, rdy]]) => {
+    const b = B[k] || {};
+    setSp(m, ent, 0, b.entities); setSp(m, tgt, 0, b.target); setSp(m, bat, 0, b.batch); setSp(m, rdy, 0, b.ready);
+    setSp(m, pct, 1, ` ${b.pct || 0}% نسبة الإنجاز المتوقعة`);
+  });
+  setSp(m, '117', 1, d.notDelivered || '');
+  save(5, doc);
+
+  // 6 points to consider (first word keeps the highlight colour)
+  doc = await load(6); m = spMap(doc);
+  ['15', '17', '19'].forEach((id, i) => setSp(m, id, 0, (d.points[i] || '').trim(), true));
+  save(6, doc);
+
+  // 9 FedAI
+  doc = await load(9); m = spMap(doc); const F = d.fedai || {};
+  setSp(m, '9', 0, F.headline); setSp(m, '9', 1, F.sub);
+  setSp(m, '17', 0, F.total); setSp(m, '121', 0, `${F.pct || 0}%`); setSp(m, '126', 0, F.connected); setSp(m, '25', 0, F.inProgress); setSp(m, '21', 0, F.eligible);
+  save(9, doc);
+
+  const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+  return { blob, report };
+}
+
+async function generateDeck() {
+  const d = deckWorking();
+  state.deck = JSON.parse(JSON.stringify(d)); persistQuiet();
+  toast('جارٍ إنشاء العرض…');
+  try {
+    const { blob, report } = await buildCommitteeDeck(d, ws.dnum, ws.ddate);
+    await saveFile(blob, `National-Committee-Meeting-${ws.dnum || 'X'}${ws.ddate ? '-' + ws.ddate : ''}.pptx`);
+    toast(`العرض جاهز · حُدِّثت ${report.launches} بطاقات في تقويم الإطلاقات`);
+  } catch (e) { console.error(e); toast(e && e.message === 'jszip' ? 'تعذّر تحميل أداة الملفات. تحقق من الإنترنت.' : 'تعذّر إنشاء العرض'); }
+}
+
+async function suggestDeckPoints(btn) {
+  const recent = meetingsOf('national').filter((m) => m.items.length).slice(-2);
+  const pend = recent.flatMap((m) => m.items.filter((i) => !isDone(i)).map((i) => `- (${meetingLabel(m)}) ${i.topic}: ${i.directive}`)).slice(0, 40).join('\n');
+  const lates = state.launches.filter(isOverdue).map((l) => `- ${l.title} (${LSTN[l.status]})`).join('\n') || 'لا يوجد';
+  btn.disabled = true;
+  try {
+    const r = await aiJSON(`You prepare the "نقاط للأخذ بعين الاعتبار" slide for the next meeting of the UAE National Committee for Agentic AI (اللجنة الوطنية للذكاء الاصطناعي المساعد). Propose exactly three short, formal Arabic points (one sentence each, 10 to 22 words) that the committee should consider, based only on the pending directives and delayed launches below. Start each point with a verb-noun such as «النظر في», «ضمان», «تسريع», «متابعة».
+
+Pending directives from the last two meetings:
+${pend || 'لا يوجد'}
+
+Delayed launches:
+${lates}
+
+Reply with only JSON: {"points":["…","…","…"]}`);
+    if (!r || !Array.isArray(r.points)) throw new Error('رد غير صالح');
+    deckWorking().points = r.points.slice(0, 3).map(String);
+    render(); toast('اقترح المساعد ثلاث نقاط. عدّلها حسب الحاجة');
+  } catch (e) { toast(`تعذّر الاقتراح: ${(e && (e.message || e.code)) || ''}`); }
+  btn.disabled = false;
+}
+
 /* ---------------- agent: briefing, recommendations and actions on the site ---------------- */
 // The briefing and recommendations are computed locally from the project data, so they
 // show instantly and work without Claude. Typed requests go to Claude with a small set
@@ -1589,6 +1808,20 @@ const AG_TOOLS = [
     },
   },
   {
+    name: 'prepare_committee_deck',
+    description: "Prepares the National Committee meeting presentation in the workspace (cover, agenda, launches calendar statuses, batch figures, points to consider, FedAI figures) for a meeting number and date, and gives the user a button to open it. Optionally replaces the three 'points to consider'.",
+    schema: { type: 'object', properties: { meeting_number: { type: 'integer' }, date: { type: 'string', description: 'YYYY-MM-DD' }, points: { type: 'array', items: { type: 'string' } } }, additionalProperties: false },
+    run(inp, acts) {
+      ws.task = 'committee'; ws.deck = null; deckWorking();
+      if (inp.meeting_number) ws.dnum = String(inp.meeting_number);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(inp.date || '')) ws.ddate = inp.date;
+      if (Array.isArray(inp.points) && inp.points.length) ws.deck.points = inp.points.slice(0, 3).map(String);
+      saveDraft();
+      acts.push({ type: 'open', view: 'workspace', label: `عرض الاجتماع ${ORD[+ws.dnum] || ws.dnum} للجنة الوطنية جاهز للمراجعة والإنشاء في مساحة العمل` });
+      return { ok: true, meeting_number: ws.dnum, date: ws.ddate };
+    },
+  },
+  {
     name: 'open_meeting',
     description: 'Gives the user a button to open a specific meeting in the minutes tracker.',
     schema: { type: 'object', properties: { committee: { type: 'string', enum: ['national', 'ministry'] }, meeting_number: { type: 'integer' } }, required: ['committee', 'meeting_number'], additionalProperties: false },
@@ -1614,6 +1847,7 @@ const AG_SYSTEM = `أنت «المساعد» في لوحة متابعة مشرو
 - نفّذ التغييرات (تحديد بند كمنجز، إضافة ملاحظة) فقط عندما يطلبها المستخدم صراحةً، ولا تقل إنك نفّذت شيئاً لم تنفّذه أداة.
 - عند طلب رسالة متابعة أو ملخص، اكتب النص كاملاً جاهزاً للنسخ، مع ألقاب «معالي» و«سعادة» كما وردت في البيانات.
 - عند طلب إعداد محضر، استخدم prepare_minutes_draft ثم أخبر المستخدم أن يفتح مساحة العمل.
+- لعرض اجتماع اللجنة الوطنية استخدم prepare_committee_deck.
 - للإطلاقات والإعلانات استخدم get_launches وupdate_launch. لبنك الأفكار استخدم list_ideas وadd_idea وexport_project_template (الأخيرة تعطي المستخدم زر تنزيل القالب).`;
 
 async function agentRunSDK(signal, onText, acts) {
@@ -1938,6 +2172,10 @@ app.addEventListener('click', (e) => {
     case 'i-export': exportIdea(ds.id); break;
     case 'i-filter': ui.if = ds.f; saveUI(); render(); break;
     case 'ag-export': exportIdea(ds.id); break;
+    case 'dk-addrow': deckWorking().agenda.push({ topic: '', sub: '', presenter: '', minutes: '5' }); render(); break;
+    case 'dk-rm': deckWorking().agenda.splice(+ds.i, 1); render(); break;
+    case 'dk-suggest': suggestDeckPoints(t); break;
+    case 'dk-build': generateDeck(); break;
     case 'ag-ask': agentAsk(ds.q); break;
     case 'ag-send': agentAsk($('#ag-input')?.value); break;
     case 'ag-stop': ag.ctl?.abort(); break;
@@ -1962,6 +2200,8 @@ app.addEventListener('keydown', (e) => {
 });
 app.addEventListener('input', (e) => {
   if (e.target.id === 'ag-input') { ag.draft = e.target.value; return; }
+  if (e.target.dataset.deck) { const path = e.target.dataset.deck.split('.'); let o = deckWorking(); while (path.length > 1) { const k = path.shift(); o = o[k] ??= {}; } o[path[0]] = e.target.value; return; }
+  if (e.target.dataset.wsd) { ws[e.target.dataset.wsd] = e.target.value; return; }
   const f = e.target.dataset.ws;
   if (f) { ws[f] = e.target.value; saveDraft(); return; }
   const ed = e.target.closest && e.target.closest('[data-ed]');
