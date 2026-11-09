@@ -1,6 +1,6 @@
 {
- "schema": 3,
- "updatedAt": "2026-11-09T01:00:00Z",
+ "schema": 4,
+ "updatedAt": "2026-11-09T14:00:00Z",
  "project": {
   "name": "مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات",
   "announced": "2026-04-23",
@@ -1126,285 +1126,442 @@
    ]
   }
  ],
+ "launches": [
+  {
+   "id": "l1",
+   "title": "مختبر تطبيق الذكاء الاصطناعي في الخدمات الحكومية",
+   "month": "2026-10",
+   "status": "announced",
+   "note": "تم الإعلان"
+  },
+  {
+   "id": "l2",
+   "title": "التحدي الحكومي السنوي 2026",
+   "month": "2026-10",
+   "status": "announced",
+   "note": "تم الإعلان"
+  },
+  {
+   "id": "l3",
+   "title": "مسرعات الذكاء الاصطناعي المساعد",
+   "month": "2026-10",
+   "status": "ready",
+   "note": "الخبر جاهز + لتحديد تاريخ الإعلان"
+  },
+  {
+   "id": "l4",
+   "title": "اتفاقيات الشراكات مع شركات التكنولوجيا للتدريب",
+   "month": "2026-10",
+   "status": "prep",
+   "note": "على هامش اجتماع مجلس الوزراء؟"
+  },
+  {
+   "id": "l5",
+   "title": "اتفاقيات منظومة المساعدين مع شركات التقنية",
+   "month": "2026-10",
+   "status": "prep",
+   "note": "على هامش اجتماع مجلس الوزراء؟"
+  },
+  {
+   "id": "l6",
+   "title": "تدريب 80% من موظفي الحكومة (64 ألف موظف)",
+   "month": "2026-10",
+   "status": "ready",
+   "note": "الخبر جاهز + لتحديد تاريخ الإعلان"
+  },
+  {
+   "id": "l7",
+   "title": "أول منظومة أداء حكومية للذكاء الاصطناعي المساعد",
+   "month": "2026-11",
+   "status": "scheduled",
+   "date": "2026-11-11",
+   "note": "موعد الإطلاق 11 نوفمبر 2026"
+  },
+  {
+   "id": "l8",
+   "title": "إطلاق 1.ae",
+   "month": "2026-11",
+   "status": "planned",
+   "group": "الفعالية الكبرى في نوفمبر: إطلاق 1.ae والدفعة الأولى من خدمات الـAgentic AI"
+  },
+  {
+   "id": "l9",
+   "title": "الدفعة الأولى من الخدمات والباقات الحكومية",
+   "month": "2026-11",
+   "status": "planned",
+   "group": "الفعالية الكبرى في نوفمبر: إطلاق 1.ae والدفعة الأولى من خدمات الـAgentic AI"
+  },
+  {
+   "id": "l10",
+   "title": "مرسوم بقانون اتحادي للذكاء الاصطناعي المساعد",
+   "month": "2026-11",
+   "status": "ready",
+   "note": "جاهز + للاعتماد"
+  },
+  {
+   "id": "l11",
+   "title": "فعالية إطلاق منظومة الذكاء التشريعي",
+   "month": "2026-11",
+   "status": "planned"
+  },
+  {
+   "id": "l12",
+   "title": "فعالية إطلاق منصة شاهين",
+   "month": "2026-11",
+   "status": "planned"
+  },
+  {
+   "id": "l13",
+   "title": "المعيار الوطني لتقييم جاهزية مساعدي الذكاء الاصطناعي",
+   "month": "2026-11",
+   "status": "planned"
+  },
+  {
+   "id": "l14",
+   "title": "تحول استقطاب وتوظيف المواهب الحكومية",
+   "month": "2026-11",
+   "status": "planned"
+  },
+  {
+   "id": "l15",
+   "title": "إطلاق الدفعة الثانية من الخدمات والباقات",
+   "month": "2026-12",
+   "status": "planned"
+  },
+  {
+   "id": "l16",
+   "title": "إطار دولي لقياس الأثر مع WEF",
+   "month": null,
+   "status": "planned",
+   "note": "للتحديد"
+  }
+ ],
+ "ideas": [],
  "events": [
   {
    "id": "e1",
    "date": "2026-04-23",
    "title": "إعلان منظومة التحول لحكومة دولة الإمارات Agentic AI",
-   "category": "milestone"
+   "category": "milestone",
+   "photos": []
   },
   {
    "id": "e2",
    "date": "2026-05-12",
    "title": "الاطلاع على مستجدات المشروع",
-   "category": "other"
+   "category": "other",
+   "photos": []
   },
   {
    "id": "e3",
    "date": "2026-05-18",
    "title": "إطلاق الإطار العام وبرنامج تدريب 80 ألف موظف",
-   "category": "launch"
+   "category": "launch",
+   "photos": []
   },
   {
    "id": "e4",
    "date": "2026-05-18",
    "title": "إنشاء اللجنة الوطنية للذكاء الاصطناعي المساعد",
-   "category": "milestone"
+   "category": "milestone",
+   "photos": []
   },
   {
    "id": "e5",
    "date": "2026-05-20",
    "title": "خلوة الذكاء الاصطناعي المساعد",
-   "category": "event"
+   "category": "event",
+   "photos": []
   },
   {
    "id": "e6",
    "date": "2026-05-21",
    "title": "إعلان شراكة مع جامعة محمد بن زايد للذكاء الاصطناعي",
-   "category": "milestone"
+   "category": "milestone",
+   "photos": []
   },
   {
    "id": "e7",
    "date": "2026-06-01",
    "title": "تشكيل لجنة الوزارة",
-   "category": "milestone"
+   "category": "milestone",
+   "photos": []
   },
   {
    "id": "e8",
    "date": "2026-06-04",
    "title": "الاجتماع الأول للجنة الوطنية",
-   "category": "national"
+   "category": "national",
+   "photos": []
   },
   {
    "id": "e9",
    "date": "2026-06-09",
    "title": "ورشة تدريبية للوكلاء المساعدين",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e10",
    "date": "2026-06-10",
    "title": "ورشة تفعيل تطبيق الذكاء الاصطناعي المساعد للخدمات والعمليات والدعم المؤسسي",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e11",
    "date": "2026-06-11",
    "title": "الاجتماع الثاني للجنة الوطنية",
-   "category": "national"
+   "category": "national",
+   "photos": []
   },
   {
    "id": "e12",
    "date": "2026-06-11",
    "title": "ورشة تدريبية للوكلاء المساعدين",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e13",
    "date": "2026-06-18",
    "title": "لقاء الذكاء الاصطناعي المساعد لديوان الرئاسة ووزارة شؤون مجلس الوزراء",
-   "category": "event"
+   "category": "event",
+   "photos": []
   },
   {
    "id": "e14",
    "date": "2026-06-29",
    "title": "ورشة تدريبية للوكلاء/المدراء العموم",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e15",
    "date": "2026-07-01",
    "title": "اعتماد الخطة العامة للمشروع خلال اجتماع المجلس الوزاري للذكاء الاصطناعي والتنمية",
-   "category": "milestone"
+   "category": "milestone",
+   "photos": []
   },
   {
    "id": "e16",
    "date": "2026-07-02",
    "title": "الاجتماع الثالث للجنة الوطنية",
-   "category": "national"
+   "category": "national",
+   "photos": []
   },
   {
    "id": "e17",
    "date": "2026-07-08",
    "title": "الاجتماع الرابع للجنة الوطنية",
-   "category": "national"
+   "category": "national",
+   "photos": []
   },
   {
    "id": "e18",
    "date": "2026-07-09",
    "title": "ورشة عمل منسقي مسار العمليات والدعم المؤسسي",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e19",
    "date": "2026-07-11",
    "title": "اجتماع لجنة الوزارة الأول",
-   "category": "ministry"
+   "category": "ministry",
+   "photos": []
   },
   {
    "id": "e20",
    "date": "2026-07-14",
    "title": "ورشة تفعيل مسار العمل الحكومي الاستراتيجي",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e21",
    "date": "2026-07-17",
    "title": "تعميم نظام العمل والدليل التعريفي للجهات الاتحادية",
-   "category": "launch"
+   "category": "launch",
+   "photos": []
   },
   {
    "id": "e22",
    "date": "2026-07-22",
    "title": "اجتماع افتراضي: آلية اعتماد أخبار المشروع",
-   "category": "other"
+   "category": "other",
+   "photos": []
   },
   {
    "id": "e23",
    "date": "2026-07-23",
    "title": "الاجتماع الخامس للجنة الوطنية",
-   "category": "national"
+   "category": "national",
+   "photos": []
   },
   {
    "id": "e24",
    "date": "2026-07-23",
    "title": "ورشة افتراضية: شرح نظام عمل المشروع والدليل التعريفي",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e25",
    "date": "2026-07-29",
    "title": "ورشة عمل مسار تقنيات الذكاء الاصطناعي والبيانات للرؤساء التنفيذيين للذكاء الاصطناعي",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e26",
    "date": "2026-08-05",
    "title": "ورشة مسار الخدمات الحكومية: رحلة المتعامل في عصر الذكاء الاصطناعي المساعد",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e27",
    "date": "2026-08-06",
    "title": "الجلسة الحوارية مع القيادات الحكومية",
-   "category": "event"
+   "category": "event",
+   "photos": []
   },
   {
    "id": "e28",
    "date": "2026-08-06",
    "title": "إصدار 7 تكليفات لـ16 مشروعاً داعماً لتنفيذ وتسريع المشروع",
-   "category": "milestone"
+   "category": "milestone",
+   "photos": []
   },
   {
    "id": "e29",
    "date": "2026-08-11",
    "title": "اجتماع لجنة الوزارة الثاني",
-   "category": "ministry"
+   "category": "ministry",
+   "photos": []
   },
   {
    "id": "e30",
    "date": "2026-08-13",
    "title": "تشكيل الفريق الفني في وزارة شؤون مجلس الوزراء لدعم تنفيذ المشروع",
-   "category": "milestone"
+   "category": "milestone",
+   "photos": []
   },
   {
    "id": "e31",
    "date": "2026-08-13",
    "title": "ورشة مسار تقنيات الذكاء الاصطناعي والبيانات: العرض التفاعلي للبوابة الاتحادية للذكاء الاصطناعي",
-   "category": "workshop"
+   "category": "workshop",
+   "photos": []
   },
   {
    "id": "e32",
    "date": "2026-08-15",
    "title": "الاجتماع الأول للفريق الفني في وزارة شؤون مجلس الوزراء لدعم تنفيذ المشروع",
-   "category": "other"
+   "category": "other",
+   "photos": []
   },
   {
    "id": "e33",
    "date": "2026-08-17",
    "title": "إطلاق المنظومة التقنية الوطنية للذكاء الاصطناعي المساعد (FedAI)",
-   "category": "launch"
+   "category": "launch",
+   "photos": []
   },
   {
    "id": "e34",
    "date": "2026-08-18",
    "title": "لقاء مناقشة مستجدات مسار العمليات والدعم المؤسسي في مشروع الذكاء الاصطناعي المساعد في الحكومة الاتحادية",
-   "category": "event"
+   "category": "event",
+   "photos": []
   },
   {
    "id": "e35",
    "date": "2026-08-21",
    "title": "إطلاق دليل تصميم خدمات حكومية مدعومة بالذكاء الاصطناعي المساعد",
-   "category": "launch"
+   "category": "launch",
+   "photos": []
   },
   {
    "id": "e36",
    "date": "2026-08-25",
    "title": "الاجتماع الثاني للفريق الفني في وزارة شؤون مجلس الوزراء لدعم تنفيذ المشروع",
-   "category": "other"
+   "category": "other",
+   "photos": []
   },
   {
    "id": "e37",
    "date": "2026-08-26",
    "title": "برنامج الذكاء الاصطناعي المساعد – فئة القيادة: الوكلاء والوكلاء المساعدين",
    "category": "workshop",
-   "endDate": "2026-08-27"
+   "endDate": "2026-08-27",
+   "photos": []
   },
   {
    "id": "e38",
    "date": "2026-09-02",
    "title": "إطلاق نظام مستشار الذكاء الاصطناعي لمجلس الوزراء من خلال 32 مساعداً متخصصاً بتحليل السياسات والتشريعات والاستراتيجيات",
-   "category": "launch"
+   "category": "launch",
+   "photos": []
   },
   {
    "id": "e39",
    "date": "2026-09-03",
    "title": "إطلاق الدفعة الأولى من برنامج تدريب المدربين لمشروع الذكاء الاصطناعي المساعد",
-   "category": "launch"
+   "category": "launch",
+   "photos": []
   },
   {
    "id": "e40",
    "date": "2026-09-03",
    "title": "اجتماع اللجنة الوطنية السادس",
-   "category": "national"
+   "category": "national",
+   "photos": []
   },
   {
    "id": "e41",
    "date": "2026-09-08",
    "title": "المجلس الوزاري للذكاء الاصطناعي والتنمية برئاسة منصور بن زايد يستعرض المرحلة الثانية من المشروع",
-   "category": "milestone"
+   "category": "milestone",
+   "photos": []
   },
   {
    "id": "e42",
    "date": "2026-09-24",
    "title": "اجتماع اللجنة الوطنية السابع",
-   "category": "national"
+   "category": "national",
+   "photos": []
   },
   {
    "id": "e43",
    "date": "2026-09-24",
    "title": "اجتماع لجنة الوزارة الثالث",
-   "category": "ministry"
+   "category": "ministry",
+   "photos": []
   },
   {
    "id": "e44",
    "date": "2026-09-29",
    "title": "إطلاق «دليل استخدامات الذكاء الاصطناعي المساعد لفرق الاتصال الحكومي»",
-   "category": "launch"
+   "category": "launch",
+   "photos": []
   },
   {
    "id": "e45",
    "date": "2026-10-01",
    "title": "إطلاق المسرّعات: توقيع العقد مع شركة بريسايت",
    "category": "launch",
-   "description": "التوافق على الميزانية المطلوبة والاحتياجات من البنية التحتية، ومدى جاهزية منصة شاهين على NORTH Star للإطلاق"
+   "description": "التوافق على الميزانية المطلوبة والاحتياجات من البنية التحتية، ومدى جاهزية منصة شاهين على NORTH Star للإطلاق",
+   "photos": []
   },
   {
    "id": "e46",
    "date": "2026-10-01",
    "title": "التحدي الحكومي السنوي: إغلاق المرحلة الأولى والإطلاق الرسمي للمرحلة الثانية",
    "category": "milestone",
-   "description": "من قبل رئيس المسار، مع التأكد من مشاركة وحضور رؤساء الجهات الاتحادية والفرق المعنية لإيصال الرسائل وتوضيح المطلوب ضمن المرحلة الثانية"
+   "description": "من قبل رئيس المسار، مع التأكد من مشاركة وحضور رؤساء الجهات الاتحادية والفرق المعنية لإيصال الرسائل وتوضيح المطلوب ضمن المرحلة الثانية",
+   "photos": []
   }
  ]
 }

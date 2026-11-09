@@ -7,7 +7,7 @@
 'use strict';
 
 const TZ = 'Asia/Dubai';
-const SCHEMA = 3;
+const SCHEMA = 4;
 const LS_STATE = 'aai.state.v1';
 const LS_GH = 'aai.github.v1';
 const LS_UI = 'aai.ui.v2';
@@ -48,6 +48,8 @@ const fmtYM = (s) => { const { y, m } = parse(s); return `${MONTHS[m - 1]} ${y}`
 const fmtMonths = (a, b) => { const A = parse(a), B = parse(b); return A.y === B.y ? `${MONTHS[A.m - 1]} – ${MONTHS[B.m - 1]} ${B.y}` : `${fmtYM(a)} – ${fmtYM(b)}`; };
 const dowOf = (s) => { const { y, m, d } = parse(s); return DOW[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]; };
 const isDone = (it) => it.status === 'done';
+// keep Latin/numeric tokens such as «1.ae» or «FedAI» in reading order inside Arabic text
+const bd = (t) => esc(t).replace(/[0-9A-Za-z][0-9A-Za-z.%_\-/]*[0-9A-Za-z%]|[A-Za-z]/g, (m) => `<bdi dir="ltr">${m}</bdi>`);
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2400);
@@ -143,6 +145,11 @@ function migrate(local, remote) {
   }));
   const have = new Set(remote.meetings.map((m) => m.id)), haveKey = new Set(remote.meetings.filter((m) => m.items.length).map(key));
   (local.meetings || []).forEach((m) => { if (!have.has(m.id) && (m.items || []).length && !haveKey.has(key(m))) remote.meetings.push(m); });
+  ['launches', 'ideas'].forEach((k) => { if ((local[k] || []).length) remote[k] = local[k]; });
+  const lev = new Map((local.events || []).map((e) => [e.id, e]));
+  (remote.events || []).forEach((e) => { const o = lev.get(e.id); if (o && (o.photos || []).length) e.photos = o.photos; });
+  const rids = new Set((remote.events || []).map((e) => e.id));
+  (local.events || []).forEach((e) => { if (!rids.has(e.id)) remote.events.push(e); });
   return remote;
 }
 
@@ -158,7 +165,8 @@ async function load() {
   else if (local && (!remote || (local.updatedAt || '') >= (remote.updatedAt || ''))) state = local;
   else state = remote;
   if (!state) state = { schema: SCHEMA, updatedAt: '', project: {}, stages: [], meetings: [] };
-  state.meetings ||= []; state.stages ||= []; state.project ||= {};
+  state.meetings ||= []; state.stages ||= []; state.project ||= {}; state.launches ||= []; state.ideas ||= []; state.events ||= [];
+  state.events.forEach((e) => { e.photos ||= []; });
   state.meetings.forEach((m) => (m.items ||= []).forEach((it) => { if (it.status !== 'done') it.status = 'pending'; }));
   try { news = await fetchJSON('data/news.json'); } catch { news = { uae: [], global: [] }; }
 }
@@ -179,11 +187,13 @@ function currentStage(now = Date.now()) {
 
 /* ---------------- router ---------------- */
 const app = $('#app');
-const route = () => { const h = location.hash.replace('#', ''); return ['minutes', 'workspace'].includes(h) ? h : 'dashboard'; };
+const VIEWS = ['minutes', 'launches', 'archive', 'ideas', 'workspace'];
+const route = () => { const h = location.hash.replace('#', ''); return VIEWS.includes(h) ? h : 'dashboard'; };
 function render() {
   const r = route();
   document.querySelectorAll('.tabs a').forEach((a) => a.classList.toggle('active', a.dataset.tab === r));
-  app.innerHTML = r === 'minutes' ? viewMinutes() : r === 'workspace' ? viewWorkspace() : viewDashboard();
+  app.innerHTML = { minutes: viewMinutes, launches: viewLaunches, archive: viewArchive, ideas: viewIdeas, workspace: viewWorkspace }[r]?.() ?? viewDashboard();
+  hydratePhotos(app);
   if (r === 'dashboard') { typeBriefing(); const t = $('#agThread'); if (t) t.scrollTop = t.scrollHeight; }
   const on = $('.mcard.on'); if (on) on.parentElement.scrollLeft += on.getBoundingClientRect().left - on.parentElement.getBoundingClientRect().left - 8;
   tick();
@@ -272,12 +282,24 @@ function viewDashboard() {
   <h2 class="sec-h">ما زال معلّقاً</h2>
   <section class="dash-cols">${pendCard('national')}${pendCard('ministry')}</section>
 
+  ${launchesDashCard()}
   <section class="news-cols">
     ${newsCard('أخبار الذكاء الاصطناعي المساعد في الإمارات', 'UAE', news.uae)}
     ${newsCard('أخبار Agentic AI عالمياً', 'Global', news.global)}
   </section>
   <p class="section-note">تُحدَّث الأخبار تلقائياً يومياً الساعة 7:00 صباحاً بتوقيت الإمارات (أحدث 3 أخبار، وتبقى السابقة إن لم يوجد جديد)${news.updatedAt ? ` · آخر تحديث ${newsDate(news.updatedAt)}` : ''}.</p>
   `;
+}
+
+function launchesDashCard() {
+  const L = state.launches || []; if (!L.length) return '';
+  const done = L.filter((l) => l.status === 'announced').length;
+  const next = L.filter((l) => l.status !== 'announced').sort((a, b) => (a.date || (a.month ? a.month + '-31' : '9999')).localeCompare(b.date || (b.month ? b.month + '-31' : '9999'))).slice(0, 5);
+  return `<section class="card l-dash">
+    <div class="card-h"><h2>الإطلاقات والإعلانات <span class="count">${done} من ${L.length} أُعلن</span></h2><a class="link" href="#launches">كل الإطلاقات ←</a></div>
+    <div class="card-b"><div class="bar"><i style="width:${done / L.length * 100}%"></i></div>
+      <ul class="list">${next.map((l) => `<li><span class="lpill ls-${l.status}">${LSTN[l.status]}</span><div class="li-main"><div class="li-title">${bd(l.title)}</div><div class="li-sub">${lWhen(l)}${l.note ? ' · ' + bd(l.note) : ''}</div></div>${isOverdue(l) ? '<span class="chip late-chip">متأخر</span>' : ''}</li>`).join('')}</ul>
+    </div></section>`;
 }
 
 function newsCard(title, tag, list = []) {
@@ -563,7 +585,7 @@ Object.assign(ICON, {
 
 const ws = Object.assign({ task: null, menu: false, committee: 'national', number: '', date: '', time: '', attendees: '', notes: '' }, ls.get(LS_DRAFT) || {}, { menu: false, images: [], status: 'idle', progress: '', result: null, error: '', ctl: null });
 const saveDraft = () => ls.set(LS_DRAFT, { task: ws.task, committee: ws.committee, number: ws.number, date: ws.date, time: ws.time, attendees: ws.attendees, notes: ws.notes });
-const cap = { sample: null, sampleImages: false, downloads: null, ready: false };
+const cap = { sample: null, sampleImages: false, downloads: null, assets: null, ready: false };
 
 function initCapabilities() {
   if (!window.claude || typeof window.claude.use !== 'function') { cap.ready = true; return; }
@@ -572,6 +594,7 @@ function initCapabilities() {
     if (s) s.limits().then((l) => { cap.sampleImages = !!(l && l.images); if (state && route() === 'workspace') render(); }).catch(() => {});
   }).catch(() => {}).finally(() => { cap.ready = true; if (state && route() !== 'minutes') render(); });
   window.claude.use('downloads').then((d) => { cap.downloads = d; }).catch(() => {});
+  window.claude.use('assets').then((a) => { cap.assets = a; }).catch(() => {});
 }
 const engine = () => cap.sample ? 'claude' : (ls.get(LS_KEY) ? 'api' : null);
 
@@ -916,15 +939,7 @@ async function downloadMinutes() {
   catch (e) { console.error(e); toast(e.message === 'jszip' ? 'تعذّر تحميل أداة Word. تحقق من الإنترنت.' : 'تعذّر تجهيز الملف. تحقق من قالب اللجنة.'); return; }
   // ASCII filename: some browsers drop non-Latin names from generated downloads
   const filename = `Minutes-${ws.committee === 'national' ? 'National' : 'Ministry'}-Committee-${ws.number || 'X'}${ws.date ? '-' + ws.date : ''}.docx`;
-  if (cap.downloads) {
-    try { await cap.downloads.save({ filename, data: blob }); toast('تم حفظ الملف'); }
-    catch (e) { if (e && e.code !== 'declined') toast('تعذّر حفظ الملف في هذا العرض'); }
-    return;
-  }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = filename; a.hidden = true;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  saveFile(blob, filename);
 }
 
 function saveMinutesToTracker() {
@@ -989,6 +1004,351 @@ function addImages(files) {
   render();
 }
 
+/* ---------------- photos: compress, store, show ---------------- */
+// Where a photo goes: the claude.ai page's own asset store when available; otherwise this
+// browser's IndexedDB, and also the GitHub repository (assets/photos/) when sync is on.
+const CATS = {
+  national: 'اجتماع اللجنة الوطنية', ministry: 'اجتماع لجنة الوزارة', workshop: 'ورشة / تدريب',
+  launch: 'إطلاق', milestone: 'محطة رئيسية', event: 'لقاء / فعالية', other: 'أخرى',
+};
+const IDB = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('aai-photos', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('photos');
+      r.onsuccess = () => { this.db = r.result; res(this.db); }; r.onerror = () => rej(r.error);
+    });
+  },
+  async put(k, blob) { const db = await this.open(); return new Promise((res, rej) => { const t = db.transaction('photos', 'readwrite'); t.objectStore('photos').put(blob, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); },
+  async get(k) { const db = await this.open(); return new Promise((res) => { const q = db.transaction('photos').objectStore('photos').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); },
+};
+async function compressImage(file, max = 1600, quality = 0.82, ratio = null) {
+  const bmp = await createImageBitmap(file);
+  let sx = 0, sy = 0, sw = bmp.width, sh = bmp.height;
+  if (ratio) { // centre-crop to width/height ratio
+    if (sw / sh > ratio) { const w = sh * ratio; sx = (sw - w) / 2; sw = w; } else { const h = sw / ratio; sy = (sh - h) / 2; sh = h; }
+  }
+  const scale = Math.min(1, max / Math.max(sw, sh));
+  const cv = document.createElement('canvas'); cv.width = Math.round(sw * scale); cv.height = Math.round(sh * scale);
+  cv.getContext('2d').drawImage(bmp, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+  return new Promise((res) => cv.toBlob(res, 'image/jpeg', quality));
+}
+async function ghPutFile(path, blob) {
+  const g = gh(); const buf = new Uint8Array(await blob.arrayBuffer());
+  let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+  const res = await fetch(`https://api.github.com/repos/${encodeURIComponent(g.owner)}/${encodeURIComponent(g.repo)}/contents/${path}`, {
+    method: 'PUT', headers: { Authorization: `Bearer ${g.token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: `إضافة صورة ${todayStr()}`, content: btoa(bin), branch: g.branch || undefined }),
+  });
+  if (!res.ok) throw new Error(`GitHub ${res.status}`);
+}
+async function savePhoto(file) {
+  const blob = await compressImage(file);
+  if (cap.assets) { const r = await cap.assets.upload(blob); return r.url || '/_blob/' + r.id; }
+  const key = uid('p');
+  await IDB.put(key, blob);
+  if (ghOn()) { try { await ghPutFile(`assets/photos/${key}.jpg`, blob); return `assets/photos/${key}.jpg`; } catch (e) { console.warn(e); } }
+  return 'idb:' + key;
+}
+const photoCache = new Map();
+async function photoBlob(src) {
+  const key = src.startsWith('idb:') ? src.slice(4) : (src.match(/assets\/photos\/([^/.]+)\.jpg$/) || [])[1];
+  if (key) { const b = await IDB.get(key); if (b) return b; }
+  if (src.startsWith('idb:')) return null;
+  const r = await fetch(src); return r.ok ? r.blob() : null;
+}
+async function photoURL(src) {
+  if (!src.startsWith('idb:')) return src;
+  if (photoCache.has(src)) return photoCache.get(src);
+  const b = await photoBlob(src); const u = b ? URL.createObjectURL(b) : '';
+  photoCache.set(src, u); return u;
+}
+// fill <img data-photo> after each render; repo photos fall back to this browser's copy
+function hydratePhotos(root = document) {
+  root.querySelectorAll('img[data-photo]:not([src])').forEach(async (img) => {
+    const src = img.dataset.photo;
+    img.onerror = async () => { img.onerror = null; const b = await photoBlob('idb:' + ((src.match(/([^/]+)\.jpg$/) || [])[1] || '')).catch(() => null); if (b) img.src = URL.createObjectURL(b); else img.classList.add('broken'); };
+    img.src = await photoURL(src) || '';
+  });
+}
+async function saveFile(blob, filename) {
+  if (cap.downloads) {
+    try { await cap.downloads.save({ filename, data: blob }); toast('تم حفظ الملف'); }
+    catch (e) { if (e && e.code !== 'declined') toast('تعذّر حفظ الملف في هذا العرض'); }
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename; a.hidden = true;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function lightbox(srcs, i) {
+  openModal({ title: `الصور (${i + 1} من ${srcs.length})`, submit: null,
+    body: `<div class="lb"><img data-photo="${esc(srcs[i])}" alt="">${srcs.length > 1 ? `<div class="lb-nav"><button type="button" class="btn sm" data-lb="${(i - 1 + srcs.length) % srcs.length}">السابقة</button><button type="button" class="btn sm" data-lb="${(i + 1) % srcs.length}">التالية</button></div>` : ''}</div>` });
+  hydratePhotos(form);
+  form.querySelectorAll('[data-lb]').forEach((b) => b.onclick = () => lightbox(srcs, +b.dataset.lb));
+}
+
+/* ---------------- launches & announcements ---------------- */
+const LST = [
+  ['planned', 'مخطط'], ['prep', 'قيد الإعداد'], ['ready', 'جاهز – بانتظار الموعد أو الاعتماد'], ['scheduled', 'محدد الموعد'], ['announced', 'تم الإعلان'],
+];
+const LSTN = Object.fromEntries(LST);
+const lNext = (s) => (LST[LST.findIndex(([k]) => k === s) + 1] || [])[0];
+const thisYM = () => todayStr().slice(0, 7);
+const isOverdue = (l) => l.status !== 'announced' && ((l.date && l.date < todayStr()) || (!l.date && l.month && l.month < thisYM()));
+const lWhen = (l) => l.date ? fmtDate(l.date) : l.month ? fmtYM(l.month + '-01') : 'للتحديد';
+
+function launchCard(l) {
+  const nx = lNext(l.status);
+  return `<article class="lc ls-${l.status} ${isOverdue(l) ? 'late' : ''}">
+    <div class="lc-top"><span class="lpill ls-${l.status}">${LSTN[l.status] || l.status}</span>${isOverdue(l) ? '<span class="chip late-chip">متأخر</span>' : ''}
+      <button class="icon-btn sm" data-act="l-edit" data-id="${l.id}" aria-label="تعديل">${ICON.edit}</button></div>
+    <h3>${bd(l.title)}</h3>
+    ${l.group ? `<div class="lc-group">${bd(l.group)}</div>` : ''}
+    ${l.note ? `<p class="lc-note">${bd(l.note)}</p>` : ''}
+    <div class="lc-steps" aria-label="مراحل الإطلاق">${LST.map(([k], i) => `<i class="${i <= LST.findIndex(([x]) => x === l.status) ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="lc-foot"><span>${lWhen(l)}${l.owner ? ` · ${esc(l.owner)}` : ''}</span>
+      ${nx ? `<button class="link" data-act="l-next" data-id="${l.id}">${LSTN[nx]} ←</button>` : '<span class="ok-t">مكتمل</span>'}</div>
+  </article>`;
+}
+
+function viewLaunches() {
+  const L = state.launches;
+  const f = ui.lf || 'all';
+  const shown = L.filter((l) => f === 'all' || (f === 'late' ? isOverdue(l) : l.status === f));
+  const done = L.filter((l) => l.status === 'announced').length;
+  const late = L.filter(isOverdue).length;
+  const byMonth = ui.lview !== 'status';
+  let cols;
+  if (byMonth) {
+    const months = [...new Set(shown.map((l) => l.month || ''))].sort((a, b) => (a || '9999').localeCompare(b || '9999'));
+    cols = months.map((m) => ({ h: m ? fmtYM(m + '-01') : 'للتحديد', items: shown.filter((l) => (l.month || '') === m).sort((a, b) => LST.findIndex(([k]) => k === b.status) - LST.findIndex(([k]) => k === a.status)) }));
+  } else cols = LST.map(([k, v]) => ({ h: v, cls: 'ls-' + k, items: shown.filter((l) => l.status === k) }));
+  return `
+  <div class="page-head">
+    <div><h1>الإطلاقات والإعلانات</h1><p>تقويم إطلاقات المشروع ومتابعة كل إطلاق حتى الإعلان.</p></div>
+    <button class="btn primary" data-act="l-add">+ إضافة إطلاق</button>
+  </div>
+  <section class="card l-sum">
+    <div class="l-prog"><div class="prog-n"><b class="num">${done}</b> من ${L.length} تم الإعلان عنها</div><div class="bar"><i style="width:${L.length ? done / L.length * 100 : 0}%"></i></div></div>
+    <div class="l-filters">
+      <button class="chip lf ${f === 'all' ? 'on' : ''}" data-act="l-filter" data-f="all">الكل ${L.length}</button>
+      ${LST.map(([k, v]) => `<button class="chip lf ls-${k} ${f === k ? 'on' : ''}" data-act="l-filter" data-f="${k}"><span class="dot"></span>${v} ${L.filter((l) => l.status === k).length}</button>`).join('')}
+      ${late ? `<button class="chip lf late-chip ${f === 'late' ? 'on' : ''}" data-act="l-filter" data-f="late">متأخر ${late}</button>` : ''}
+    </div>
+  </section>
+  <div class="l-tools"><div class="seg"><button class="${byMonth ? 'on' : ''}" data-act="l-view" data-v="month">حسب الشهر</button><button class="${byMonth ? '' : 'on'}" data-act="l-view" data-v="status">حسب الحالة</button></div></div>
+  <div class="l-board">${cols.map((c) => `
+    <section class="l-col ${c.cls || ''}">
+      <h2>${c.h}<span class="count">${c.items.length}</span></h2>
+      ${c.items.map(launchCard).join('') || '<div class="empty">لا يوجد</div>'}
+    </section>`).join('')}
+  </div>`;
+}
+
+function launchModal(l) {
+  const isNew = !l;
+  l ||= { title: '', month: thisYM(), status: 'planned' };
+  openModal({
+    title: isNew ? 'إضافة إطلاق' : 'تعديل الإطلاق',
+    body: field('الإطلاق / الإعلان', inp('title', l.title, 'required')) +
+      `<div class="row2">${field('الحالة', sel('status', LSTN, l.status))}${field('الشهر المستهدف', inp('month', l.month || '', 'type="month"'), 'اتركه فارغاً إن لم يُحدَّد')}</div>` +
+      `<div class="row2">${field('تاريخ الإطلاق', inp('date', l.date || '', 'type="date"'), 'اختياري')}${field('الجهة / المسؤول', inp('owner', l.owner || ''))}</div>` +
+      field('ملاحظة الحالة', inp('note', l.note || '', 'placeholder="مثال: الخبر جاهز + لتحديد تاريخ الإعلان"')) +
+      field('الفعالية / المجموعة', inp('group', l.group || ''), 'اختياري، مثل «الفعالية الكبرى في نوفمبر»'),
+    del: isNew ? null : () => { state.launches = state.launches.filter((x) => x.id !== l.id); commit('تم حذف الإطلاق'); },
+    onSave(d) {
+      Object.assign(l, { title: d.title, status: d.status, month: d.month || (d.date ? d.date.slice(0, 7) : null) });
+      ['date', 'owner', 'note', 'group'].forEach((k) => { d[k] ? l[k] = d[k] : delete l[k]; });
+      if (isNew) { l.id = uid('l'); state.launches.push(l); }
+      commit(isNew ? 'تمت إضافة الإطلاق' : 'تم حفظ الإطلاق');
+    },
+  });
+}
+
+/* ---------------- events archive ---------------- */
+function viewArchive() {
+  const off = ui.aoff || [];
+  const evs = [...state.events].filter((e) => !off.includes(e.category)).sort((a, b) => b.date.localeCompare(a.date));
+  const nPhotos = state.events.reduce((n, e) => n + (e.photos || []).length, 0);
+  const groups = [];
+  evs.forEach((e) => { const ym = e.date.slice(0, 7); const g = groups.find((x) => x.ym === ym); g ? g.items.push(e) : groups.push({ ym, items: [e] }); });
+  return `
+  <div class="page-head">
+    <div><h1>أرشيف الفعاليات</h1><p>${state.events.length} فعالية · ${nPhotos} صورة. افتح أي فعالية لإضافة صورها.</p></div>
+    <button class="btn primary" data-act="ev-add">+ إضافة فعالية</button>
+  </div>
+  <div class="filters">${Object.entries(CATS).map(([k, v]) => `<button class="chip fchip ${off.includes(k) ? 'off' : ''}" data-act="a-filter" data-cat="${k}"><span class="dot" style="--c:var(--c-${k})"></span>${v}</button>`).join('')}</div>
+  ${groups.map((g) => `
+    <section class="arch-month">
+      <h2>${fmtYM(g.ym + '-01')}<span class="count">${g.items.length}</span></h2>
+      <div class="arch-grid">${g.items.map((e) => { const p = e.photos || []; return `
+        <button class="ev-card" data-act="ev-open" data-id="${e.id}" style="--c:var(--c-${e.category})">
+          <span class="ev-cover">${p.length ? `<img data-photo="${esc(p[0].src)}" alt="" loading="lazy">` : `<span class="ev-ph">${ICON.image}</span>`}
+            <span class="ev-date"><b>${parse(e.date).d}</b>${MONTHS[parse(e.date).m - 1]}</span>${p.length > 1 ? `<span class="ev-n">${p.length} صور</span>` : ''}</span>
+          <span class="ev-body"><b>${esc(e.title)}</b><small><span class="dot"></span>${CATS[e.category] || CATS.other}</small></span>
+        </button>`; }).join('')}
+      </div>
+    </section>`).join('') || '<div class="card empty">لا توجد فعاليات.</div>'}`;
+}
+
+function eventModal(e) {
+  const isNew = !e;
+  e ||= { date: todayStr(), title: '', category: 'event', photos: [] };
+  const photos = e.photos || [];
+  openModal({
+    title: isNew ? 'إضافة فعالية' : esc(e.title),
+    body: (isNew ? '' : `
+      <div class="gal">${photos.map((p, i) => `<figure><img data-photo="${esc(p.src)}" alt="" data-gi="${i}"><button type="button" class="x" data-rmph="${i}" aria-label="حذف الصورة">✕</button></figure>`).join('')}
+        <label class="gal-add" for="evPhotos">${ICON.image}<span>إضافة صور</span></label>
+      </div><input type="file" id="evPhotos" accept="image/*" multiple hidden>`) +
+      field('عنوان الفعالية', inp('title', e.title, 'required')) +
+      `<div class="row2">${field('التاريخ', inp('date', e.date, 'type="date" required'))}${field('تاريخ الانتهاء', inp('endDate', e.endDate || '', 'type="date"'), 'اختياري')}</div>` +
+      field('التصنيف', sel('category', CATS, e.category)) +
+      field('الوصف', area('description', e.description || '', 'rows="3"')),
+    del: isNew ? null : () => { state.events = state.events.filter((x) => x.id !== e.id); commit('تم حذف الفعالية'); },
+    onSave(d) {
+      Object.assign(e, { title: d.title, date: d.date, category: d.category });
+      d.endDate && d.endDate !== d.date ? e.endDate = d.endDate : delete e.endDate;
+      d.description ? e.description = d.description : delete e.description;
+      if (isNew) { e.id = uid('e'); e.photos = []; state.events.push(e); }
+      commit(isNew ? 'تمت إضافة الفعالية. افتحها لإضافة الصور' : 'تم حفظ الفعالية');
+    },
+  });
+  if (isNew) return;
+  hydratePhotos(form);
+  form.querySelectorAll('[data-gi]').forEach((img) => img.onclick = () => lightbox(photos.map((p) => p.src), +img.dataset.gi));
+  form.querySelectorAll('[data-rmph]').forEach((b) => b.onclick = () => { photos.splice(+b.dataset.rmph, 1); e.photos = photos; persistQuiet(); dlg.close(); render(); eventModal(e); });
+  $('#evPhotos').onchange = async (ev) => {
+    const files = [...ev.target.files]; if (!files.length) return;
+    toast(`جارٍ حفظ ${files.length} صورة…`);
+    let ok = 0;
+    for (const f of files) { try { photos.push({ id: uid('ph'), src: await savePhoto(f) }); ok++; } catch (err) { console.error(err); } }
+    e.photos = photos; dlg.close(); commit(ok ? `أُضيفت ${ok} صورة` : 'تعذّر حفظ الصور'); eventModal(e);
+  };
+}
+
+/* ---------------- ideas & projects bank ---------------- */
+const IST = { idea: 'فكرة', study: 'قيد الدراسة', approved: 'معتمد', active: 'قيد التنفيذ', done: 'مكتمل' };
+const ITYPE = { idea: 'فكرة', project: 'مشروع' };
+function viewIdeas() {
+  const f = ui.if || 'all';
+  const list = state.ideas.filter((x) => f === 'all' || x.status === f).sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
+  return `
+  <div class="page-head">
+    <div><h1>بنك الأفكار والمشاريع</h1><p>سجّل الأفكار والمشاريع، تابع حالتها، وصدّر أي مشروع بقالب «Project Template» المعتمد.</p></div>
+    <button class="btn primary" data-act="i-add">+ فكرة أو مشروع</button>
+  </div>
+  <div class="l-tools"><div class="seg">${[['all', 'الكل'], ...Object.entries(IST)].map(([k, v]) => `<button class="${f === k ? 'on' : ''}" data-act="i-filter" data-f="${k}">${v} ${k === 'all' ? state.ideas.length : state.ideas.filter((x) => x.status === k).length}</button>`).join('')}</div></div>
+  ${list.length ? `<div class="idea-grid">${list.map((x) => `
+    <article class="idea">
+      <div class="idea-img">${x.image ? `<img data-photo="${esc(x.image)}" alt="">` : `<span>${ICON.spark}</span>`}</div>
+      <div class="idea-body">
+        <div class="idea-tags"><span class="chip">${ITYPE[x.type] || 'فكرة'}</span><span class="lpill is-${x.status}">${IST[x.status] || ''}</span></div>
+        <h3>${esc(x.name)}</h3>${x.name_en ? `<div class="idea-en" dir="ltr">${esc(x.name_en)}</div>` : ''}
+        ${x.what ? `<p>${esc(x.what)}</p>` : ''}
+        <div class="idea-meta">${x.owner ? `<span>${esc(x.owner)}</span>` : ''}${x.start ? `<span>${fmtDate(x.start)}${x.end ? ' – ' + fmtDate(x.end) : ''}</span>` : ''}</div>
+      </div>
+      <div class="idea-actions"><button class="btn sm primary" data-act="i-export" data-id="${x.id}">تصدير القالب</button><button class="btn sm" data-act="i-edit" data-id="${x.id}">تعديل</button></div>
+    </article>`).join('')}</div>` : `<div class="ws-empty">${ICON.spark}<p>${state.ideas.length ? 'لا توجد عناصر بهذه الحالة.' : 'البنك فارغ. أضف أول فكرة، أو اطلب من المساعد في الرئيسية: «أضف فكرة مشروع عن…».'}</p><button class="btn primary" data-act="i-add">+ أضف فكرة</button></div>`}`;
+}
+
+async function aiJSON(prompt) {
+  const eng = engine(); if (!eng) throw new Error('Claude غير متصل');
+  if (eng === 'claude') return cap.sample.json(prompt, { cache: false });
+  const { default: Anthropic } = await import(SDK_URL);
+  const client = new Anthropic({ apiKey: ls.get(LS_KEY), dangerouslyAllowBrowser: true });
+  const msg = await client.beta.messages.create({ model: 'claude-opus-5-5', max_tokens: 4000, output_config: { effort: 'low' }, betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default', messages: [{ role: 'user', content: prompt }] });
+  if (msg.stop_reason === 'refusal') throw new Error('اعتذر Claude عن هذا الطلب');
+  return parseJSONLoose(msg.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
+}
+
+function ideaModal(x) {
+  const isNew = !x;
+  x ||= { type: 'idea', status: 'idea', name: '', outputs: ['', '', ''] };
+  const o = x.outputs || [];
+  let newImage = null;
+  openModal({
+    title: isNew ? 'فكرة أو مشروع جديد' : 'تعديل',
+    body: `
+      ${engine() ? `<div class="ai-fill"><textarea id="ai-brief" rows="2" placeholder="صف الفكرة في جملة أو جملتين، وسيملأ Claude الحقول…"></textarea><button type="button" class="btn sm primary" id="aiFillBtn">${ICON.spark} املأ بالمساعد</button></div>` : ''}
+      <div class="row2">${field('النوع', sel('type', ITYPE, x.type))}${field('الحالة', sel('status', IST, x.status))}</div>
+      <div class="row2">${field('اسم المشروع', inp('name', x.name, 'required'))}${field('Project Name', inp('name_en', x.name_en || '', 'dir="ltr"'))}</div>
+      ${field('ما هو؟', area('what', x.what || '', 'rows="3"'))}
+      <div class="field"><label>أهم المخرجات</label><div class="outs">${[0, 1, 2].map((i) => `<input name="out${i}" id="f-out${i}" value="${esc(o[i] || '')}" placeholder="المخرج ${i + 1}">`).join('')}</div></div>
+      <div class="row2">${field('تاريخ البدء', inp('start', x.start || '', 'type="date"'))}${field('تاريخ الانتهاء', inp('end', x.end || '', 'type="date"'))}</div>
+      ${field('الجهة المسؤولة', inp('owner', x.owner || ''))}
+      <div class="field"><label>الصورة التعبيرية</label><div class="img-pick">${x.image ? `<img data-photo="${esc(x.image)}" alt="" id="ideaImgPrev">` : '<img alt="" id="ideaImgPrev" hidden>'}<label class="btn sm" for="ideaImg">اختر صورة</label><input type="file" id="ideaImg" accept="image/*" hidden><small>تظهر في الجانب الأيمن من شريحة القالب</small></div></div>
+      ${field('ملاحظات', area('notes', x.notes || '', 'rows="2"'))}`,
+    del: isNew ? null : () => { state.ideas = state.ideas.filter((y) => y.id !== x.id); commit('تم الحذف'); },
+    onSave(d) {
+      Object.assign(x, { type: d.type, status: d.status, name: d.name, name_en: d.name_en, what: d.what, outputs: [d.out0, d.out1, d.out2], start: d.start, end: d.end, owner: d.owner, notes: d.notes, updated: new Date().toISOString() });
+      const finish = () => { if (isNew) { x.id = uid('i'); state.ideas.push(x); } commit(isNew ? 'أُضيف إلى بنك الأفكار' : 'تم الحفظ'); };
+      if (newImage) { savePhoto(newImage).then((src) => { x.image = src; finish(); }).catch(() => { toast('تعذّر حفظ الصورة'); finish(); }); return; }
+      finish();
+    },
+  });
+  hydratePhotos(form);
+  $('#ideaImg').onchange = (e) => { newImage = e.target.files[0]; if (newImage) { const p = $('#ideaImgPrev'); p.hidden = false; p.removeAttribute('data-photo'); p.src = URL.createObjectURL(newImage); } };
+  const btn = $('#aiFillBtn');
+  if (btn) btn.onclick = async () => {
+    const brief = ($('#ai-brief').value || form.querySelector('[name=what]').value || form.querySelector('[name=name]').value).trim();
+    if (!brief) { toast('اكتب وصفاً مختصراً أولاً'); return; }
+    btn.disabled = true; btn.textContent = 'جارٍ الصياغة…';
+    try {
+      const r = await aiJSON(`You help the UAE government "Agentic AI" project team (مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات) fill a one-slide project card. From the idea below, write formal, concise Modern Standard Arabic. Do not invent specific figures, dates or entity names that the idea does not state; leave such fields empty.
+
+Idea: ${brief}
+
+Reply with only JSON: {"name":"Arabic project name, 2-6 words","name_en":"English project name","what":"one or two sentences: what it is and its value","outputs":["output 1","output 2","output 3"],"owner":"responsible entity if stated, else empty"}`);
+      if (!r || !r.name) throw new Error('رد غير صالح');
+      const set = (n, v) => { const el = form.querySelector(`[name=${n}]`); if (el && v) el.value = v; };
+      set('name', r.name); set('name_en', r.name_en); set('what', r.what); set('owner', r.owner);
+      (r.outputs || []).slice(0, 3).forEach((v, i) => set('out' + i, v));
+      toast('ملأ المساعد الحقول. راجعها ثم احفظ');
+    } catch (e) { toast((e && (e.message || e.code)) ? `تعذّر: ${e.message || e.code}` : 'تعذّر الاتصال بـ Claude'); }
+    btn.disabled = false; btn.innerHTML = `${ICON.spark} املأ بالمساعد`;
+  };
+}
+
+async function buildProjectPptx(x) {
+  const JSZip = await loadJSZip();
+  if (!window.AAI_PROJECT_TEMPLATE) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'assets/templates/project-template.js'; s.onload = res; s.onerror = () => rej(new Error('template')); document.head.appendChild(s); });
+  const zip = await JSZip.loadAsync(Uint8Array.from(atob(window.AAI_PROJECT_TEMPLATE), (c) => c.charCodeAt(0)));
+  const path = 'ppt/slides/slide1.xml';
+  const doc = new DOMParser().parseFromString(await zip.file(path).async('string'), 'application/xml');
+  const A = 'http://schemas.openxmlformats.org/drawingml/2006/main', P = 'http://schemas.openxmlformats.org/presentationml/2006/main';
+  const shapes = {};
+  [...doc.getElementsByTagNameNS(P, 'sp')].forEach((sp) => { const c = sp.getElementsByTagNameNS(P, 'cNvPr')[0]; if (c) shapes[c.getAttribute('id')] = sp; });
+  const setPara = (id, idx, text) => {
+    const sp = shapes[id]; if (!sp) return;
+    const p = sp.getElementsByTagNameNS(A, 'p')[idx]; if (!p) return;
+    let ts = [...p.getElementsByTagNameNS(A, 't')];
+    if (!ts.length) { const r = doc.createElementNS(A, 'a:r'); const t = doc.createElementNS(A, 'a:t'); r.appendChild(t); p.insertBefore(r, p.getElementsByTagNameNS(A, 'endParaRPr')[0] || null); ts = [t]; }
+    ts[0].textContent = text; ts.slice(1).forEach((t) => { t.textContent = ''; });
+  };
+  const o = x.outputs || [];
+  setPara('7', 0, x.name || ''); setPara('7', 1, x.name_en || '');
+  setPara('10', 0, x.what || '…');
+  setPara('16', 0, o[0] || '…'); setPara('18', 0, o[1] || '…'); setPara('21', 0, o[2] || '…');
+  setPara('11', 0, x.start ? `${fmtDate(x.start)}${x.end ? ' – ' + fmtDate(x.end) : ''}` : '…');
+  setPara('9', 1, x.owner || '…');
+  if (x.image) {
+    const b = await photoBlob(x.image).catch(() => null);
+    if (b) { zip.file('ppt/media/image1.jpeg', await compressImage(b, 1800, 0.86, 3697300 / 6865964)); setPara('6', 0, ''); }
+  }
+  zip.file(path, new XMLSerializer().serializeToString(doc));
+  return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+}
+async function exportIdea(id) {
+  const x = state.ideas.find((y) => y.id === id); if (!x) return;
+  try { saveFile(await buildProjectPptx(x), `Project-${(x.name_en || 'Template').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'Template'}.pptx`); }
+  catch (e) { console.error(e); toast(e.message === 'jszip' ? 'تعذّر تحميل أداة الملفات. تحقق من الإنترنت.' : 'تعذّر تجهيز القالب'); }
+}
+
 /* ---------------- agent: briefing, recommendations and actions on the site ---------------- */
 // The briefing and recommendations are computed locally from the project data, so they
 // show instantly and work without Claude. Typed requests go to Claude with a small set
@@ -1008,12 +1368,19 @@ function projectSnapshot() {
   const topOwner = Object.entries(owners).sort((a, b) => b[1] - a[1])[0];
   const daysLeft = cur ? Math.max(0, Math.ceil((endMs(cur) - Date.now()) / 864e5)) : 0;
   const oldest = pending.reduce((o, x) => (!o || (x.m.date || '9') < (o.m.date || '9')) ? x : o, null);
-  return { cur, idx, stages: list, pending, awaiting, topOwner, daysLeft, oldest };
+  const lActive = (state.launches || []).filter((l) => l.status !== 'announced');
+  const lLate = lActive.filter(isOverdue), lReady = lActive.filter((l) => l.status === 'ready');
+  const lMonth = lActive.filter((l) => l.month === thisYM());
+  return { cur, idx, stages: list, pending, awaiting, topOwner, daysLeft, oldest, lLate, lReady, lMonth };
 }
 
 function agentRecs(s) {
   const recs = [];
   if (s.awaiting.length) recs.push({ icon: 'upload', t: `${s.awaiting.length} اجتماعات بانتظار رفع محاضرها`, d: s.awaiting.slice(0, 3).map((m) => `${COMMITTEES[m.committee]} · ${meetingLabel(m)}`).join('، '), act: 'ag-goto', view: 'minutes', label: 'ارفع المحاضر' });
+  if (s.lLate.length || s.lReady.length) {
+    const l = s.lLate[0] || s.lReady[0];
+    recs.push({ icon: 'spark', t: s.lLate.length ? `${s.lLate.length} إطلاقات تجاوزت موعدها` : `${s.lReady.length} إطلاقات جاهزة بانتظار تحديد الموعد`, d: l.title, act: 'ag-goto', view: 'launches', label: 'افتح الإطلاقات' });
+  }
   if (s.oldest && daysSince(s.oldest.m.date) > 21) {
     const n = s.pending.filter((x) => x.m === s.oldest.m).length;
     recs.push({ icon: 'note', t: `${n} توجيهات معلّقة منذ ${daysSince(s.oldest.m.date)} يوماً`, d: `${COMMITTEES[s.oldest.m.committee]} · ${meetingLabel(s.oldest.m)}`, act: 'ag-ask', q: `جهّز رسالة متابعة رسمية مختصرة للتوجيهات المعلّقة من ${meetingLabel(s.oldest.m)} لـ${COMMITTEES[s.oldest.m.committee]}، مجمّعة حسب أصحاب العلاقة.`, label: 'جهّز رسالة متابعة' });
@@ -1029,10 +1396,11 @@ function briefingText(s) {
   const parts = [`${greeting()}.`];
   if (s.cur) parts.push(`نحن في ${s.cur.name} (${s.cur.title})، ويتبقى ${s.daysLeft} يوماً على نهايتها.`);
   parts.push(s.pending.length ? `لديك ${s.pending.length} توجيهاً معلّقاً${s.awaiting.length ? ` و${s.awaiting.length} اجتماعات بانتظار محاضرها` : ''}.` : 'لا توجد توجيهات معلّقة حالياً.');
+  if (s.lMonth.length) parts.push(`وهذا الشهر ${s.lMonth.length} إطلاقات لم يُعلن عنها بعد.`);
   return parts.join(' ');
 }
 
-const AG_SUGGEST = ['ما الذي يجب أن أركّز عليه هذا الأسبوع؟', 'ما التوجيهات المعلّقة على مسار التقنيات؟', 'جهّز ملخصاً للقيادة عن وضع المشروع', 'ضع علامة منجز على بند «إعلانات الإطلاقات»'];
+const AG_SUGGEST = ['ما الذي يجب أن أركّز عليه هذا الأسبوع؟', 'ما وضع إطلاقات نوفمبر؟', 'جهّز ملخصاً للقيادة عن وضع المشروع', 'أضف فكرة مشروع وصدّر قالبها'];
 
 function agentPanel() {
   const s = projectSnapshot();
@@ -1089,6 +1457,8 @@ function fmtAgent(t) {
 function actionCard(a, k, j) {
   if (a.type === 'done') return `<div class="act-card ok">${ICON.check}<span>${a.undone ? 'تم التراجع عن' : 'تم تحديد'} ${a.ids.length} ${a.ids.length === 1 ? 'توجيه' : 'توجيهات'} ${a.undone ? '' : 'كمنجزة'}: ${esc(a.label)}</span>${a.undone ? '' : `<button class="link" data-act="ag-undo" data-k="${k}" data-j="${j}">تراجع</button>`}</div>`;
   if (a.type === 'note') return `<div class="act-card">${ICON.note}<span>أُضيفت ملاحظة على «${esc(a.label)}»</span></div>`;
+  if (a.type === 'launch') return `<div class="act-card ok">${ICON.check}<span>${esc(a.label)}</span><button class="link" data-act="ag-goto" data-view="launches">الإطلاقات</button></div>`;
+  if (a.type === 'export') return `<div class="act-card">${ICON.doc}<span>قالب المشروع «${esc(a.label)}» جاهز</span><button class="btn sm primary" data-act="ag-export" data-id="${a.id}">تنزيل القالب</button></div>`;
   if (a.type === 'open') return `<div class="act-card">${ICON.doc}<span>${esc(a.label)}</span><button class="btn sm" data-act="ag-open" data-k="${k}" data-j="${j}">افتح</button></div>`;
   return '';
 }
@@ -1113,6 +1483,8 @@ const AG_TOOLS = [
         national: by('national'), ministry: by('ministry'),
         meetings_awaiting_minutes: s.awaiting.map((m) => `${COMMITTEES[m.committee]} – ${meetingLabel(m)} (${m.date})`),
         news: [...(news.uae || []), ...(news.global || [])].slice(0, 6).map((n) => n.title),
+        launches: { total: state.launches.length, announced: state.launches.filter((l) => l.status === 'announced').length, overdue: state.launches.filter(isOverdue).map((l) => l.title), this_month: s.lMonth.map((l) => l.title) },
+        ideas_bank: state.ideas.length,
       };
     },
   },
@@ -1171,6 +1543,52 @@ const AG_TOOLS = [
     },
   },
   {
+    name: 'get_launches',
+    description: 'Lists the launches and announcements calendar: id, title, month, date, status (planned, prep, ready, scheduled, announced), status note, group and whether it is overdue.',
+    schema: { type: 'object', properties: { status: { type: 'string', enum: LST.map(([k]) => k) } }, additionalProperties: false },
+    run(inp) { return state.launches.filter((l) => !inp.status || l.status === inp.status).map((l) => ({ id: l.id, title: l.title, month: l.month, date: l.date, status: l.status, status_label: LSTN[l.status], note: l.note, group: l.group, owner: l.owner, overdue: isOverdue(l) })); },
+  },
+  {
+    name: 'update_launch',
+    description: 'Updates one launch: its status, status note and/or date. Only when the user asked. Get the id from get_launches.',
+    schema: { type: 'object', properties: { launch_id: { type: 'string' }, status: { type: 'string', enum: LST.map(([k]) => k) }, note: { type: 'string' }, date: { type: 'string', description: 'YYYY-MM-DD' } }, required: ['launch_id'], additionalProperties: false },
+    run(inp, acts) {
+      const l = state.launches.find((x) => x.id === String(inp.launch_id)); if (!l) throw new Error('No launch with that id');
+      if (inp.status && LSTN[inp.status]) l.status = inp.status;
+      if (typeof inp.note === 'string') l.note = inp.note.slice(0, 200);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(inp.date || '')) { l.date = inp.date; l.month = inp.date.slice(0, 7); }
+      acts.push({ type: 'launch', label: `${l.title}: ${LSTN[l.status]}${l.date ? ' · ' + fmtDate(l.date) : ''}` });
+      persistQuiet(); return { ok: true, status: l.status };
+    },
+  },
+  {
+    name: 'list_ideas',
+    description: 'Lists the ideas and projects bank: id, type, status, name, what it is, outputs, owner and dates.',
+    schema: { type: 'object', properties: {}, additionalProperties: false },
+    run() { return state.ideas.map((x) => ({ id: x.id, type: x.type, status: x.status, name: x.name, name_en: x.name_en, what: x.what, outputs: x.outputs, owner: x.owner, start: x.start, end: x.end })); },
+  },
+  {
+    name: 'add_idea',
+    description: 'Adds an idea or project to the ideas bank with the project-card fields (Arabic name, English name, what it is, up to three outputs, start and end dates, responsible entity). Write formal Arabic; leave unknown fields empty rather than inventing figures or entities.',
+    schema: { type: 'object', properties: { type: { type: 'string', enum: ['idea', 'project'] }, name: { type: 'string' }, name_en: { type: 'string' }, what: { type: 'string' }, outputs: { type: 'array', items: { type: 'string' } }, start: { type: 'string' }, end: { type: 'string' }, owner: { type: 'string' } }, required: ['name'], additionalProperties: false },
+    run(inp, acts) {
+      const x = { id: uid('i'), type: inp.type === 'project' ? 'project' : 'idea', status: 'idea', name: String(inp.name).slice(0, 120), name_en: String(inp.name_en || ''), what: String(inp.what || ''), outputs: (Array.isArray(inp.outputs) ? inp.outputs : []).slice(0, 3).map(String), owner: String(inp.owner || ''), updated: new Date().toISOString() };
+      if (/^\d{4}-\d{2}-\d{2}$/.test(inp.start || '')) x.start = inp.start; if (/^\d{4}-\d{2}-\d{2}$/.test(inp.end || '')) x.end = inp.end;
+      state.ideas.push(x);
+      acts.push({ type: 'export', id: x.id, label: x.name });
+      persistQuiet(); return { ok: true, id: x.id };
+    },
+  },
+  {
+    name: 'export_project_template',
+    description: 'Prepares the official one-slide Project Template (PowerPoint) for an idea or project in the bank and gives the user a download button.',
+    schema: { type: 'object', properties: { idea_id: { type: 'string' } }, required: ['idea_id'], additionalProperties: false },
+    run(inp, acts) {
+      const x = state.ideas.find((y) => y.id === String(inp.idea_id)); if (!x) throw new Error('No idea with that id');
+      acts.push({ type: 'export', id: x.id, label: x.name }); return { ok: true };
+    },
+  },
+  {
     name: 'open_meeting',
     description: 'Gives the user a button to open a specific meeting in the minutes tracker.',
     schema: { type: 'object', properties: { committee: { type: 'string', enum: ['national', 'ministry'] }, meeting_number: { type: 'integer' } }, required: ['committee', 'meeting_number'], additionalProperties: false },
@@ -1195,7 +1613,8 @@ const AG_SYSTEM = `أنت «المساعد» في لوحة متابعة مشرو
 - اعتمد على الأدوات للاطلاع على البيانات الفعلية قبل الإجابة عن المراحل أو التوجيهات أو المحاضر، ولا تخمّن أرقاماً أو أسماء.
 - نفّذ التغييرات (تحديد بند كمنجز، إضافة ملاحظة) فقط عندما يطلبها المستخدم صراحةً، ولا تقل إنك نفّذت شيئاً لم تنفّذه أداة.
 - عند طلب رسالة متابعة أو ملخص، اكتب النص كاملاً جاهزاً للنسخ، مع ألقاب «معالي» و«سعادة» كما وردت في البيانات.
-- عند طلب إعداد محضر، استخدم prepare_minutes_draft ثم أخبر المستخدم أن يفتح مساحة العمل.`;
+- عند طلب إعداد محضر، استخدم prepare_minutes_draft ثم أخبر المستخدم أن يفتح مساحة العمل.
+- للإطلاقات والإعلانات استخدم get_launches وupdate_launch. لبنك الأفكار استخدم list_ideas وadd_idea وexport_project_template (الأخيرة تعطي المستخدم زر تنزيل القالب).`;
 
 async function agentRunSDK(signal, onText, acts) {
   let Anthropic;
@@ -1506,6 +1925,19 @@ app.addEventListener('click', (e) => {
     case 'ws-copy': navigator.clipboard.writeText(minutesAsText()).then(() => toast('تم نسخ نص المحضر'), () => toast('تعذّر النسخ')); break;
     case 'ws-templates': templatesModal(); break;
     case 'open-settings': settingsModal(); break;
+    case 'l-add': launchModal(); break;
+    case 'l-edit': launchModal(state.launches.find((l) => l.id === ds.id)); break;
+    case 'l-next': { const l = state.launches.find((x) => x.id === ds.id); const nx = l && lNext(l.status); if (nx) { l.status = nx; if (nx === 'announced') l.note = 'تم الإعلان'; commit(`${l.title}: ${LSTN[nx]}`); } break; }
+    case 'l-filter': ui.lf = ds.f; saveUI(); render(); break;
+    case 'l-view': ui.lview = ds.v; saveUI(); render(); break;
+    case 'ev-add': eventModal(); break;
+    case 'ev-open': eventModal(state.events.find((e) => e.id === ds.id)); break;
+    case 'a-filter': { const o = ui.aoff || []; ui.aoff = o.includes(ds.cat) ? o.filter((x) => x !== ds.cat) : [...o, ds.cat]; saveUI(); render(); break; }
+    case 'i-add': ideaModal(); break;
+    case 'i-edit': ideaModal(state.ideas.find((x) => x.id === ds.id)); break;
+    case 'i-export': exportIdea(ds.id); break;
+    case 'i-filter': ui.if = ds.f; saveUI(); render(); break;
+    case 'ag-export': exportIdea(ds.id); break;
     case 'ag-ask': agentAsk(ds.q); break;
     case 'ag-send': agentAsk($('#ag-input')?.value); break;
     case 'ag-stop': ag.ctl?.abort(); break;
