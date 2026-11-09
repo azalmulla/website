@@ -7,7 +7,7 @@
 'use strict';
 
 const TZ = 'Asia/Dubai';
-const SCHEMA = 2;
+const SCHEMA = 3;
 const LS_STATE = 'aai.state.v1';
 const LS_GH = 'aai.github.v1';
 const LS_UI = 'aai.ui.v2';
@@ -129,18 +129,20 @@ async function fetchJSON(path) {
   return res.json();
 }
 
-// An older browser copy keeps its ticks and any meetings added in the browser,
-// but takes the new stages and meeting list from the repo.
+// An older browser copy keeps its ticks, notes and any meetings added in the browser,
+// but takes the new stages and meeting list from the repo. Ticks match by item id, or by
+// topic within the same committee + meeting number (minutes uploaded in the browser).
 function migrate(local, remote) {
-  const done = new Map();
-  (local.meetings || []).forEach((m) => (m.items || []).forEach((it) => done.set(it.id, it)));
+  const key = (m) => `${m.committee}#${m.number || m.id}`;
+  const byId = new Map(), byTopic = new Map();
+  (local.meetings || []).forEach((m) => (m.items || []).forEach((it) => { byId.set(it.id, it); byTopic.set(key(m) + '|' + String(it.topic).trim(), it); }));
   remote.meetings.forEach((m) => (m.items || []).forEach((it) => {
-    const old = done.get(it.id);
+    const old = byId.get(it.id) || byTopic.get(key(m) + '|' + String(it.topic).trim());
     if (old && old.status === 'done') { it.status = 'done'; if (old.doneDate) it.doneDate = old.doneDate; }
     if (old && old.note) it.note = old.note;
   }));
-  const ids = new Set(remote.meetings.map((m) => m.id));
-  (local.meetings || []).forEach((m) => { if (!ids.has(m.id) && (m.items || []).length) remote.meetings.push(m); });
+  const have = new Set(remote.meetings.map((m) => m.id)), haveKey = new Set(remote.meetings.filter((m) => m.items.length).map(key));
+  (local.meetings || []).forEach((m) => { if (!have.has(m.id) && (m.items || []).length && !haveKey.has(key(m))) remote.meetings.push(m); });
   return remote;
 }
 
@@ -182,6 +184,7 @@ function render() {
   const r = route();
   document.querySelectorAll('.tabs a').forEach((a) => a.classList.toggle('active', a.dataset.tab === r));
   app.innerHTML = r === 'minutes' ? viewMinutes() : r === 'workspace' ? viewWorkspace() : viewDashboard();
+  if (r === 'dashboard') { typeBriefing(); const t = $('#agThread'); if (t) t.scrollTop = t.scrollHeight; }
   const on = $('.mcard.on'); if (on) on.parentElement.scrollLeft += on.getBoundingClientRect().left - on.parentElement.getBoundingClientRect().left - 8;
   tick();
 }
@@ -256,6 +259,7 @@ function viewDashboard() {
   };
 
   return `
+  ${agentPanel()}
   <section class="hero">${hero}</section>
 
   <section class="kpis">
@@ -387,6 +391,7 @@ function viewMinutes() {
       <div class="mh-main">
         <h2>${esc(sel.title || meetingLabel(sel))}</h2>
         <div class="meta">${sel.date ? `${dowOf(sel.date)} ${fmtDate(sel.date)}` : ''}${sel.time ? ` · ${esc(sel.time)}` : ''}</div>
+        ${sel.remark ? `<p class="m-remark">${esc(sel.remark)}</p>` : ''}
         ${sel.attendees ? `<details class="att"><summary>الحضور</summary><p>${esc(sel.attendees)}</p></details>` : ''}
       </div>
       ${items.length ? `<div class="prog">
@@ -480,7 +485,7 @@ async function importFiles(files) {
   reviewImport(results);
 }
 
-const defaultTitle = (committee, number) => `الاجتماع ${ORD[number] || number || ''} ${committee === 'national' ? 'للجنة الوطنية للذكاء الاصطناعي المساعد' : 'للجنة الوزارة'}`.replace(/\s+/g, ' ');
+const defaultTitle = (committee, number) => `الاجتماع (${ORD[number] || number || ''}) ${committee === 'national' ? 'للجنة الوطنية للذكاء الاصطناعي المساعد' : 'للجنة الذكاء الاصطناعي المساعد في وزارة شؤون مجلس الوزراء'}`.replace(/\s+/g, ' ');
 
 // Add a meeting's minutes to the tracker, or replace the directives of the same
 // committee + meeting number while keeping ticks and notes on matching topics.
@@ -539,7 +544,7 @@ function reviewImport(results) {
 const SDK_URL = 'https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@0.133.0/+esm';
 const LS_KEY = 'aai.apikey.v1';
 const LS_DRAFT = 'aai.ws.draft.v1';
-const COMMITTEE_FULL = { national: 'اللجنة الوطنية للذكاء الاصطناعي المساعد', ministry: 'لجنة الوزارة' };
+const COMMITTEE_FULL = { national: 'اللجنة الوطنية للذكاء الاصطناعي المساعد', ministry: 'لجنة الذكاء الاصطناعي المساعد في وزارة شؤون مجلس الوزراء' };
 const TASKS = [
   { id: 'minutes', icon: 'doc', t: 'إصدار محضر اجتماع', d: 'من ملاحظاتك المكتوبة أو صورها إلى محضر رسمي بقالب اللجنة' },
   { id: 'deck', icon: 'deck', t: 'إعداد عرض تقديمي', d: 'شرائح بهوية المشروع', soon: true },
@@ -564,8 +569,8 @@ function initCapabilities() {
   if (!window.claude || typeof window.claude.use !== 'function') { cap.ready = true; return; }
   window.claude.use('sample').then((s) => {
     cap.sample = s;
-    if (s) s.limits().then((l) => { cap.sampleImages = !!(l && l.images); if (route() === 'workspace') render(); }).catch(() => {});
-  }).catch(() => {}).finally(() => { cap.ready = true; if (route() === 'workspace') render(); });
+    if (s) s.limits().then((l) => { cap.sampleImages = !!(l && l.images); if (state && route() === 'workspace') render(); }).catch(() => {});
+  }).catch(() => {}).finally(() => { cap.ready = true; if (state && route() !== 'minutes') render(); });
   window.claude.use('downloads').then((d) => { cap.downloads = d; }).catch(() => {});
 }
 const engine = () => cap.sample ? 'claude' : (ls.get(LS_KEY) ? 'api' : null);
@@ -656,7 +661,7 @@ function viewMinutesTask(eng) {
   return `<div class="ws-grid">${form}<section class="ws-out">${viewMinutesOutput()}</section></div>`;
 }
 
-function minutesTitle() { return `محضر الاجتماع (${ORD[+ws.number] || ws.number || '…'}) ${ws.committee === 'national' ? 'للجنة الوطنية للذكاء الاصطناعي المساعد' : 'للجنة الوزارة'}`; }
+function minutesTitle() { return `محضر الاجتماع (${ORD[+ws.number] || ws.number || '…'}) ${ws.committee === 'national' ? 'للجنة الوطنية للذكاء الاصطناعي المساعد' : 'للجنة الذكاء الاصطناعي المساعد في وزارة شؤون مجلس الوزراء'}`; }
 function minutesDateText(r) { return ws.date ? `${dowOf(ws.date)}، ${fmtDate(ws.date)}` : (r && r.date_text) || ''; }
 
 function viewMinutesOutput() {
@@ -846,11 +851,11 @@ async function generateMinutes() {
 async function loadTemplate(c) {
   const custom = ls.get('aai.tpl.' + c);
   if (custom && custom.b64) return Uint8Array.from(atob(custom.b64), (ch) => ch.charCodeAt(0)).buffer;
-  if (!window.AAI_MINUTES_TEMPLATE) await new Promise((res, rej) => {
+  if (!window.AAI_MINUTES_TEMPLATES) await new Promise((res, rej) => {
     const s = document.createElement('script'); s.src = 'assets/templates/minutes-template.js';
     s.onload = res; s.onerror = () => rej(new Error('template')); document.head.appendChild(s);
   });
-  return Uint8Array.from(atob(window.AAI_MINUTES_TEMPLATE), (ch) => ch.charCodeAt(0)).buffer;
+  return Uint8Array.from(atob(window.AAI_MINUTES_TEMPLATES[c] || window.AAI_MINUTES_TEMPLATES.national), (ch) => ch.charCodeAt(0)).buffer;
 }
 async function buildMinutesDocx(r, c) {
   const JSZip = await loadJSZip();
@@ -945,7 +950,7 @@ function templatesModal() {
     const t = ls.get('aai.tpl.' + c);
     return `<div class="tpl-row">
       <div class="tpl-h"><span class="dot" style="--c:var(--c-${c})"></span><b>${COMMITTEES[c]}</b></div>
-      <div class="tpl-file">${ICON.doc}<span>${t ? esc(t.name) : 'القالب الافتراضي (بتنسيق محاضر اللجنة الوطنية)'}</span>
+      <div class="tpl-file">${ICON.doc}<span>${t ? esc(t.name) : `القالب الافتراضي (بتنسيق محاضر ${COMMITTEES[c]})`}</span>
         <label class="btn sm" for="tpl-${c}">رفع قالب</label><input type="file" id="tpl-${c}" data-tpl="${c}" accept=".docx" hidden>
         ${t ? `<button type="button" class="btn sm danger" data-tplreset="${c}">الافتراضي</button>` : ''}
       </div>
@@ -982,6 +987,311 @@ function addImages(files) {
     ws.images.push({ file: f, url: URL.createObjectURL(f) });
   }
   render();
+}
+
+/* ---------------- agent: briefing, recommendations and actions on the site ---------------- */
+// The briefing and recommendations are computed locally from the project data, so they
+// show instantly and work without Claude. Typed requests go to Claude with a small set
+// of page tools (read pending items, tick items done, add notes, prepare a minutes draft).
+const ag = { turns: [], api: [], status: 'idle', draft: '', ctl: null, typed: false, actions: {} };
+const daysSince = (s) => s ? Math.max(0, dayDiffStr(s, todayStr())) : 0;
+function dayDiffStr(a, b) { const A = parse(a), B = parse(b); return Math.round((Date.UTC(B.y, B.m - 1, B.d) - Date.UTC(A.y, A.m - 1, A.d)) / 864e5); }
+const greeting = () => { const h = +new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: 'numeric', hour12: false }).format(new Date()); return h < 12 ? 'صباح الخير' : 'مساء الخير'; };
+const splitOwners = (s) => String(s || '').split(/\s*(?:\+|،|,| و(?=معالي|سعادة|د\.))\s*/).map((x) => x.trim()).filter((x) => x.length > 2);
+
+function projectSnapshot() {
+  const { cur, list, idx } = currentStage();
+  const pending = state.meetings.flatMap((m) => m.items.filter((i) => !isDone(i)).map((i) => ({ i, m })));
+  const awaiting = state.meetings.filter((m) => !m.items.length && m.date && m.date <= todayStr());
+  const owners = {};
+  pending.forEach(({ i }) => splitOwners(i.owners).filter((o) => !/أعضاء اللجنة|الأمانة العامة|جميع|الجهات/.test(o)).forEach((o) => { owners[o] = (owners[o] || 0) + 1; }));
+  const topOwner = Object.entries(owners).sort((a, b) => b[1] - a[1])[0];
+  const daysLeft = cur ? Math.max(0, Math.ceil((endMs(cur) - Date.now()) / 864e5)) : 0;
+  const oldest = pending.reduce((o, x) => (!o || (x.m.date || '9') < (o.m.date || '9')) ? x : o, null);
+  return { cur, idx, stages: list, pending, awaiting, topOwner, daysLeft, oldest };
+}
+
+function agentRecs(s) {
+  const recs = [];
+  if (s.awaiting.length) recs.push({ icon: 'upload', t: `${s.awaiting.length} اجتماعات بانتظار رفع محاضرها`, d: s.awaiting.slice(0, 3).map((m) => `${COMMITTEES[m.committee]} · ${meetingLabel(m)}`).join('، '), act: 'ag-goto', view: 'minutes', label: 'ارفع المحاضر' });
+  if (s.oldest && daysSince(s.oldest.m.date) > 21) {
+    const n = s.pending.filter((x) => x.m === s.oldest.m).length;
+    recs.push({ icon: 'note', t: `${n} توجيهات معلّقة منذ ${daysSince(s.oldest.m.date)} يوماً`, d: `${COMMITTEES[s.oldest.m.committee]} · ${meetingLabel(s.oldest.m)}`, act: 'ag-ask', q: `جهّز رسالة متابعة رسمية مختصرة للتوجيهات المعلّقة من ${meetingLabel(s.oldest.m)} لـ${COMMITTEES[s.oldest.m.committee]}، مجمّعة حسب أصحاب العلاقة.`, label: 'جهّز رسالة متابعة' });
+  }
+  if (s.topOwner && s.topOwner[1] > 1) recs.push({ icon: 'user', t: `${s.topOwner[0]}: ${s.topOwner[1]} توجيهات معلّقة`, d: 'الأكثر توجيهات معلّقة بين أصحاب العلاقة', act: 'ag-ask', q: `ما التوجيهات المعلّقة على ${s.topOwner[0]}؟ وجهّز لي رسالة متابعة قصيرة له.`, label: 'اعرض وجهّز متابعة' });
+  if (s.cur && s.daysLeft <= 30) recs.push({ icon: 'spark', t: `${s.daysLeft} يوماً على نهاية ${s.cur.name}`, d: s.cur.title || '', act: 'ag-ask', q: `لخّص وضع ${s.cur.name} (${s.cur.title}): ما أُنجز من توجيهات وما زال معلّقاً، وما الذي يجب أن نركّز عليه قبل نهايتها.`, label: 'لخّص الوضع' });
+  const nat = meetingsOf('national'); const next = nat.reduce((n, m) => Math.max(n, m.items.length ? m.number || 0 : 0), 0) + 1;
+  recs.push({ icon: 'doc', t: `حضّر محضر الاجتماع ${ORD[next] || next} للجنة الوطنية`, d: 'من ملاحظاتك أو صورها في مساحة العمل', act: 'ag-minutes', c: 'national', label: 'ابدأ المحضر' });
+  return recs.slice(0, 4);
+}
+
+function briefingText(s) {
+  const parts = [`${greeting()}.`];
+  if (s.cur) parts.push(`نحن في ${s.cur.name} (${s.cur.title})، ويتبقى ${s.daysLeft} يوماً على نهايتها.`);
+  parts.push(s.pending.length ? `لديك ${s.pending.length} توجيهاً معلّقاً${s.awaiting.length ? ` و${s.awaiting.length} اجتماعات بانتظار محاضرها` : ''}.` : 'لا توجد توجيهات معلّقة حالياً.');
+  return parts.join(' ');
+}
+
+const AG_SUGGEST = ['ما الذي يجب أن أركّز عليه هذا الأسبوع؟', 'ما التوجيهات المعلّقة على مسار التقنيات؟', 'جهّز ملخصاً للقيادة عن وضع المشروع', 'ضع علامة منجز على بند «إعلانات الإطلاقات»'];
+
+function agentPanel() {
+  const s = projectSnapshot();
+  const eng = engine();
+  const recs = agentRecs(s);
+  const brief = briefingText(s);
+  const thread = ag.turns.map((t, k) => t.role === 'user'
+    ? `<div class="msg me"><p>${esc(t.text)}</p></div>`
+    : `<div class="msg ai"><span class="orb sm" aria-hidden="true"></span><div class="msg-body">
+        <div class="msg-text" ${k === ag.turns.length - 1 && ag.status === 'running' ? 'id="agLive"' : ''}>${t.text ? fmtAgent(t.text) : '<span class="dots"><i></i><i></i><i></i></span>'}</div>
+        ${(t.actions || []).map((a, j) => actionCard(a, k, j)).join('')}
+        ${t.text && !(k === ag.turns.length - 1 && ag.status === 'running') ? `<button class="link sm-link" data-act="ag-copy" data-k="${k}">نسخ الرد</button>` : ''}
+      </div></div>`).join('');
+  return `
+  <section class="agent ${ag.turns.length ? 'has-thread' : ''}" aria-label="المساعد">
+    <div class="ag-top">
+      <span class="orb" aria-hidden="true"></span>
+      <div class="ag-brief">
+        <div class="ag-name">المساعد <span class="engine ${eng ? 'on' : ''}">${eng === 'claude' ? 'Claude' : eng === 'api' ? 'Claude API' : 'بدون اتصال'}</span></div>
+        <p id="agBrief" data-full="${esc(brief)}">${ag.typed ? esc(brief) : ''}</p>
+      </div>
+      ${ag.turns.length ? '<button class="btn sm ghost-w" data-act="ag-clear">محادثة جديدة</button>' : ''}
+    </div>
+    ${ag.turns.length ? `<div class="ag-thread" id="agThread">${thread}</div>` : `
+    <div class="ag-recs">${recs.map((r) => `
+      <button class="rec" data-act="${r.act}" ${r.q ? `data-q="${esc(r.q)}"` : ''} ${r.view ? `data-view="${r.view}"` : ''} ${r.c ? `data-c="${r.c}"` : ''}>
+        <span class="rec-ico">${ICON[r.icon] || ICON.spark}</span>
+        <span class="rec-txt"><b>${esc(r.t)}</b>${r.d ? `<small>${esc(r.d)}</small>` : ''}</span>
+        <span class="rec-go">${r.label} ←</span>
+      </button>`).join('')}
+    </div>`}
+    <form class="ag-ask" data-agform onsubmit="return false">
+      <input id="ag-input" autocomplete="off" placeholder="${eng ? 'اطلب من المساعد… مثال: ما المعلّق على معالي عمر العلماء؟' : 'اربط Claude من الإعدادات لتفعيل أوامر المساعد'}" value="${esc(ag.draft)}" ${eng ? '' : 'disabled'} aria-label="اطلب من المساعد">
+      ${ag.status === 'running' ? '<button type="button" class="btn sm" data-act="ag-stop">إيقاف</button>' : `<button type="button" class="btn primary sm" data-act="ag-send" ${eng ? '' : 'disabled'}>${ICON.spark} أرسل</button>`}
+    </form>
+    ${!ag.turns.length && eng ? `<div class="ag-sugg">${AG_SUGGEST.map((q) => `<button class="chip sugg" data-act="ag-ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}
+    ${!eng && cap.ready ? `<p class="ag-note">التوصيات أعلاه تعمل دائماً. لتنفيذ الطلبات، افتح اللوحة من رابطها على claude.ai أو أضف مفتاح Claude API من <button class="link" data-act="open-settings">الإعدادات</button>.</p>` : ''}
+  </section>`;
+}
+
+// light formatting for agent replies: paragraphs, bullet lists, **bold**
+function fmtAgent(t) {
+  const lines = esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').split(/\n/);
+  let html = '', inList = false;
+  for (const l of lines) {
+    const m = l.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)/);
+    if (m) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${m[1]}</li>`; continue; }
+    if (inList) { html += '</ul>'; inList = false; }
+    if (l.trim()) html += `<p>${l.replace(/^#+\s*/, '')}</p>`;
+  }
+  return html + (inList ? '</ul>' : '');
+}
+
+function actionCard(a, k, j) {
+  if (a.type === 'done') return `<div class="act-card ok">${ICON.check}<span>${a.undone ? 'تم التراجع عن' : 'تم تحديد'} ${a.ids.length} ${a.ids.length === 1 ? 'توجيه' : 'توجيهات'} ${a.undone ? '' : 'كمنجزة'}: ${esc(a.label)}</span>${a.undone ? '' : `<button class="link" data-act="ag-undo" data-k="${k}" data-j="${j}">تراجع</button>`}</div>`;
+  if (a.type === 'note') return `<div class="act-card">${ICON.note}<span>أُضيفت ملاحظة على «${esc(a.label)}»</span></div>`;
+  if (a.type === 'open') return `<div class="act-card">${ICON.doc}<span>${esc(a.label)}</span><button class="btn sm" data-act="ag-open" data-k="${k}" data-j="${j}">افتح</button></div>`;
+  return '';
+}
+
+/* tools Claude can call on this page */
+function findItemsByIds(ids) {
+  const want = new Set((ids || []).map(String)); const out = [];
+  state.meetings.forEach((m) => m.items.forEach((i) => { if (want.has(i.id)) out.push({ i, m }); }));
+  return out;
+}
+const AG_TOOLS = [
+  {
+    name: 'get_project_status',
+    description: 'Returns the current project stage, days left in it, all eight stages, counts of pending and done directives per committee, meetings still waiting for their minutes, and the latest news headlines.',
+    schema: { type: 'object', properties: {}, additionalProperties: false },
+    run() {
+      const s = projectSnapshot();
+      const by = (c) => { const its = meetingsOf(c).flatMap((m) => m.items); return { pending: its.filter((i) => !isDone(i)).length, done: its.filter(isDone).length }; };
+      return {
+        today: todayStr(), stage: s.cur && { name: s.cur.name, title: s.cur.title, start: s.cur.start, end: s.cur.end, days_left: s.daysLeft, number: s.idx + 1, of: s.stages.length },
+        stages: s.stages.map((x) => `${x.name}: ${x.title} (${x.start} → ${x.end})`),
+        national: by('national'), ministry: by('ministry'),
+        meetings_awaiting_minutes: s.awaiting.map((m) => `${COMMITTEES[m.committee]} – ${meetingLabel(m)} (${m.date})`),
+        news: [...(news.uae || []), ...(news.global || [])].slice(0, 6).map((n) => n.title),
+      };
+    },
+  },
+  {
+    name: 'get_pending_items',
+    description: 'Lists pending (not done) meeting directives with their id, committee, meeting, topic, directive, owners and days open. Optional filters: committee ("national" or "ministry"), owner (part of a name, e.g. "عمر العلماء"), text (words in topic or directive). Use before marking items done or writing follow-ups.',
+    schema: { type: 'object', properties: { committee: { type: 'string', enum: ['national', 'ministry'] }, owner: { type: 'string' }, text: { type: 'string' } }, additionalProperties: false },
+    run(inp) {
+      const owner = String(inp.owner || '').trim(), text = String(inp.text || '').trim();
+      return projectSnapshot().pending
+        .filter(({ m }) => !inp.committee || m.committee === inp.committee)
+        .filter(({ i }) => !owner || i.owners.includes(owner))
+        .filter(({ i }) => !text || `${i.topic} ${i.directive}`.includes(text))
+        .slice(0, 60)
+        .map(({ i, m }) => ({ id: i.id, committee: COMMITTEES[m.committee], meeting: meetingLabel(m), meeting_date: m.date, topic: i.topic, directive: i.directive, owners: i.owners, days_open: daysSince(m.date), note: i.note || undefined }));
+    },
+  },
+  {
+    name: 'mark_items_done',
+    description: 'Marks the given directives as done (ticked) in the minutes tracker. Only call it when the user clearly asked to mark specific items done; get their ids from get_pending_items first. The user can undo it.',
+    schema: { type: 'object', properties: { item_ids: { type: 'array', items: { type: 'string' } } }, required: ['item_ids'], additionalProperties: false },
+    run(inp, acts) {
+      const found = findItemsByIds(inp.item_ids).filter(({ i }) => !isDone(i));
+      if (!found.length) throw new Error('No pending items with those ids');
+      found.forEach(({ i }) => { i.status = 'done'; i.doneDate = todayStr(); });
+      acts.push({ type: 'done', ids: found.map(({ i }) => i.id), label: found.map(({ i }) => i.topic).join('، ') });
+      persistQuiet();
+      return { marked_done: found.map(({ i }) => i.topic) };
+    },
+  },
+  {
+    name: 'add_item_note',
+    description: 'Adds or replaces the follow-up note on one directive (for example "تم التواصل، بانتظار العرض"). Only when the user asked for it.',
+    schema: { type: 'object', properties: { item_id: { type: 'string' }, note: { type: 'string' } }, required: ['item_id', 'note'], additionalProperties: false },
+    run(inp, acts) {
+      const [hit] = findItemsByIds([inp.item_id]);
+      if (!hit) throw new Error('No item with that id');
+      hit.i.note = String(inp.note || '').slice(0, 500);
+      acts.push({ type: 'note', label: hit.i.topic });
+      persistQuiet();
+      return { ok: true };
+    },
+  },
+  {
+    name: 'prepare_minutes_draft',
+    description: 'Prepares the workspace to draft the minutes of a committee meeting: sets the committee, meeting number and any notes the user gave, and gives the user a button to open it. Use when the user wants to write or issue meeting minutes.',
+    schema: { type: 'object', properties: { committee: { type: 'string', enum: ['national', 'ministry'] }, meeting_number: { type: 'integer' }, notes: { type: 'string' } }, required: ['committee'], additionalProperties: false },
+    run(inp, acts) {
+      ws.task = 'minutes'; ws.committee = inp.committee === 'ministry' ? 'ministry' : 'national';
+      seedMeetingFields(true);
+      if (inp.meeting_number) ws.number = String(inp.meeting_number);
+      if (inp.notes) ws.notes = String(inp.notes);
+      ws.result = null; ws.status = 'idle'; saveDraft();
+      acts.push({ type: 'open', view: 'workspace', label: `محضر ${COMMITTEES[ws.committee]} · الاجتماع ${ORD[+ws.number] || ws.number} جاهز للإعداد في مساحة العمل` });
+      return { ok: true, meeting_number: ws.number };
+    },
+  },
+  {
+    name: 'open_meeting',
+    description: 'Gives the user a button to open a specific meeting in the minutes tracker.',
+    schema: { type: 'object', properties: { committee: { type: 'string', enum: ['national', 'ministry'] }, meeting_number: { type: 'integer' } }, required: ['committee', 'meeting_number'], additionalProperties: false },
+    run(inp, acts) {
+      const m = meetingsOf(inp.committee).find((x) => x.number === Number(inp.meeting_number));
+      if (!m) throw new Error('Meeting not found');
+      acts.push({ type: 'open', view: 'minutes', committee: m.committee, mid: m.id, label: `${COMMITTEES[m.committee]} · ${meetingLabel(m)}` });
+      return { ok: true };
+    },
+  },
+];
+
+// save without re-rendering mid-conversation (the reply re-renders at the end)
+function persistQuiet() {
+  state.updatedAt = new Date().toISOString(); ls.set(LS_STATE, state);
+  if (ghOn()) { clearTimeout(saveTimer); saveTimer = setTimeout(() => ghSave().then(() => setSync('ok', 'تمت المزامنة ✓')).catch(() => setSync('err', 'تعذّرت المزامنة')), 1200); }
+}
+
+const AG_SYSTEM = `أنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
+
+- اكتب بالعربية الفصحى بأسلوب حكومي واضح ومختصر، واستخدم قوائم قصيرة عند الحاجة.
+- اعتمد على الأدوات للاطلاع على البيانات الفعلية قبل الإجابة عن المراحل أو التوجيهات أو المحاضر، ولا تخمّن أرقاماً أو أسماء.
+- نفّذ التغييرات (تحديد بند كمنجز، إضافة ملاحظة) فقط عندما يطلبها المستخدم صراحةً، ولا تقل إنك نفّذت شيئاً لم تنفّذه أداة.
+- عند طلب رسالة متابعة أو ملخص، اكتب النص كاملاً جاهزاً للنسخ، مع ألقاب «معالي» و«سعادة» كما وردت في البيانات.
+- عند طلب إعداد محضر، استخدم prepare_minutes_draft ثم أخبر المستخدم أن يفتح مساحة العمل.`;
+
+async function agentRunSDK(signal, onText, acts) {
+  let Anthropic;
+  try { ({ default: Anthropic } = await import(SDK_URL)); }
+  catch (e) { throw new Error(`تعذّر تحميل مكتبة Claude من الإنترنت (cdn.jsdelivr.net): ${e && e.message || e}`); }
+  const client = new Anthropic({ apiKey: ls.get(LS_KEY), dangerouslyAllowBrowser: true });
+  const tools = AG_TOOLS.map((t) => ({ name: t.name, description: t.description, input_schema: t.schema, eager_input_streaming: true }));
+  let shown = '';
+  for (let round = 0; round < 6; round++) {
+    const stream = client.beta.messages.stream({
+      model: 'claude-opus-5-5', max_tokens: 8000, system: AG_SYSTEM, tools,
+      output_config: { effort: 'medium' },
+      betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default',
+      messages: ag.api,
+    }, { signal });
+    const base = shown;
+    stream.on('text', (_d, snap) => { shown = base + (base ? '\n\n' : '') + snap; onText(shown); });
+    let msg;
+    try { msg = await stream.finalMessage(); }
+    catch (e) {
+      if (e instanceof Anthropic.APIUserAbortError) throw { cancelled: true };
+      if (e instanceof Anthropic.AuthenticationError) throw new Error('مفتاح Claude API غير صالح. حدّثه من الإعدادات.');
+      if (e instanceof Anthropic.APIError) throw new Error(`خطأ من خدمة Claude (${e.status}): ${(e.error && e.error.error && e.error.error.message) || e.message}`);
+      throw e;
+    }
+    ag.api.push({ role: 'assistant', content: msg.content });
+    if (msg.stop_reason === 'refusal') throw new Error('اعتذر Claude عن هذا الطلب.');
+    const uses = msg.content.filter((b) => b.type === 'tool_use');
+    if (msg.stop_reason === 'max_tokens' && uses.length) throw new Error('انقطع الرد قبل اكتماله. حاول بطلب أقصر.');
+    if (msg.stop_reason !== 'tool_use' || !uses.length) return shown;
+    const results = uses.map((u) => {
+      const tool = AG_TOOLS.find((t) => t.name === u.name);
+      try {
+        const input = u.input && typeof u.input === 'object' ? u.input : {};
+        if (!tool) throw new Error('Unknown tool');
+        return { type: 'tool_result', tool_use_id: u.id, content: JSON.stringify(tool.run(input, acts)) };
+      } catch (err) { return { type: 'tool_result', tool_use_id: u.id, content: String(err.message || err), is_error: true }; }
+    });
+    ag.api.push({ role: 'user', content: results });
+  }
+  return shown;
+}
+
+async function agentRunSample(signal, onText, acts) {
+  const lim = await cap.sample.limits().catch(() => null);
+  const ctx = lim && lim.tools ? '' : `\n\nبيانات المشروع الحالية (JSON):\n${JSON.stringify({ status: AG_TOOLS[0].run(), pending: AG_TOOLS[1].run({}) }).slice(0, 60000)}`;
+  const turns = [{ role: 'user', content: AG_SYSTEM + ctx }, ...ag.turns.filter((t) => t.text).map((t) => ({ role: t.role === 'user' ? 'user' : 'assistant', content: t.text }))];
+  try {
+    const { text } = await cap.sample(turns, {
+      signal, onText: ({ text }) => onText(text),
+      ...(lim && lim.tools ? { tools: AG_TOOLS.map((t) => ({ name: t.name, description: t.description, inputSchema: t.schema, execute: (input) => t.run(input || {}, acts) })) } : { cache: false }),
+    });
+    return text;
+  } catch (e) {
+    if (e && e.code === 'cancelled') throw { cancelled: true };
+    const msg = { not_granted: 'لم يُسمح لهذه الصفحة باستخدام Claude. أعد تحميل الصفحة واختر «السماح».', rate_limited: 'تم بلوغ حد الاستخدام مؤقتاً. حاول لاحقاً.', refused: 'اعتذر Claude عن هذا الطلب.', session_expired: 'انتهت الجلسة. سجّل الدخول إلى claude.ai مرة أخرى.' }[e && e.code];
+    throw new Error(msg || `تعذّر الاتصال بـ Claude (${(e && e.code) || 'unknown'}).`);
+  }
+}
+
+async function agentAsk(q) {
+  q = String(q || '').trim(); const eng = engine();
+  if (!q || !eng || ag.status === 'running') return;
+  if (route() !== 'dashboard') location.hash = '#dashboard';
+  ag.turns.push({ role: 'user', text: q });
+  const reply = { role: 'assistant', text: '', actions: [] };
+  ag.turns.push(reply);
+  if (eng === 'api') ag.api.push({ role: 'user', content: q });
+  ag.draft = ''; ag.status = 'running'; ag.ctl = new AbortController();
+  render(); $('#agThread')?.scrollIntoView({ block: 'nearest' });
+  let last = 0;
+  const onText = (t) => {
+    reply.text = t; const now = Date.now();
+    if (now - last > 120) { last = now; const el = $('#agLive'); if (el) el.innerHTML = fmtAgent(t); }
+  };
+  try {
+    reply.text = eng === 'claude' ? await agentRunSample(ag.ctl.signal, onText, reply.actions) : await agentRunSDK(ag.ctl.signal, onText, reply.actions);
+    if (!reply.text.trim()) reply.text = reply.actions.length ? 'تم.' : 'لم يصل رد. حاول مرة أخرى.';
+  } catch (e) {
+    if (e && e.cancelled) reply.text = (reply.text || '') + (reply.text ? '\n\n' : '') + '(أُوقف)';
+    else reply.text = (reply.text ? reply.text + '\n\n' : '') + '⚠ ' + ((e && e.message) || 'حدث خطأ غير متوقع.');
+    if (eng === 'api' && ag.api.length && ag.api[ag.api.length - 1].role === 'user' && typeof ag.api[ag.api.length - 1].content !== 'string') ag.api.pop();
+  }
+  ag.status = 'idle'; ag.ctl = null;
+  render();
+  setTimeout(() => { const t = $('#agThread'); if (t) t.scrollTop = t.scrollHeight; }, 0);
+}
+
+function typeBriefing() {
+  const el = $('#agBrief'); if (!el || ag.typed) return;
+  ag.typed = true;
+  const full = el.dataset.full || '';
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = full; return; }
+  let i = 0;
+  const step = () => { i = Math.min(full.length, i + 2); el.textContent = full.slice(0, i); if (i < full.length && document.body.contains(el)) setTimeout(step, 18); };
+  step();
 }
 
 /* ---------------- modal ---------------- */
@@ -1056,7 +1366,7 @@ function meetingModal(m) {
     del: isNew ? null : () => { state.meetings = state.meetings.filter((x) => x.id !== m.id); commit('تم حذف الاجتماع'); },
     onSave(d) {
       const num = d.number ? Number(d.number) : null;
-      const title = d.title || `الاجتماع ${ORD[num] || num || ''} ${d.committee === 'national' ? 'للجنة الوطنية للذكاء الاصطناعي المساعد' : 'للجنة الوزارة'}`.replace(/\s+/g, ' ');
+      const title = d.title || defaultTitle(d.committee, num);
       Object.assign(m, { committee: d.committee, title, date: d.date, time: d.time, attendees: d.attendees });
       num ? m.number = num : delete m.number;
       if (isNew) { m.id = uid('m'); state.meetings.push(m); }
@@ -1196,9 +1506,30 @@ app.addEventListener('click', (e) => {
     case 'ws-copy': navigator.clipboard.writeText(minutesAsText()).then(() => toast('تم نسخ نص المحضر'), () => toast('تعذّر النسخ')); break;
     case 'ws-templates': templatesModal(); break;
     case 'open-settings': settingsModal(); break;
+    case 'ag-ask': agentAsk(ds.q); break;
+    case 'ag-send': agentAsk($('#ag-input')?.value); break;
+    case 'ag-stop': ag.ctl?.abort(); break;
+    case 'ag-clear': ag.turns = []; ag.api = []; render(); break;
+    case 'ag-goto': location.hash = '#' + ds.view; break;
+    case 'ag-minutes': ws.task = 'minutes'; ws.committee = ds.c; seedMeetingFields(true); saveDraft(); location.hash = '#workspace'; break;
+    case 'ag-copy': navigator.clipboard.writeText(ag.turns[+ds.k].text).then(() => toast('تم نسخ الرد'), () => toast('تعذّر النسخ')); break;
+    case 'ag-undo': {
+      const a = ag.turns[+ds.k].actions[+ds.j];
+      findItemsByIds(a.ids).forEach(({ i }) => { i.status = 'pending'; delete i.doneDate; });
+      a.undone = true; commit('تم التراجع'); break;
+    }
+    case 'ag-open': {
+      const a = ag.turns[+ds.k].actions[+ds.j];
+      if (a.view === 'minutes' && a.mid) { ui.committee = a.committee; ui.meeting[a.committee] = a.mid; saveUI(); }
+      location.hash = '#' + a.view; break;
+    }
   }
 });
+app.addEventListener('keydown', (e) => {
+  if (e.target.id === 'ag-input' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); agentAsk(e.target.value); }
+});
 app.addEventListener('input', (e) => {
+  if (e.target.id === 'ag-input') { ag.draft = e.target.value; return; }
   const f = e.target.dataset.ws;
   if (f) { ws[f] = e.target.value; saveDraft(); return; }
   const ed = e.target.closest && e.target.closest('[data-ed]');
