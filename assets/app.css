@@ -1,3 +1,7 @@
+/* Sakkal Majalla from the viewer's device (Windows, or Mac with Microsoft Office), drawn larger:
+   its glyphs are much smaller than other fonts at the same size. */
+@font-face{font-family:'Sakkal Majalla Site';src:local('Sakkal Majalla'),local('SakkalMajalla');font-weight:400;size-adjust:138%}
+@font-face{font-family:'Sakkal Majalla Site';src:local('Sakkal Majalla Bold'),local('SakkalMajalla-Bold'),local('Sakkal Majalla');font-weight:600 800;size-adjust:138%}
 /* Agentic AI for UAE Government — brand guideline colours with a UAE-gold government layer.
    Layout: white page, sticky header with the cyan→blue signature line, gradient stage panel,
    cards on white; gold marks the federal layer (national committee, counts, dates, footer).
@@ -50,8 +54,8 @@
   --c-event:oklch(0.624 0.198 36.0);
   --c-other:#98A2B3;
 
-  --font-heading:'Sakkal Majalla','Alexandria','Helvetica Neue',ui-sans-serif,system-ui,sans-serif;
-  --font-body:'Sakkal Majalla','Noto Kufi Arabic','Helvetica Neue',ui-sans-serif,system-ui,sans-serif;
+  --font-heading:'Sakkal Majalla Site','Alexandria','Helvetica Neue',ui-sans-serif,system-ui,sans-serif;
+  --font-body:'Sakkal Majalla Site','Noto Kufi Arabic','Helvetica Neue',ui-sans-serif,system-ui,sans-serif;
   --r-sm:.25rem; --r-lg:.5rem; --r-xl:.75rem;
   color-scheme:light;
 }
@@ -945,6 +949,3 @@ dialog::backdrop{background:var(--scrim)}
 .chat-note{margin:0;text-align:center;font-size:12.5px;color:var(--muted)}
 .agent.chat.listening .composer{border-color:#E5484D}
 @media (max-width:640px){.agent.chat{padding:12px}.msg.user .bubble{max-width:88%}.chat-hello .ag-title{font-size:21px}}
-
-/* Sakkal Majalla draws small: when the device has it, scale text up to match the layout */
-html.sakkal{font-size-adjust:0.55}
