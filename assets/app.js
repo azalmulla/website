@@ -266,8 +266,8 @@ function viewDashboard() {
   };
 
   return `
-  ${agentPanel()}
   <section class="hero">${hero}</section>
+  ${agentPanel()}
 
   <section class="kpis">
     <div class="card kpi"><div class="l"><span class="dot" style="--c:var(--c-national)"></span>معلّق · اللجنة الوطنية</div><div class="v">${pend.national.length}</div><div class="s">${meetingsOf('national').filter((m) => m.items.length).length} محاضر مرفوعة</div></div>
