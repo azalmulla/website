@@ -2626,14 +2626,6 @@ function settingsModal() {
   };
 }
 
-// Mark the page when Sakkal Majalla is installed (Windows / Office), so its small glyphs can be scaled up.
-(function detectSakkal() {
-  try {
-    const c = document.createElement('canvas').getContext('2d'); const t = 'مشروع الذكاء الاصطناعي abc';
-    c.font = '40px monospace'; const a = c.measureText(t).width; c.font = '40px "Sakkal Majalla", monospace';
-    if (Math.abs(c.measureText(t).width - a) > 1) document.documentElement.classList.add('sakkal');
-  } catch {}
-})();
 function applyTheme() {
   const t = ls.get('aai.theme');
   if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
