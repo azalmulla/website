@@ -271,6 +271,9 @@ main{padding-block:22px 48px;min-height:70vh}
 .pend-gh span{font-size:12px;background:var(--gold-soft);border-radius:var(--r-sm);padding:0 8px;line-height:22px}
 .pend-gh:hover{color:var(--accent-fg)}
 .pend-body .list>li{padding:10px 0}
+.pf-l{font-weight:600;color:var(--muted);font-size:12.5px}
+.pf-dir{font-size:13.5px;color:var(--fg-2);line-height:1.75;margin-top:3px}
+.pend-body .li-sub{margin-top:4px}
 .news-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
 .section-note{color:var(--muted);font-size:13px;margin:12px 2px 0}
 
