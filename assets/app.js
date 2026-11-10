@@ -1833,7 +1833,21 @@ const AG_STARTERS = [
   { act: 'ag-deck', t: 'عرض الاجتماع القادم' },
   { act: 'ag-idea', t: 'أضف فكرة مشروع' },
 ];
+// The chat is paused while it is being finished («جاري العمل»); set to false to turn it back on.
+const AG_LOCKED = true;
+function agentLockedPanel() {
+  return `
+  <section class="agent chat empty locked" aria-label="المساعد">
+    <div class="chat-h"><span class="chat-name"><img src="assets/agent-icon.png" alt="">مساعد الذكاء الاصطناعي</span><span class="wip">جاري العمل</span></div>
+    <div class="chat-hello"><span class="ag-icon"><img src="assets/agent-icon.png" alt=""></span><h2 class="ag-title">${esc(greeting())}، كيف أساعدك اليوم؟</h2></div>
+    <div class="composer" aria-disabled="true">
+      <textarea rows="1" disabled placeholder="جاري العمل على المساعد، سيتاح قريباً.." aria-label="المساعد غير متاح حالياً"></textarea>
+      <div class="composer-row"><span class="icon-btn">${ICON.clip}</span><span class="spacer"></span><span class="mic">${ICON.mic}</span><span class="send">${ICON.send}</span></div>
+    </div>
+  </section>`;
+}
 function agentPanel() {
+  if (AG_LOCKED) return agentLockedPanel();
   const eng = engine();
   const busy = ag.status === 'running';
   const empty = !ag.turns.length && !ag.local;
@@ -2018,6 +2032,7 @@ function wireDictation(d) {
   });
 }
 function voiceToggle() {
+  if (AG_LOCKED) return;
   if (cap.dictation) {
     if (voice.on || cap.dictation.active()) { cap.dictation.stop().catch(() => {}); return; }
     voice.base = ''; ag.draft = '';
@@ -2063,6 +2078,7 @@ function localIntent(q) {
   return null;
 }
 function agentSubmit(q) {
+  if (AG_LOCKED) return;
   q = String(q || '').trim(); if (!q) return;
   const eng = engine(); const fn = localIntent(q);
   if (!eng) { if (fn) { ag.draft = ''; fn(); } else toast('اربط Claude من الإعدادات للطلبات المفتوحة، أو اختر أحد الإجراءات'); return; }
