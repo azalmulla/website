@@ -565,6 +565,9 @@ details.att p{margin:6px 0 0;line-height:1.9;max-width:90ch}
 .lg i{width:10px;height:10px;border-radius:3px;background:var(--c-st)}
 .a3-add{margin-inline-start:auto;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.4);color:#FFFFFF;border-radius:999px}
 .a3-add:hover{background:rgba(255,255,255,.25);color:#FFFFFF}
+.a3-reset{background:transparent;border-color:rgba(255,255,255,.4);color:#FFFFFF;border-radius:999px}
+.a3-reset:hover{background:rgba(255,255,255,.18);color:#FFFFFF}
+.a3-reset.armed{background:#E5484D;border-color:#E5484D;color:#FFFFFF}
 .st-announced{--c-st:var(--a3-green,#00B050)}.st-ready,.st-prep{--c-st:var(--a3-yellow,#FFC000)}.st-scheduled{--c-st:var(--a3-blue,#2E75FF)}.st-planned{--c-st:var(--a3-gray,#E8ECF4)}
 .a3-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:stretch}
 .a3c{position:relative;overflow:hidden;isolation:isolate;min-height:178px;border-radius:14px;padding:10px 11px 10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;
