@@ -259,8 +259,9 @@ function viewDashboard() {
             <li>
               <input type="checkbox" class="tick" data-act="toggle-item" data-mid="${g.m.id}" data-iid="${i.id}" aria-label="تم الإنجاز: ${esc(i.topic)}">
               <div class="li-main">
-                <div class="li-title">${esc(i.topic)}</div>
-                ${i.owners ? `<div class="li-sub">${esc(i.owners)}</div>` : ''}
+                <div class="li-title"><span class="pf-l">الموضوع:</span> ${bd(i.topic)}</div>
+                ${i.directive ? `<div class="pf-dir"><span class="pf-l">التوجيه:</span> ${bd(i.directive)}</div>` : ''}
+                ${i.owners ? `<div class="li-sub"><span class="pf-l">صاحب العلاقة:</span> ${bd(i.owners)}</div>` : ''}
               </div>
             </li>`).join('')}</ul>
         </div>`).join('') : `<div class="empty">${meetingsOf(c).some((m) => m.items.length) ? 'لا توجد بنود معلّقة.' : 'لم تُرفع محاضر بعد.'}</div>`}
