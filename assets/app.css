@@ -561,11 +561,11 @@ details.att p{margin:6px 0 0;line-height:1.9;max-width:90ch}
 .a3-h{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .a3-h h1{margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(22px,3vw,34px);letter-spacing:.01em;color:#FFFFFF;text-shadow:0 2px 12px rgba(0,0,0,.35)}
 .a3-logo{height:38px;width:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
-.a3-bar{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin:12px 0 16px;font-size:12.5px}
+.a3-bar{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;margin:12px 0 16px;font-size:12.5px}
 .a3-prog{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:3px 12px}
 .a3-prog b{font-family:var(--font-heading);font-size:15px}
 .a3-prog i{display:inline-block;width:80px;height:5px;border-radius:9px;background:linear-gradient(90deg,var(--a3-green) var(--p),rgba(255,255,255,.25) var(--p))}
-.a3-legend{display:flex;gap:10px;flex-wrap:wrap}
+.a3-legend{display:flex;gap:6px 10px;flex-wrap:wrap;flex:1 1 260px;min-width:0}
 .lg{display:inline-flex;align-items:center;gap:5px;opacity:.92}
 .lg i{width:10px;height:10px;border-radius:3px;background:var(--c-st)}
 .a3-add{margin-inline-start:auto;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.4);color:#FFFFFF;border-radius:999px}
