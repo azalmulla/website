@@ -923,7 +923,7 @@ dialog::backdrop{background:var(--scrim)}
 .msg.ai.busy .msg-av{animation:agspin 2.2s linear infinite}
 .msg-body{flex:1;min-width:0;display:grid;gap:8px}
 .msg-title{font-family:var(--font-heading);font-weight:700}
-.msg-body .ag-text{font-size:15px;line-height:1.85;max-height:none;-webkit-line-clamp:unset;overflow:visible}
+.msg-body .ag-text{font-size:15px;line-height:1.85;max-height:none;-webkit-line-clamp:unset;overflow:visible;mask-image:none;-webkit-mask-image:none}
 .msg-body .ag-text p{margin:0 0 6px}
 .msg-body .ag-text ul{margin:4px 0 8px;padding-inline-start:20px}
 .msg-tools{display:flex;gap:4px;opacity:.6;transition:opacity .2s}
