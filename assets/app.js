@@ -1658,11 +1658,6 @@ function agentPanel() {
   const s = projectSnapshot();
   const eng = engine();
   const recs = agentRecs(s);
-  const metrics = [
-    s.cur && { n: s.daysLeft, t: 'يوماً للمرحلة', act: 'ag-ask', q: recs.find((r) => r.s === 'لخّص وضع المرحلة')?.q || `لخّص وضع ${s.cur.name}` },
-    { n: s.pending.length, t: 'معلّق', act: 'ag-goto', view: 'minutes' },
-    s.lLate.length && { n: s.lLate.length, t: 'إطلاق متأخر', act: 'ag-goto', view: 'launches', warn: true },
-  ].filter(Boolean);
   const chips = recs.filter((r) => r.s && r.s !== 'لخّص وضع المرحلة' && !/إطلاقات متأخرة/.test(r.s));
   const busy = ag.status === 'running';
   return `
@@ -1673,8 +1668,7 @@ function agentPanel() {
       <span class="engine ${eng ? 'on' : ''}">${eng === 'claude' ? 'Claude' : eng === 'api' ? 'Claude API' : 'بدون اتصال'}</span>
     </div>
     <div class="ag-tiles">
-      ${metrics.map((m, i) => `<button class="mtile ${m.warn ? 'warn' : ''}" style="--i:${i}" data-act="${m.act}" ${m.q ? `data-q="${esc(m.q)}"` : ''} ${m.view ? `data-view="${m.view}"` : ''}><b data-count="${m.n}">${ag.counted ? m.n : 0}</b><span>${m.t}</span></button>`).join('')}
-      ${chips.map((r, i) => `<button class="atile" style="--i:${i + metrics.length}" title="${esc(r.t)}${r.d ? ' · ' + esc(r.d) : ''}" data-act="${r.act}" ${r.q ? `data-q="${esc(r.q)}"` : ''} ${r.view ? `data-view="${r.view}"` : ''} ${r.c ? `data-c="${r.c}"` : ''}><span class="at-ico">${ICON[r.icon] || ICON.spark}</span><span>${esc(r.s)}</span><i>${r.label} ←</i></button>`).join('')}
+      ${chips.map((r, i) => `<button class="atile" style="--i:${i}" title="${esc(r.t)}${r.d ? ' · ' + esc(r.d) : ''}" data-act="${r.act}" ${r.q ? `data-q="${esc(r.q)}"` : ''} ${r.view ? `data-view="${r.view}"` : ''} ${r.c ? `data-c="${r.c}"` : ''}><span class="at-ico">${ICON[r.icon] || ICON.spark}</span><span>${esc(r.s)}</span><i>${r.label} ←</i></button>`).join('')}
     </div>
     <form class="ag-ask" onsubmit="return false">
       <span class="ag-ask-ico">${ICON.spark}</span>
