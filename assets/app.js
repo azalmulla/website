@@ -1841,7 +1841,7 @@ function agentPanel() {
   return `
   <section class="agent chat ${busy ? 'busy' : ''} ${voice.on ? 'listening' : ''} ${empty ? 'empty' : ''}" aria-label="المساعد">
     <div class="chat-h">
-      <span class="chat-name"><img src="assets/agent-icon.png" alt="">المساعد</span>
+      <span class="chat-name"><img src="assets/agent-icon.png" alt="">مساعد الذكاء الاصطناعي</span>
       <span class="engine ${eng ? 'on' : ''}">${eng === 'claude' ? 'Claude' : eng === 'api' ? 'Claude API' : 'بدون اتصال'}</span>
       ${empty ? '' : `<button class="btn sm chat-new" data-act="ag-clear">${ICON.edit} محادثة جديدة</button>`}
     </div>
