@@ -229,7 +229,6 @@ function viewDashboard() {
       <h2>${esc(cur.name)}</h2>
       <div class="hero-sub">${esc(cur.title || '')}</div>
       <div class="range">${fmtDate(cur.start)} — ${fmtDate(cur.end)}</div>
-      <button class="btn sm" data-act="edit-stages">تعديل المراحل</button>
     </div>
     <div class="hero-count">
       <div class="cd-label" id="cdLabel"></div>
@@ -240,11 +239,6 @@ function viewDashboard() {
       <div class="bar-meta"><span id="stagePct"></span><span>تنتهي ${fmtDate(cur.end)}</span></div>
     </div>
     <ol class="track" aria-label="مراحل المشروع">${track}</ol>
-    ${p.start && p.end ? `<div class="target">
-      <div class="t">${esc(p.targetLabel || 'الإطار الزمني للمشروع')} · ${fmtYM(p.start)} – ${fmtYM(p.end)}</div>
-      <div class="bar"><i id="targetBar" style="width:0"></i></div>
-      <div class="bar-meta"><span id="targetPct"></span><span id="targetLeft"></span></div>
-    </div>` : ''}
   ` : `<div class="hero-main"><h2>لم تُحدَّد مراحل المشروع بعد</h2><button class="btn sm" data-act="edit-stages">إضافة المراحل</button></div>`;
 
   const pendCard = (c) => {
@@ -2128,6 +2122,7 @@ function settingsModal() {
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="exportBtn">تصدير البيانات (JSON)</button>
         <label class="btn sm" for="importFile">استيراد نسخة</label><input type="file" accept="application/json" id="importFile" hidden>
+        <button type="button" class="btn sm" id="stagesBtn">تعديل المراحل</button>
         <button type="button" class="btn sm danger" id="resetBtn">استعادة بيانات المستودع</button>
       </div>
       <small style="color:var(--muted)">آخر تعديل: ${state.updatedAt ? new Date(state.updatedAt).toLocaleString('ar-AE', { timeZone: TZ }) : '—'}</small>`,
@@ -2289,6 +2284,7 @@ app.addEventListener('change', (e) => {
   importFiles(files);
 });
 $('#settingsBtn').addEventListener('click', settingsModal);
+dlg.addEventListener('click', (e) => { if (e.target.id === 'stagesBtn') { e.preventDefault(); dlg.close(); setTimeout(stagesModal, 0); } });
 
 /* ---------------- boot ---------------- */
 applyTheme();
