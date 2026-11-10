@@ -274,12 +274,12 @@ function viewDashboard() {
   ${agentPanel()}
 
   <section class="kpis">
-    <div class="card kpi"><div class="l"><span class="dot" style="--c:var(--c-national)"></span>معلّق · اللجنة الوطنية</div><div class="v">${pend.national.length}</div><div class="s">${meetingsOf('national').filter((m) => m.items.length).length} محاضر مرفوعة</div></div>
-    <div class="card kpi"><div class="l"><span class="dot" style="--c:var(--c-ministry)"></span>معلّق · لجنة الوزارة</div><div class="v">${pend.ministry.length}</div><div class="s">${meetingsOf('ministry').filter((m) => m.items.length).length} محاضر مرفوعة</div></div>
+    <div class="card kpi"><div class="l"><span class="dot" style="--c:var(--c-national)"></span>بند معلّق · اللجنة الوطنية</div><div class="v">${pend.national.length}</div><div class="s">${meetingsOf('national').filter((m) => m.items.length).length} محاضر مرفوعة</div></div>
+    <div class="card kpi"><div class="l"><span class="dot" style="--c:var(--c-ministry)"></span>بند معلّق · لجنة الوزارة</div><div class="v">${pend.ministry.length}</div><div class="s">${meetingsOf('ministry').filter((m) => m.items.length).length} محاضر مرفوعة</div></div>
     <div class="card kpi"><div class="l">نسبة إنجاز التوجيهات</div><div class="v" style="color:var(--ok)">${all.length ? Math.round(doneN / all.length * 100) : 0}%</div><div class="s">${doneN} من ${all.length} بنداً من محاضر اجتماعات اللجنة الوطنية ولجنة الوزارة</div></div>
   </section>
 
-  <h2 class="sec-h">ما زال معلّقاً</h2>
+  <h2 class="sec-h">بنود للمتابعة</h2>
   <section class="dash-cols">${pendCard('national')}${pendCard('ministry')}</section>
 
   ${launchesDashCard()}
@@ -1772,6 +1772,20 @@ function followupDraft(key) {
   return { key, title: subject, subject, text: body, n: items.length };
 }
 const trackCounts = () => { const p = projectSnapshot().pending; return trackList().map((t) => [t.name, p.filter(({ i }) => tracksOfItem(i).includes(t.name)).length]); };
+// Refresh the home page's figures (KPIs, pending counts, follow-up draft) without a full re-render.
+function refreshDash() {
+  if (route() !== 'dashboard') return;
+  const tpl = document.createElement('div'); tpl.innerHTML = viewDashboard();
+  const k = $('.kpis'), k2 = tpl.querySelector('.kpis'); if (k && k2) k.replaceWith(k2);
+  const fresh = tpl.querySelectorAll('.pend-card');
+  document.querySelectorAll('.pend-card').forEach((c, i) => {
+    const f = fresh[i]; if (!f) return;
+    c.querySelector('.count').textContent = f.querySelector('.count').textContent;
+    c.querySelectorAll('.pend-group').forEach((g) => { const sp = g.querySelector('.pend-gh span'); if (sp) sp.textContent = g.querySelectorAll('li').length; });
+    if (!c.querySelector('.pend-group')) c.querySelector('.pend-body').replaceWith(f.querySelector('.pend-body'));
+  });
+  if (ag.local) { ag.local = followupDraft(ag.local.key); const l = $('.ag-local'); if (l) { const d = document.createElement('div'); d.innerHTML = agentLocal(); l.replaceWith(d.firstElementChild); } }
+}
 function agentLocal() {
   const d = ag.local; if (!d) return '';
   return `<div class="ag-res ag-local">
@@ -2374,11 +2388,10 @@ app.addEventListener('click', (e) => {
       commit(isDone(it) ? 'تم: أُنجز التوجيه' : 'أُعيد التوجيه إلى المعلّق', true);
       const row = t.closest('li'); if (row) row.classList.toggle('is-done', isDone(it));
       t.checked = isDone(it);
-      const card = t.closest('.pend-card');
-      if (card) {
-        const n = card.querySelectorAll('.tick').length - card.querySelectorAll('.tick:checked').length;
-        const cnt = card.querySelector('.count'); if (cnt) cnt.textContent = `${n} معلّق`;
-        const g = t.closest('.pend-group')?.querySelector('.pend-gh span'); if (g) g.textContent = t.closest('.pend-group').querySelectorAll('.tick:not(:checked)').length;
+      // on the home page a ticked item leaves the pending list, and the figures update in place
+      if (t.closest('.pend-card') && isDone(it) && row) {
+        row.classList.add('leaving');
+        setTimeout(() => { const g = row.closest('.pend-group'); row.remove(); if (g && !g.querySelector('li')) g.remove(); refreshDash(); }, 320);
       }
       if (route() === 'minutes') { const m = findMeeting(ds.mid); const d = m.items.filter(isDone).length; const b = $('.seg button[data-v="0"]'); if (b) b.textContent = `المعلّق (${m.items.length - d})`; }
       break;

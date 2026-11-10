@@ -845,3 +845,5 @@ dialog::backdrop{background:var(--scrim)}
 #toast[popover]{inset:auto auto calc(24px + env(safe-area-inset-bottom,0px)) 50%;margin:0;border:0;overflow:visible}
 .need{animation:need .5s;border-color:#E5484D!important;box-shadow:0 0 0 3px rgba(229,72,77,.2)!important}
 @keyframes need{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.pend-body .list>li.leaving{animation:pendleave .32s ease forwards;pointer-events:none}
+@keyframes pendleave{to{opacity:0;transform:translateX(-24px)}}
