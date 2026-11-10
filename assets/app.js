@@ -1435,7 +1435,7 @@ function ideaModal(x) {
       ${field('ما هو؟', area('what', x.what || '', 'rows="3"'))}
       <div class="field"><label>أهم المخرجات</label><div class="outs">${[0, 1, 2].map((i) => `<input name="out${i}" id="f-out${i}" value="${esc(o[i] || '')}" placeholder="المخرج ${i + 1}">`).join('')}</div></div>
       <div class="row2">${field('تاريخ البدء', inp('start', x.start || '', 'type="date"'))}${field('تاريخ الانتهاء', inp('end', x.end || '', 'type="date"'))}</div>
-      ${field('الجهة المسؤولة', inp('owner', x.owner || '', 'list="ownerList" placeholder="اختر مساراً أو الأمانة العامة، أو اكتب جهة أخرى"') + `<datalist id="ownerList">${[...trackList().map((t) => t.name), 'الأمانة العامة للجنة الوطنية للذكاء الاصطناعي المساعد'].map((v) => `<option value="${esc(v)}">`).join('')}</datalist>`)}
+      ${field('الجهة المسؤولة', inp('owner', x.owner || '', 'list="ownerList" placeholder="اختر مساراً أو الأمانة العامة أو جهات حكومية، أو اكتب جهة أخرى"') + `<datalist id="ownerList">${[...trackList().map((t) => t.name), 'الأمانة العامة للجنة الوطنية للذكاء الاصطناعي المساعد', 'جهات حكومية'].map((v) => `<option value="${esc(v)}">`).join('')}</datalist>`)}
       <div class="field"><label>الصورة التعبيرية</label><div class="img-pick">${x.image ? `<img data-photo="${esc(x.image)}" alt="" id="ideaImgPrev">` : '<img alt="" id="ideaImgPrev" hidden>'}<label class="btn sm" for="ideaImg">اختر صورة</label><input type="file" id="ideaImg" accept="image/*" hidden><small>تظهر في الجانب الأيمن من شريحة القالب</small></div></div>
       ${field('ملاحظات', area('notes', x.notes || '', 'rows="2"'))}`,
     del: isNew ? null : () => { state.ideas = state.ideas.filter((y) => y.id !== x.id); commit('تم الحذف'); },
