@@ -225,7 +225,6 @@ function viewDashboard() {
 
   const hero = cur ? `
     <div class="hero-main">
-      <div class="eyebrow">المرحلة الحالية · ${idx + 1} من ${stages.length}</div>
       <h2>${esc(cur.name)}</h2>
       <div class="hero-sub">${esc(cur.title || '')}</div>
       <div class="range">${fmtDate(cur.start)} — ${fmtDate(cur.end)}</div>
@@ -236,7 +235,7 @@ function viewDashboard() {
         ${['يوم', 'ساعة', 'دقيقة', 'ثانية'].map((l, i) => `<div class="cd-unit"><b data-cd="${i}">--</b><span>${l}</span></div>`).join('')}
       </div>
       <div class="bar"><i id="stageBar" style="width:0"></i></div>
-      <div class="bar-meta"><span id="stagePct"></span><span>تنتهي ${fmtDate(cur.end)}</span></div>
+      <div class="bar-meta"><span></span><span>تنتهي ${fmtDate(cur.end)}</span></div>
     </div>
     <ol class="track" aria-label="مراحل المشروع">${track}</ol>
   ` : `<div class="hero-main"><h2>لم تُحدَّد مراحل المشروع بعد</h2><button class="btn sm" data-act="edit-stages">إضافة المراحل</button></div>`;
@@ -330,15 +329,7 @@ function tick() {
   const pct = before ? 0 : Math.min(100, (now - start) / (end - start) * 100);
   $('#stageBar').style.width = pct + '%';
   const tn = $('#trackNow'); if (tn) tn.style.width = pct + '%';
-  $('#stagePct').textContent = before ? 'لم تبدأ بعد' : `اليوم ${Math.floor((now - start) / 864e5) + 1} من ${Math.round((end - start) / 864e5)} · ${pct.toFixed(0)}%`;
-  const p = state.project;
-  if (p.start && p.end && $('#targetBar')) {
-    const s = uaeMidnight(p.start), t = uaeMidnight(dayAfter(p.end));
-    const tp = Math.min(100, Math.max(0, (now - s) / (t - s) * 100));
-    $('#targetBar').style.width = tp + '%';
-    $('#targetPct').textContent = `مضى ${tp.toFixed(1)}% من مدة المشروع`;
-    $('#targetLeft').textContent = `متبقٍّ ${Math.max(0, Math.ceil((t - now) / 864e5))} يوماً`;
-  }
+
 }
 setInterval(tick, 1000);
 
