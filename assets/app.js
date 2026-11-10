@@ -50,9 +50,13 @@ const dowOf = (s) => { const { y, m, d } = parse(s); return DOW[new Date(Date.UT
 const isDone = (it) => it.status === 'done';
 // keep Latin/numeric tokens such as «1.ae» or «FedAI» in reading order inside Arabic text
 const bd = (t) => esc(t).replace(/[0-9A-Za-z][0-9A-Za-z.%_\-/]*[0-9A-Za-z%]|[A-Za-z]/g, (m) => `<bdi dir="ltr">${m}</bdi>`);
+// The toast is a popover so it shows in the top layer, above any open dialog.
 function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2400);
+  const t = $('#toast'); t.textContent = msg;
+  clearTimeout(toast.t); clearTimeout(toast.h);
+  if (t.showPopover) { try { if (t.matches(':popover-open')) t.hidePopover(); t.showPopover(); } catch {} }
+  requestAnimationFrame(() => t.classList.add('show'));
+  toast.t = setTimeout(() => { t.classList.remove('show'); toast.h = setTimeout(() => { try { t.hidePopover && t.hidePopover(); } catch {} }, 320); }, 2400);
 }
 
 /* ---------------- state & persistence ---------------- */
@@ -1372,7 +1376,7 @@ function ideaModal(x) {
   const btn = $('#aiFillBtn');
   if (btn) btn.onclick = async () => {
     const brief = ($('#ai-brief').value || form.querySelector('[name=what]').value || form.querySelector('[name=name]').value).trim();
-    if (!brief) { toast('اكتب وصفاً مختصراً أولاً'); return; }
+    if (!brief) { toast('اكتب وصفاً مختصراً أولاً'); const b = $('#ai-brief'); b.focus(); b.classList.remove('need'); void b.offsetWidth; b.classList.add('need'); return; }
     btn.disabled = true; btn.textContent = 'جارٍ الصياغة…';
     try {
       const r = await aiJSON(`You help the UAE government "Agentic AI" project team (مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات) fill a one-slide project card. From the idea below, write formal, concise Modern Standard Arabic. Do not invent specific figures, dates or entity names that the idea does not state; leave such fields empty.

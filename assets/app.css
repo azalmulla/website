@@ -842,3 +842,6 @@ dialog::backdrop{background:var(--scrim)}
 .ag-tracks .chip{cursor:pointer}
 .ag-tracks .chip b{font-variant-numeric:tabular-nums;opacity:.7;margin-inline-start:4px}
 .ag-tracks .chip.on{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
+#toast[popover]{inset:auto auto calc(24px + env(safe-area-inset-bottom,0px)) 50%;margin:0;border:0;overflow:visible}
+.need{animation:need .5s;border-color:#E5484D!important;box-shadow:0 0 0 3px rgba(229,72,77,.2)!important}
+@keyframes need{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
