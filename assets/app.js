@@ -153,7 +153,7 @@ function migrate(local, remote) {
   (local.meetings || []).forEach((m) => { if (!have.has(m.id) && (m.items || []).length && !haveKey.has(key(m))) remote.meetings.push(m); });
   ['launches', 'ideas'].forEach((k) => { if ((local[k] || []).length) remote[k] = local[k].map((x) => { const r = (remote[k] || []).find((y) => y.id === x.id); if (r) ['bg', 'avatars', 'logos', 'logosTop', 'mark', 'order'].forEach((f) => { if (x[f] === undefined && r[f] !== undefined) x[f] = r[f]; }); return x; }); });
   if (local.deck) remote.deck = local.deck;
-  if (local.assignments && remote.assignments) { const st = new Map(local.assignments.groups.flatMap((g) => g.items.map((i) => [i.id, i.status]))); remote.assignments.groups.forEach((g) => g.items.forEach((i) => { if (st.has(i.id)) i.status = st.get(i.id); })); }
+  if (local.assignments && remote.assignments) { const st = new Map(local.assignments.groups.flatMap((g) => g.items.map((i) => [i.id, i.status]))); remote.assignments.groups.forEach((g) => g.items.forEach((i) => { if (st.has(i.id)) i.status = st.get(i.id); })); local.assignments.groups.forEach((lg) => { const r = remote.assignments.groups.find((x) => x.id === lg.id); if (r && lg.track !== undefined) r.track = lg.track; }); }
   const lev = new Map((local.events || []).map((e) => [e.id, e]));
   (remote.events || []).forEach((e) => { const o = lev.get(e.id); if (o && (o.photos || []).length) e.photos = o.photos; });
   const rids = new Set((remote.events || []).map((e) => e.id));
@@ -175,6 +175,7 @@ async function load() {
   else state = remote;
   if (!state) state = { schema: SCHEMA, updatedAt: '', project: {}, stages: [], meetings: [] };
   if (!state.assignments && remote && remote.assignments) state.assignments = remote.assignments;
+  else if (state.assignments && remote && remote.assignments) state.assignments.groups.forEach((g) => { const r = remote.assignments.groups.find((x) => x.id === g.id); if (r && r.track && g.track === undefined) g.track = r.track; });
   state.meetings ||= []; state.stages ||= []; state.project ||= {}; state.launches ||= []; state.ideas ||= []; state.events ||= [];
   state.events.forEach((e) => { e.photos ||= []; });
   state.meetings.forEach((m) => (m.items ||= []).forEach((it) => { if (it.status !== 'done') it.status = 'pending'; }));
@@ -352,7 +353,7 @@ function assignSection() {
     <div class="asg-top"><h2 class="asg-title">تكليفـــــــات المشـــــاريـــــع</h2><div class="asg-tools">${asgTools()}</div></div>
     <div class="asg-head"><span>قائد المشروع</span><span>المشروع</span><span>تاريخ البدء والانتهاء</span><span>حالة المشروع</span></div>
     ${A.groups.map((g) => `<div class="asg-card">
-      <img class="asg-av" data-photo="${esc(g.avatar)}" alt="">
+      <button class="asg-avb" data-act="a-track" data-g="${g.id}" title="${g.track ? esc(g.track) + ' · ' : ''}ربط القائد بمسار"><img class="asg-av" data-photo="${esc(g.avatar)}" alt="">${g.track ? `<small>${esc(g.track.replace(/^مسار\s+/, ''))}</small>` : ''}</button>
       <div class="asg-rows">${g.items.map((i) => `<div class="asg-row">
         <b class="asg-t">${bd(i.title)}</b>
         <span class="asg-d">${esc(i.dates)}</span>
@@ -1782,7 +1783,7 @@ function briefingText(s) {
 
 const AG_SUGGEST = ['ما الذي يجب أن أركّز عليه هذا الأسبوع؟', 'ما وضع إطلاقات نوفمبر؟', 'جهّز ملخصاً للقيادة عن وضع المشروع', 'أضف فكرة مشروع وصدّر قالبها'];
 
-const AG_STEP = { get_project_status: 'قرأ حالة المشروع', get_pending_items: 'راجع التوجيهات', mark_items_done: 'حدّد بنوداً كمنجزة', add_item_note: 'أضاف ملاحظة', prepare_minutes_draft: 'جهّز المحضر', open_meeting: 'فتح الاجتماع', get_launches: 'راجع الإطلاقات', update_launch: 'حدّث إطلاقاً', list_ideas: 'راجع بنك الأفكار', add_idea: 'أضاف فكرة', export_project_template: 'جهّز القالب', prepare_committee_deck: 'جهّز عرض الاجتماع' };
+const AG_STEP = { export_followup_deck: 'جهّز عرض المتابعة', get_assignments: 'راجع تكليفات المشاريع', update_assignment_status: 'حدّث حالة مشروع', get_project_status: 'قرأ حالة المشروع', get_pending_items: 'راجع التوجيهات', mark_items_done: 'حدّد بنوداً كمنجزة', add_item_note: 'أضاف ملاحظة', prepare_minutes_draft: 'جهّز المحضر', open_meeting: 'فتح الاجتماع', get_launches: 'راجع الإطلاقات', update_launch: 'حدّث إطلاقاً', list_ideas: 'راجع بنك الأفكار', add_idea: 'أضاف فكرة', export_project_template: 'جهّز القالب', prepare_committee_deck: 'جهّز عرض الاجتماع' };
 function agentResult() {
   const k = ag.turns.length - 1; const t = ag.turns[k]; if (!t || t.role !== 'assistant') return '';
   const q = ag.turns[k - 1] ? ag.turns[k - 1].text : '';
@@ -1839,8 +1840,91 @@ function followupDraft(key) {
   const to = kind === 'track' ? id : COMMITTEES[m0.committee];
   const subject = kind === 'track' ? `متابعة التوجيهات المعلّقة – ${id}` : `متابعة توجيهات ${meetingLabel(m0)} – ${COMMITTEES[m0.committee]}`;
   const lines = items.slice(0, 15).map(({ i, m }, n) => `${n + 1}. ${i.topic.replace(/\.$/, '')}: ${i.directive}${kind === 'track' ? ` (${meetingLabel(m)})` : ''}`);
-  const body = ['السلام عليكم ورحمة الله وبركاته،', '', `تحية طيبة وبعد، نود متابعة التوجيهات المعلّقة الخاصة بـ${to}:`, '', ...lines, '', 'نأمل التكرم بتزويدنا بآخر المستجدات والموعد المتوقع للإنجاز.', '', 'وتفضلوا بقبول فائق الاحترام،', 'فريق مشروع الذكاء الاصطناعي المساعد'].join('\n');
+  const body = ['السلام عليكم ورحمة الله وبركاته،', '', `تحية طيبة وبعد، نود متابعة التوجيهات المعلّقة الخاصة بـ${to}:`, '', ...lines, '', 'مرفق عرض المتابعة بالتفاصيل، ونأمل التكرم بتزويدنا بآخر المستجدات والموعد المتوقع للإنجاز.', '', 'وتفضلوا بقبول فائق الاحترام،', 'فريق مشروع الذكاء الاصطناعي المساعد'].join('\n');
   return { key, title: subject, subject, text: body, n: items.length };
+}
+// Follow-up PowerPoint for a track (or a meeting): cover, pending directives, and the track's project assignments.
+const leadTitle = (track) => {
+  const t = trackList().find((x) => x.name === track); if (!t) return '';
+  const all = state.meetings.flatMap((m) => m.items.map((i) => i.owners)).join(' + ');
+  for (const n of t.leads) { const m = all.match(new RegExp(`((?:معالي|سعادة|د\\.)\\s*)?${n}`)); if (m) return m[0].trim(); }
+  return t.leads[0] || '';
+};
+const asgForTrack = (track) => (state.assignments?.groups || []).filter((g) => g.track === track).flatMap((g) => g.items.map((i) => ({ ...i, avatar: g.avatar })));
+async function urlData(url) { const b = await (await fetch(url)).blob(); return await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(b); }); }
+async function svgData(url, w, h) {
+  const img = new Image(); img.src = url; await img.decode();
+  const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); return c.toDataURL('image/png');
+}
+async function buildFollowupDeck(key) {
+  const [kind, id] = [key.slice(0, key.indexOf(':')), key.slice(key.indexOf(':') + 1)];
+  const pend = projectSnapshot().pending;
+  const items = kind === 'track' ? pend.filter(({ i }) => tracksOfItem(i).includes(id)) : pend.filter(({ m }) => m.id === id);
+  const m0 = kind === 'meeting' ? findMeeting(id) : null;
+  const tasks = kind === 'track' ? asgForTrack(id) : [];
+  const PptxGenJS = await loadPptxGen(); const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE'; pptx.rtlMode = true; pptx.title = kind === 'track' ? `متابعة ${id}` : `متابعة ${meetingLabel(m0)}`;
+  const W = 13.333, H = 7.5, F = 'Dubai', T = { fontFace: F, rtlMode: true, lang: 'ar-AE', margin: 0 };
+  let bg = null, logo = null; try { bg = await urlData(state.assignments?.bg || 'assets/assign/bg.jpg'); } catch {} try { logo = await svgData('assets/logo-mono.svg', 1038, 359); } catch {}
+  const base = (title, sub) => {
+    const s = pptx.addSlide(); s.background = bg ? { data: bg } : { color: '0A1C4A' };
+    if (logo) s.addImage({ data: logo, x: 0.45, y: 0.32, w: 1.75, h: 0.6 });
+    s.addText(title, { ...T, x: 2.6, y: 0.3, w: W - 3.1, h: 0.75, fontSize: 30, bold: true, color: 'FFFFFF', align: 'right', valign: 'middle' });
+    if (sub) s.addText(sub, { ...T, x: 2.6, y: 1.02, w: W - 3.1, h: 0.4, fontSize: 14, color: 'C9D6E3', align: 'right', valign: 'middle' });
+    return s;
+  };
+  const who = kind === 'track' ? leadTitle(id) : COMMITTEES[m0.committee];
+  // cover
+  const c = pptx.addSlide(); c.background = bg ? { data: bg } : { color: '0A1C4A' };
+  if (logo) c.addImage({ data: logo, x: 0.6, y: 0.5, w: 2.6, h: 0.9 });
+  c.addText(kind === 'track' ? `متابعة ${id}` : `متابعة ${meetingLabel(m0)}`, { ...T, x: 0.8, y: 1.75, w: W - 1.6, h: 1.55, fontSize: 38, bold: true, color: 'FFFFFF', align: 'right', valign: 'bottom', fit: 'shrink' });
+  if (who) c.addText(who, { ...T, x: 0.8, y: 3.45, w: W - 1.6, h: 0.6, fontSize: 22, color: 'C9D6E3', align: 'right' });
+  c.addText('التوجيهات المعلّقة من محاضر الاجتماعات' + (kind === 'track' ? ' وتكليفات المشاريع' : ''), { ...T, x: 0.8, y: 4.05, w: W - 1.6, h: 0.5, fontSize: 18, color: 'FFFFFF', align: 'right' });
+  const chips = [[items.length, 'توجيهاً معلّقاً'], ...(kind === 'track' ? [[tasks.length, 'مشروعاً']] : [])];
+  chips.forEach(([n, l], k) => c.addText(`${n} ${l}`, { ...T, x: W - 0.8 - 2.6 * (k + 1) - 0.2 * k, y: 4.9, w: 2.6, h: 0.55, fontSize: 16, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, rectRadius: 0.27, fill: { color: k ? '1E7F6E' : '0062FD' } }));
+  c.addText(new Intl.DateTimeFormat('ar-AE', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' }).format(new Date()), { ...T, x: 0.8, y: 6.6, w: 5, h: 0.4, fontSize: 13, color: 'C9D6E3', align: 'left' });
+  // pending directives, 4 per slide
+  const per = 4, pages = Math.max(1, Math.ceil(items.length / per));
+  for (let pg = 0; pg < pages; pg++) {
+    const s = base('التوجيهات المعلّقة', `من محاضر اجتماعات اللجنة الوطنية ولجنة الوزارة${pages > 1 ? ` · ${pg + 1} من ${pages}` : ''}`);
+    const chunk = items.slice(pg * per, pg * per + per);
+    if (!chunk.length) s.addText('لا توجد توجيهات معلّقة.', { ...T, x: 0.8, y: 3.2, w: W - 1.6, h: 0.6, fontSize: 20, color: 'C9D6E3', align: 'center' });
+    chunk.forEach(({ i, m }, r) => {
+      const y = 1.65 + r * 1.42, n = pg * per + r + 1;
+      s.addShape(pptx.ShapeType.roundRect, { x: 0.55, y, w: W - 1.1, h: 1.3, rectRadius: 0.12, fill: { color: '14284B', transparency: 25 }, line: { color: '8FB3CF', transparency: 45, width: 0.75 } });
+      s.addText(String(n), { ...T, x: W - 1.25, y: y + 0.38, w: 0.55, h: 0.55, fontSize: 15, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle', shape: pptx.ShapeType.ellipse, fill: { color: '0062FD' } });
+      s.addText(i.topic, { ...T, x: 3.3, y: y + 0.1, w: W - 4.75, h: 0.42, fontSize: 15, bold: true, color: 'FFFFFF', align: 'right', valign: 'middle', fit: 'shrink' });
+      s.addText(i.directive, { ...T, x: 3.3, y: y + 0.52, w: W - 4.75, h: 0.7, fontSize: 11.5, color: 'C9D6E3', align: 'right', valign: 'top', fit: 'shrink' });
+      s.addText(`${COMMITTEES[m.committee]}\n${meetingLabel(m)}${m.date ? ' · ' + fmtDate(m.date) : ''}${i.owners ? '\n' + i.owners : ''}`, { ...T, x: 0.75, y: y + 0.12, w: 2.4, h: 1.06, fontSize: 10, color: 'FFFFFF', align: 'right', valign: 'middle', fit: 'shrink', shape: pptx.ShapeType.roundRect, rectRadius: 0.08, fill: { color: 'FFFFFF', transparency: 88 }, margin: 0.06 });
+    });
+  }
+  // project assignments, like the «تكليفات المشاريع» slide
+  if (kind === 'track') {
+    const per2 = 6, pages2 = Math.max(1, Math.ceil(tasks.length / per2));
+    for (let pg = 0; pg < pages2; pg++) {
+      const s = base('تكليفات المشاريع', pages2 > 1 ? `${pg + 1} من ${pages2}` : '');
+      const hy = 1.6; [['المشروع', 6.3, 6.2], ['تاريخ البدء والانتهاء', 3.4, 2.8], ['حالة المشروع', 0.7, 2.6]].forEach(([t, x, w]) => s.addText(t, { ...T, x, y: hy, w, h: 0.35, fontSize: 12, bold: true, color: 'FFFFFF', align: t === 'المشروع' ? 'right' : 'center' }));
+      const chunk = tasks.slice(pg * per2, pg * per2 + per2);
+      if (!chunk.length) s.addText('لا توجد تكليفات مرتبطة بهذا المسار بعد.', { ...T, x: 0.8, y: 3.2, w: W - 1.6, h: 0.6, fontSize: 20, color: 'C9D6E3', align: 'center' });
+      chunk.forEach((a, r) => {
+        const y = 2.05 + r * 0.86, none = asgClass(a.status) === 'st-none';
+        s.addShape(pptx.ShapeType.roundRect, { x: 0.55, y, w: W - 1.1, h: 0.76, rectRadius: 0.12, fill: { color: '14284B', transparency: 25 }, line: { color: '8FB3CF', transparency: 45, width: 0.75 } });
+        s.addText(a.title, { ...T, x: 6.3, y: y + 0.08, w: 6.2, h: 0.6, fontSize: 15, bold: true, color: 'FFFFFF', align: 'right', valign: 'middle', fit: 'shrink' });
+        s.addText(a.dates, { ...T, x: 3.4, y: y + 0.08, w: 2.8, h: 0.6, fontSize: 13, color: 'C9D6E3', align: 'center', valign: 'middle' });
+        s.addText(a.status, { ...T, x: 0.75, y: y + 0.2, w: 2.4, h: 0.36, fontSize: 11, bold: true, color: none ? 'C9D6E3' : 'FFFFFF', align: 'center', valign: 'middle', fit: 'shrink', shape: pptx.ShapeType.roundRect, rectRadius: 0.18, fill: none ? { color: 'FFFFFF', transparency: 100 } : { color: '1E7F6E' }, line: none ? { color: '8FB3CF', width: 0.75 } : { type: 'none' } });
+      });
+    }
+  }
+  return pptx.write({ outputType: 'blob' });
+}
+async function downloadFollowupDeck(key, btn) {
+  const label = btn ? btn.innerHTML : ''; if (btn) { btn.disabled = true; btn.textContent = 'جارٍ إعداد العرض…'; }
+  try {
+    const blob = await buildFollowupDeck(key); const id = key.slice(key.indexOf(':') + 1);
+    const t = trackList().findIndex((x) => x.name === id);
+    await saveFile(blob, `Follow-up-${t >= 0 ? 'Track-' + (t + 1) : id}-${todayStr()}.pptx`);
+  } catch (e) { console.error(e); toast('تعذّر إعداد العرض'); }
+  finally { if (btn) { btn.disabled = false; btn.innerHTML = label; } }
 }
 const trackCounts = () => { const p = projectSnapshot().pending; return trackList().map((t) => [t.name, p.filter(({ i }) => tracksOfItem(i).includes(t.name)).length]); };
 // Refresh the home page's figures (KPIs, pending counts, follow-up draft) without a full re-render.
@@ -1864,7 +1948,8 @@ function agentLocal() {
     ${d.key.startsWith('track:') ? `<div class="ag-tracks" role="group" aria-label="المسار">${trackCounts().map(([t, n]) => `<button class="chip ${d.key === 'track:' + t ? 'on' : ''}" data-act="ag-follow" data-k="${esc('track:' + t)}">${esc(t.replace(/^مسار\s+/, ''))} <b>${n}</b></button>`).join('')}</div>` : ''}
     <textarea id="agLocalText" rows="9" dir="rtl">${esc(d.text)}</textarea>
     <div class="ag-acts">
-      <button class="btn primary sm" data-act="ag-mail">${ICON.mail} فتح في البريد</button>
+      <button class="btn primary sm" data-act="ag-fdeck" data-k="${esc(d.key)}">${ICON.deck} عرض PowerPoint للمتابعة</button>
+      <button class="btn sm" data-act="ag-mail">${ICON.mail} فتح في البريد</button>
       <button class="btn sm" data-act="ag-local-copy">نسخ</button>
       <button class="btn sm" data-act="ag-speak" data-src="local">${ICON.speaker} استمع</button>
       ${engine() ? '<button class="btn sm" data-act="ag-refine">حسّنها مع Claude</button>' : ''}
@@ -1924,8 +2009,12 @@ function speak(text) {
 function localIntent(q) {
   const s = projectSnapshot();
   const words = q.split(/\s+/).map((w) => w.replace(/^(ل|و|ب)?(ل)?/, '')).filter((w) => w.length > 3);
-  const score = (t) => (t.leads.some((n) => q.includes(n)) ? 9 : 0) + t.name.replace(/^مسار\s+/, '').split(/\s+/).filter((w) => w.length > 3 && words.some((x) => x === w || x === w.replace(/^ال/, '') || ('ال' + x) === w || x.includes(w))).length;
+  const score = (t) => (t.leads.some((n) => q.includes(n) || n.split(' ').some((w) => w.length > 2 && q.includes(w))) ? 9 : 0) + t.name.replace(/^مسار\s+/, '').split(/\s+/).filter((w) => w.length > 3 && words.some((x) => x === w || x === w.replace(/^ال/, '') || ('ال' + x) === w || x.includes(w))).length;
   const tr = trackList().map((t) => [t, score(t)]).filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1])[0]?.[0];
+  if (/عرض|باوربوينت|بوربوينت|بور بوينت|ppt|شرائح|سلايد/i.test(q) && (tr || /متابع/.test(q))) {
+    const t = tr ? tr.name : s.topTrack && s.topTrack[0];
+    if (t) return () => { openFollowup('track:' + t); setTimeout(() => downloadFollowupDeck('track:' + t, $('[data-act=ag-fdeck]')), 60); };
+  }
   if (/متابع/.test(q)) {
     if (tr) return () => openFollowup('track:' + tr.name);
     if (s.topTrack) return () => openFollowup('track:' + s.topTrack[0]);
@@ -1979,8 +2068,9 @@ function fmtAgent(t) {
 function actionCard(a, k, j) {
   if (a.type === 'done') return `<div class="act-card ok">${ICON.check}<span>${a.undone ? 'تم التراجع عن' : 'تم تحديد'} ${a.ids.length} ${a.ids.length === 1 ? 'توجيه' : 'توجيهات'} ${a.undone ? '' : 'كمنجزة'}: ${esc(a.label)}</span>${a.undone ? '' : `<button class="link" data-act="ag-undo" data-k="${k}" data-j="${j}">تراجع</button>`}</div>`;
   if (a.type === 'note') return `<div class="act-card">${ICON.note}<span>أُضيفت ملاحظة على «${esc(a.label)}»</span></div>`;
-  if (a.type === 'launch') return `<div class="act-card ok">${ICON.check}<span>${esc(a.label)}</span><button class="link" data-act="ag-goto" data-view="launches">الإطلاقات</button></div>`;
+  if (a.type === 'launch') return `<div class="act-card ok">${ICON.check}<span>${esc(a.label)}</span></div>`;
   if (a.type === 'export') return `<div class="act-card">${ICON.doc}<span>قالب المشروع «${esc(a.label)}» جاهز</span><button class="btn sm primary" data-act="ag-export" data-id="${a.id}">تنزيل القالب</button></div>`;
+  if (a.type === 'deck') return `<div class="act-card">${ICON.deck}<span>عرض المتابعة «${esc(a.label)}» جاهز${a.n != null ? ` · ${a.n} توجيهاً${a.t ? ` و${a.t} مشروعاً` : ''}` : ''}</span><button class="btn sm primary" data-act="ag-fdeck" data-k="${esc(a.key)}">تنزيل العرض</button></div>`;
   if (a.type === 'open') return `<div class="act-card">${ICON.doc}<span>${esc(a.label)}</span><button class="btn sm" data-act="ag-open" data-k="${k}" data-j="${j}">افتح</button></div>`;
   return '';
 }
@@ -1990,6 +2080,24 @@ function findItemsByIds(ids) {
   const want = new Set((ids || []).map(String)); const out = [];
   state.meetings.forEach((m) => m.items.forEach((i) => { if (want.has(i.id)) out.push({ i, m }); }));
   return out;
+}
+// Offer the most relevant tools for the request, within the platform's per-call limit.
+function pickTools(turns, max) {
+  if (!max || AG_TOOLS.length <= max) return AG_TOOLS;
+  const q = (Array.isArray(turns) ? turns.filter((t) => t.role === 'user').slice(-2).map((t) => typeof t.content === 'string' ? t.content : '').join(' ') : String(turns || '')).slice(-1500);
+  const boost = [
+    [/عرض|باوربوينت|بوربوينت|ppt|شرائح|سلايد|متابع|مسار|عمر|تكليف/i, ['export_followup_deck', 'get_assignments', 'prepare_followup']],
+    [/تكليف|مشروع|مشاريع|حالة/, ['get_assignments', 'update_assignment_status']],
+    [/إطلاق|اطلاق|إعلان/, ['get_launches', 'update_launch']],
+    [/فكر|مقترح|بنك|قالب/, ['list_ideas', 'add_idea', 'export_project_template']],
+    [/محضر|محاضر|ملاحظات|صياغة/, ['prepare_minutes_draft', 'open_meeting']],
+    [/اللجنة الوطنية|اجتماع/, ['prepare_committee_deck', 'open_meeting']],
+    [/منجز|أنجز|علّم|علم|تم /, ['mark_items_done', 'add_item_note']],
+  ];
+  const base = ['get_project_status', 'get_pending_items', 'export_followup_deck', 'prepare_followup', 'get_assignments', 'mark_items_done', 'add_item_note', 'prepare_minutes_draft', 'prepare_committee_deck', 'update_assignment_status', 'get_launches', 'list_ideas', 'open_meeting', 'update_launch', 'add_idea', 'export_project_template'];
+  const score = Object.fromEntries(base.map((n, i) => [n, base.length - i]));
+  boost.forEach(([re, names]) => { if (re.test(q)) names.forEach((n) => { score[n] = (score[n] || 0) + 100; }); });
+  return [...AG_TOOLS].sort((a, b) => (score[b.name] || 0) - (score[a.name] || 0)).slice(0, max);
 }
 const AG_TOOLS = [
   {
@@ -2112,6 +2220,37 @@ const AG_TOOLS = [
     },
   },
   {
+    name: 'export_followup_deck',
+    description: 'Prepares a follow-up PowerPoint for one track (track name, e.g. "مسار تقنيات الذكاء الاصطناعي والبيانات", or a lead\'s name such as "عمر العلماء") or one meeting (meeting_id). The deck has a cover addressed to the track lead, the pending directives from the minutes, and the track\'s project assignments (تكليفات المشاريع) with their statuses. Gives the user a download button and also prepares the follow-up email draft. Use this whenever the user wants a presentation, slides or a PPT for follow-up.',
+    schema: { type: 'object', properties: { track: { type: 'string' }, meeting_id: { type: 'string' } }, additionalProperties: false },
+    run(inp, acts) {
+      let key = '';
+      if (inp.meeting_id && findMeeting(inp.meeting_id)) key = 'meeting:' + inp.meeting_id;
+      else if (inp.track) { const q = String(inp.track).replace(/^مسار\s+/, ''); const t = trackList().find((x) => x.name.includes(q) || x.leads.some((n) => q.includes(n) || n.includes(q))); if (t) key = 'track:' + t.name; }
+      if (!key) throw new Error('unknown track or meeting; tracks: ' + trackList().map((t) => t.name).join(', '));
+      ag.local = followupDraft(key);
+      const id = key.slice(key.indexOf(':') + 1); const tasks = key.startsWith('track:') ? asgForTrack(id).length : 0;
+      acts.push({ type: 'deck', key, label: key.startsWith('track:') ? id : meetingLabel(findMeeting(id)), n: ag.local.n, t: tasks });
+      return { ok: true, pending_items: ag.local.n, project_assignments: tasks, lead: key.startsWith('track:') ? leadTitle(id) : undefined, note: 'The user downloads the deck with the button and can email it with the prepared draft (attach the file).' };
+    },
+  },
+  {
+    name: 'get_assignments',
+    description: 'Lists the project assignments board (تكليفات المشاريع): each project id, title, dates, status and the linked track (if the leader is linked to a track). Optional filter: track.',
+    schema: { type: 'object', properties: { track: { type: 'string' } }, additionalProperties: false },
+    run(inp) { const q = String(inp.track || '').replace(/^مسار\s+/, ''); return (state.assignments?.groups || []).filter((g) => !q || (g.track || '').includes(q)).flatMap((g) => g.items.map((i) => ({ id: i.id, title: i.title, dates: i.dates, status: i.status, track: g.track || null }))); },
+  },
+  {
+    name: 'update_assignment_status',
+    description: 'Changes the status of one project on the assignments board. Common statuses: «لم يتم البدء بعد», «قيد التطوير», «تم الانتهاء – في مرحلة الاعتماد», «تم الإنجاز» (custom text allowed). Only when the user asks.',
+    schema: { type: 'object', properties: { id: { type: 'string' }, status: { type: 'string' } }, required: ['id', 'status'], additionalProperties: false },
+    run(inp, acts) {
+      const g = (state.assignments?.groups || []).find((x) => x.items.some((i) => i.id === inp.id)); if (!g) throw new Error('No project with that id');
+      const it = g.items.find((i) => i.id === inp.id); aSnap(); it.status = String(inp.status).slice(0, 80); commit('', true);
+      acts.push({ type: 'launch', label: `${it.title}: ${it.status}` }); return { ok: true };
+    },
+  },
+  {
     name: 'prepare_followup',
     description: 'Builds a ready follow-up message for the pending directives of one track (track name, e.g. "مسار الخدمات الحكومية") or one meeting (meeting_id), and shows it to the user as a card with Email, Copy and Listen buttons. Prefer this over writing a follow-up message in your reply.',
     schema: { type: 'object', properties: { track: { type: 'string' }, meeting_id: { type: 'string' } }, additionalProperties: false },
@@ -2157,7 +2296,7 @@ function persistQuiet() {
   if (ghOn()) { clearTimeout(saveTimer); saveTimer = setTimeout(() => ghSave().then(() => setSync('ok', 'تمت المزامنة ✓')).catch(() => setSync('err', 'تعذّرت المزامنة')), 1200); }
 }
 
-const AG_SYSTEM = `أجب باختصار شديد (جملة أو جملتان)، وفضّل تنفيذ المطلوب بالأدوات التي تعطي المستخدم أزراراً وبطاقات جاهزة (مثل prepare_followup وprepare_minutes_draft وprepare_committee_deck وexport_project_template) بدلاً من الشرح النصي الطويل.\n\nأنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
+const AG_SYSTEM = `قدراتك في هذه الصفحة (استخدمها ولا تقل إنك لا تستطيع ما دامت هناك أداة تغطيه): قراءة حالة المشروع والتوجيهات المعلّقة وتحديدها كمنجزة وإضافة ملاحظات، وإعداد رسائل المتابعة، وإعداد عرض PowerPoint للمتابعة لأي مسار أو اجتماع يشمل التوجيهات المعلّقة وتكليفات المشاريع (export_followup_deck)، وقراءة تكليفات المشاريع وتحديث حالاتها، وإعداد المحاضر وعرض اللجنة الوطنية، والإطلاقات، وبنك الأفكار وقالب المشروع. لا يمكنك إرسال البريد بنفسك: جهّز الملف والمسودة وأخبر المستخدم بإرفاق الملف. إن لم تغطِّ أي أداة الطلب فنفّذ أقرب ما يمكن وقل بوضوح ما الذي يستطيع المستخدم فعله.\n\nأجب باختصار شديد (جملة أو جملتان)، وفضّل تنفيذ المطلوب بالأدوات التي تعطي المستخدم أزراراً وبطاقات جاهزة (مثل prepare_followup وprepare_minutes_draft وprepare_committee_deck وexport_project_template) بدلاً من الشرح النصي الطويل.\n\nأنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
 
 - اكتب بالعربية الفصحى بأسلوب حكومي واضح ومختصر، واستخدم قوائم قصيرة عند الحاجة.
 - اعتمد على الأدوات للاطلاع على البيانات الفعلية قبل الإجابة عن المراحل أو التوجيهات أو المحاضر، ولا تخمّن أرقاماً أو أسماء.
@@ -2216,7 +2355,7 @@ async function agentRunSample(signal, onText, acts) {
   try {
     const { text } = await cap.sample(turns, {
       signal, onText: ({ text }) => onText(text),
-      ...(lim && lim.tools ? { tools: AG_TOOLS.map((t) => ({ name: t.name, description: t.description, inputSchema: t.schema, execute: (input) => runTool(t, input || {}, acts) })) } : { cache: false }),
+      ...(lim && lim.tools ? { tools: pickTools(turns, lim.tools.maxCount).map((t) => ({ name: t.name, description: t.description, inputSchema: t.schema, execute: (input) => runTool(t, input || {}, acts) })) } : { cache: false }),
     });
     return text;
   } catch (e) {
@@ -2498,6 +2637,12 @@ app.addEventListener('click', (e) => {
       break;
     }
     case 'l-status': case 'a-status': break;
+    case 'a-track': {
+      const g = state.assignments.groups.find((x) => x.id === ds.g); if (!g) break;
+      openModal({ title: 'ربط القائد بمسار', body: field('المسار', sel('track', Object.fromEntries([['', '— بدون —'], ...trackList().map((x) => [x.name, x.name])]), g.track || '')) + '<small style="color:var(--muted)">تُضاف مشاريع هذا القائد إلى عرض المتابعة الخاص بالمسار.</small>',
+        onSave(d) { aSnap(); g.track = d.track || ''; commit('تم ربط القائد بالمسار', true); asgRefresh(); } });
+      break;
+    }
     case 'a-undo': { const prev = aHist.pop(); if (prev) { state.assignments = JSON.parse(prev); commit('تم التراجع عن آخر تغيير', true); asgRefresh(); } break; }
     case 'a-reset': {
       if (!ui.aresetArm) { ui.aresetArm = true; asgToolsSync(); clearTimeout(ui.aresetT); ui.aresetT = setTimeout(() => { ui.aresetArm = false; asgToolsSync(); }, 5000); break; }
@@ -2535,6 +2680,7 @@ app.addEventListener('click', (e) => {
     case 'ag-follow': openFollowup(ds.k); break;
     case 'ag-deck': case 'ag-lpptx': runAction(ds.act); break;
     case 'ag-idea': ideaModal(); break;
+    case 'ag-fdeck': downloadFollowupDeck(ds.k, t); break;
     case 'ag-local-close': ag.local = null; render(); break;
     case 'ag-local-copy': navigator.clipboard.writeText($('#agLocalText').value).then(() => toast('تم النسخ'), () => toast('تعذّر النسخ')); break;
     case 'ag-mail': { const d = ag.local; const body = $('#agLocalText').value; location.href = `mailto:?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(body)}`; break; }
