@@ -785,7 +785,6 @@ dialog::backdrop{background:var(--scrim)}
 .agent.big{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:40px 28px 30px}
 .agent.big>.engine{position:absolute;top:16px;inset-inline-start:18px}
 .ag-icon{position:relative;width:124px;height:124px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer;isolation:isolate}
-.ag-icon::before{content:"";position:absolute;inset:-16px;z-index:-1;border-radius:50%;background:#FFFFFF;box-shadow:0 10px 30px -12px rgba(16,40,110,.25)}
 .ag-icon img{display:block;width:100%;height:100%;object-fit:contain;animation:agspin 28s linear infinite;transition:transform .3s}
 .ag-icon:hover img{transform:scale(1.05)}
 .ag-icon:focus-visible{outline:3px solid var(--accent);outline-offset:6px}
