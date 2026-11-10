@@ -964,3 +964,11 @@ dialog::backdrop{background:var(--scrim)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .nc-logo,:root:not([data-theme="light"]) .nc-banner img{background:#FFFFFF;border-radius:10px;padding:4px 8px}}
 :root[data-theme="dark"] .nc-logo,:root[data-theme="dark"] .nc-banner img{background:#FFFFFF;border-radius:10px;padding:4px 8px}
 @media (max-width:640px){.nc-logo{height:32px}.nc-banner img{height:48px}}
+.nc-banner{align-items:center;gap:14px}
+.nc-name{font-family:var(--font-heading);font-weight:700;font-size:17px;color:var(--gold-fg);border-inline-start:1px solid var(--line);padding-inline-start:12px;white-space:nowrap}
+.nc-banner .nc-name{font-size:20px}
+.nc-logo[src*="ministry"]{height:38px}
+.nc-banner img[src*="ministry"]{height:60px}
+@media (max-width:640px){.nc-logo[src*="ministry"]{height:28px}.nc-banner img[src*="ministry"]{height:40px}.nc-name{font-size:14px}}
+.nc-banner{flex-wrap:wrap;max-width:100%}
+.nc-banner img{max-width:100%;object-fit:contain}
