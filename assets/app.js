@@ -292,12 +292,64 @@ function viewDashboard() {
 // Project assignments board (from the «تكليفات المشاريع» slides), with a status dropdown per project.
 const ASG_ST = ['لم يتم البدء بعد', 'قيد التطوير', 'تم الانتهاء – في مرحلة الاعتماد', 'تم الإنجاز'];
 const asgClass = (st) => st === 'لم يتم البدء بعد' ? 'st-none' : /تم الإنجاز/.test(st) ? 'st-done' : 'st-on';
+const aHist = [];
+const aSnap = () => { aHist.push(JSON.stringify(state.assignments)); if (aHist.length > 30) aHist.shift(); };
+function asgTools() {
+  return `<button class="btn sm a3-reset" data-act="a-pptx" title="تصدير بنفس تصميم العرض">⇩ PowerPoint</button>
+    <button class="btn sm a3-reset" data-act="a-undo" ${aHist.length ? '' : 'disabled'}>↶ تراجع${aHist.length ? ` (${aHist.length})` : ''}</button>
+    <button class="btn sm a3-reset ${ui.aresetArm ? 'armed' : ''}" data-act="a-reset" title="إعادة الحالات كما في العرض الأصلي">${ui.aresetArm ? 'تأكيد إعادة الضبط' : '↺ إعادة الضبط'}</button>
+    <button class="btn sm a3-add" data-act="a-save">${ICON.check} حفظ</button>`;
+}
+const asgToolsSync = () => { const t = $('.asg-tools'); if (t) t.innerHTML = asgTools(); };
+function asgRefresh() { const a = $('.asg'); if (!a) return; const d = document.createElement('div'); d.innerHTML = assignSection(); const n = d.firstElementChild; a.replaceWith(n); hydratePhotos(n); }
+
+// Export: fills the original «تكليفات المشاريع» PowerPoint, changing only each project's status pill.
+async function loadAssignTemplate() {
+  if (!window.AAI_ASSIGN_TEMPLATE) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'assets/templates/assignments-template.js'; s.onload = res; s.onerror = () => rej(new Error('template')); document.head.appendChild(s); });
+  return Uint8Array.from(atob(window.AAI_ASSIGN_TEMPLATE), (c) => c.charCodeAt(0));
+}
+async function buildAssignPptx() {
+  const JSZip = await loadJSZip();
+  const zip = await JSZip.loadAsync(await loadAssignTemplate());
+  const A = 'http://schemas.openxmlformats.org/drawingml/2006/main', P = 'http://schemas.openxmlformats.org/presentationml/2006/main';
+  const items = state.assignments.groups.flatMap((g) => g.items); let k = 0;
+  const kids = (el, name) => [...el.childNodes].filter((n) => n.localName === name);
+  for (let n = 1; zip.file(`ppt/slides/slide${n}.xml`); n++) {
+    const path = `ppt/slides/slide${n}.xml`;
+    const doc = new DOMParser().parseFromString(await zip.file(path).async('string'), 'application/xml');
+    const el = (name, attrs = {}, ...ch) => { const e = doc.createElementNS(A, 'a:' + name); Object.entries(attrs).forEach(([a, v]) => e.setAttribute(a, v)); ch.forEach((c) => e.appendChild(c)); return e; };
+    const pills = [...doc.getElementsByTagNameNS(P, 'sp')].map((sp) => {
+      const g = sp.getElementsByTagNameNS(A, 'prstGeom')[0], xf = sp.getElementsByTagNameNS(A, 'xfrm')[0], off = xf && kids(xf, 'off')[0], ext = xf && kids(xf, 'ext')[0];
+      return g && off && ext && g.getAttribute('prst') === 'roundRect' && +off.getAttribute('x') < 2e6 && +ext.getAttribute('cx') < 5e6 ? { sp, y: +off.getAttribute('y') } : null;
+    }).filter(Boolean).sort((a, b) => a.y - b.y);
+    for (const { sp } of pills) {
+      const it = items[k++]; if (!it) break;
+      const none = asgClass(it.status) === 'st-none';
+      const spPr = sp.getElementsByTagNameNS(P, 'spPr')[0];
+      [...spPr.childNodes].filter((c) => ['solidFill', 'noFill', 'gradFill', 'ln'].includes(c.localName)).forEach((c) => c.remove());
+      const geom = kids(spPr, 'prstGeom')[0];
+      const fill = none ? el('noFill') : el('solidFill', {}, el('srgbClr', { val: '1E7F6E' }));
+      const ln = none ? el('ln', { w: '9525' }, el('solidFill', {}, el('srgbClr', { val: '8FB3CF' }))) : el('ln', {}, el('noFill'));
+      geom.after(fill, ln);
+      const runs = [...sp.getElementsByTagNameNS(A, 'r')]; if (!runs.length) continue;
+      const keep = runs[0], para = keep.parentNode;
+      runs.slice(1).forEach((r) => r.remove());
+      [...sp.getElementsByTagNameNS(A, 'p')].forEach((p) => { if (p !== para) p.remove(); });
+      keep.getElementsByTagNameNS(A, 't')[0].textContent = it.status;
+      const rPr = kids(keep, 'rPr')[0];
+      if (rPr) { const sf = kids(rPr, 'solidFill')[0]; const c = sf && kids(sf, 'srgbClr')[0]; if (c) c.setAttribute('val', none ? 'C9D6E3' : 'FFFFFF'); }
+    }
+    zip.file(path, new XMLSerializer().serializeToString(doc));
+  }
+  return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+}
+
 function assignSection() {
   const A = state.assignments; if (!A || !(A.groups || []).length) return '';
   const all = [...new Set([...ASG_ST, ...A.groups.flatMap((g) => g.items.map((i) => i.status))])];
   return `<section class="asg" aria-label="تكليفات المشاريع">
     ${A.bg ? `<img class="asg-bg" data-photo="${esc(A.bg)}" alt="">` : ''}
-    <h2 class="asg-title">تكليفـــــــات المشـــــاريـــــع</h2>
+    <div class="asg-top"><h2 class="asg-title">تكليفـــــــات المشـــــاريـــــع</h2><div class="asg-tools">${asgTools()}</div></div>
     <div class="asg-head"><span>قائد المشروع</span><span>المشروع</span><span>تاريخ البدء والانتهاء</span><span>حالة المشروع</span></div>
     ${A.groups.map((g) => `<div class="asg-card">
       <img class="asg-av" data-photo="${esc(g.avatar)}" alt="">
@@ -1331,7 +1383,7 @@ function eventModal(e) {
 }
 
 /* ---------------- ideas & projects bank ---------------- */
-const IST = { idea: 'فكرة', study: 'قيد الدراسة', approved: 'معتمد', active: 'قيد التنفيذ', done: 'مكتمل' };
+const IST = { idea: 'مقترح', study: 'قيد الدراسة', approved: 'معتمد', active: 'قيد التنفيذ', done: 'مكتمل' };
 const ITYPE = { idea: 'فكرة', project: 'مشروع' };
 function viewIdeas() {
   const f = ui.if || 'all';
@@ -1339,14 +1391,14 @@ function viewIdeas() {
   return `
   <div class="page-head">
     <div><h1>بنك الأفكار والمشاريع</h1><p>سجّل الأفكار والمشاريع، تابع حالتها، وصدّر أي مشروع بقالب «Project Template» المعتمد.</p></div>
-    <button class="btn primary" data-act="i-add">+ فكرة أو مشروع</button>
+    <button class="btn primary" data-act="i-add">+ مشروع جديد</button>
   </div>
   <div class="l-tools"><div class="seg">${[['all', 'الكل'], ...Object.entries(IST)].map(([k, v]) => `<button class="${f === k ? 'on' : ''}" data-act="i-filter" data-f="${k}">${v} ${k === 'all' ? state.ideas.length : state.ideas.filter((x) => x.status === k).length}</button>`).join('')}</div></div>
   ${list.length ? `<div class="idea-grid">${list.map((x) => `
     <article class="idea">
       <div class="idea-img">${x.image ? `<img data-photo="${esc(x.image)}" alt="">` : `<span>${ICON.spark}</span>`}</div>
       <div class="idea-body">
-        <div class="idea-tags"><span class="chip">${ITYPE[x.type] || 'فكرة'}</span><span class="lpill is-${x.status}">${IST[x.status] || ''}</span></div>
+        <div class="idea-tags"><span class="lpill is-${x.status}">${IST[x.status] || ''}</span></div>
         <h3>${esc(x.name)}</h3>${x.name_en ? `<div class="idea-en" dir="ltr">${esc(x.name_en)}</div>` : ''}
         ${x.what ? `<p>${esc(x.what)}</p>` : ''}
         <div class="idea-meta">${x.owner ? `<span>${esc(x.owner)}</span>` : ''}${x.start ? `<span>${fmtDate(x.start)}${x.end ? ' – ' + fmtDate(x.end) : ''}</span>` : ''}</div>
@@ -1367,24 +1419,24 @@ async function aiJSON(prompt) {
 
 function ideaModal(x) {
   const isNew = !x;
-  x ||= { type: 'idea', status: 'idea', name: '', outputs: ['', '', ''] };
+  x ||= { type: 'project', status: 'idea', name: '', outputs: ['', '', ''] };
   const o = x.outputs || [];
   let newImage = null;
   openModal({
-    title: isNew ? 'فكرة أو مشروع جديد' : 'تعديل',
+    title: isNew ? 'مشروع جديد' : 'تعديل المشروع',
     body: `
-      ${engine() ? `<div class="ai-fill"><textarea id="ai-brief" rows="2" placeholder="صف الفكرة في جملة أو جملتين، وسيملأ Claude الحقول…"></textarea><button type="button" class="btn sm primary" id="aiFillBtn">${ICON.spark} املأ بالمساعد</button></div>` : ''}
-      <div class="row2">${field('النوع', sel('type', ITYPE, x.type))}${field('الحالة', sel('status', IST, x.status))}</div>
+      ${engine() ? `<div class="ai-fill"><textarea id="ai-brief" rows="2" placeholder="صف المشروع في جملة أو جملتين، وسيملأ Claude الحقول…"></textarea><button type="button" class="btn sm primary" id="aiFillBtn">${ICON.spark} املأ بالمساعد</button></div>` : ''}
+      ${field('الحالة', sel('status', IST, x.status))}
       <div class="row2">${field('اسم المشروع', inp('name', x.name, 'required'))}${field('Project Name', inp('name_en', x.name_en || '', 'dir="ltr"'))}</div>
       ${field('ما هو؟', area('what', x.what || '', 'rows="3"'))}
       <div class="field"><label>أهم المخرجات</label><div class="outs">${[0, 1, 2].map((i) => `<input name="out${i}" id="f-out${i}" value="${esc(o[i] || '')}" placeholder="المخرج ${i + 1}">`).join('')}</div></div>
       <div class="row2">${field('تاريخ البدء', inp('start', x.start || '', 'type="date"'))}${field('تاريخ الانتهاء', inp('end', x.end || '', 'type="date"'))}</div>
-      ${field('الجهة المسؤولة', inp('owner', x.owner || ''))}
+      ${field('الجهة المسؤولة', inp('owner', x.owner || '', 'list="ownerList" placeholder="اختر مساراً أو الأمانة العامة، أو اكتب جهة أخرى"') + `<datalist id="ownerList">${[...trackList().map((t) => t.name), 'الأمانة العامة للجنة الوطنية للذكاء الاصطناعي المساعد'].map((v) => `<option value="${esc(v)}">`).join('')}</datalist>`)}
       <div class="field"><label>الصورة التعبيرية</label><div class="img-pick">${x.image ? `<img data-photo="${esc(x.image)}" alt="" id="ideaImgPrev">` : '<img alt="" id="ideaImgPrev" hidden>'}<label class="btn sm" for="ideaImg">اختر صورة</label><input type="file" id="ideaImg" accept="image/*" hidden><small>تظهر في الجانب الأيمن من شريحة القالب</small></div></div>
       ${field('ملاحظات', area('notes', x.notes || '', 'rows="2"'))}`,
     del: isNew ? null : () => { state.ideas = state.ideas.filter((y) => y.id !== x.id); commit('تم الحذف'); },
     onSave(d) {
-      Object.assign(x, { type: d.type, status: d.status, name: d.name, name_en: d.name_en, what: d.what, outputs: [d.out0, d.out1, d.out2], start: d.start, end: d.end, owner: d.owner, notes: d.notes, updated: new Date().toISOString() });
+      Object.assign(x, { type: 'project', status: d.status, name: d.name, name_en: d.name_en, what: d.what, outputs: [d.out0, d.out1, d.out2], start: d.start, end: d.end, owner: d.owner, notes: d.notes, updated: new Date().toISOString() });
       const finish = () => { if (isNew) { x.id = uid('i'); state.ideas.push(x); } commit(isNew ? 'أُضيف إلى بنك الأفكار' : 'تم الحفظ'); };
       if (newImage) { savePhoto(newImage).then((src) => { x.image = src; finish(); }).catch(() => { toast('تعذّر حفظ الصورة'); finish(); }); return; }
       finish();
@@ -2043,7 +2095,7 @@ const AG_TOOLS = [
     description: 'Adds an idea or project to the ideas bank with the project-card fields (Arabic name, English name, what it is, up to three outputs, start and end dates, responsible entity). Write formal Arabic; leave unknown fields empty rather than inventing figures or entities.',
     schema: { type: 'object', properties: { type: { type: 'string', enum: ['idea', 'project'] }, name: { type: 'string' }, name_en: { type: 'string' }, what: { type: 'string' }, outputs: { type: 'array', items: { type: 'string' } }, start: { type: 'string' }, end: { type: 'string' }, owner: { type: 'string' } }, required: ['name'], additionalProperties: false },
     run(inp, acts) {
-      const x = { id: uid('i'), type: inp.type === 'project' ? 'project' : 'idea', status: 'idea', name: String(inp.name).slice(0, 120), name_en: String(inp.name_en || ''), what: String(inp.what || ''), outputs: (Array.isArray(inp.outputs) ? inp.outputs : []).slice(0, 3).map(String), owner: String(inp.owner || ''), updated: new Date().toISOString() };
+      const x = { id: uid('i'), type: 'project', status: 'idea', name: String(inp.name).slice(0, 120), name_en: String(inp.name_en || ''), what: String(inp.what || ''), outputs: (Array.isArray(inp.outputs) ? inp.outputs : []).slice(0, 3).map(String), owner: String(inp.owner || ''), updated: new Date().toISOString() };
       if (/^\d{4}-\d{2}-\d{2}$/.test(inp.start || '')) x.start = inp.start; if (/^\d{4}-\d{2}-\d{2}$/.test(inp.end || '')) x.end = inp.end;
       state.ideas.push(x);
       acts.push({ type: 'export', id: x.id, label: x.name });
@@ -2446,6 +2498,19 @@ app.addEventListener('click', (e) => {
       break;
     }
     case 'l-status': case 'a-status': break;
+    case 'a-undo': { const prev = aHist.pop(); if (prev) { state.assignments = JSON.parse(prev); commit('تم التراجع عن آخر تغيير', true); asgRefresh(); } break; }
+    case 'a-reset': {
+      if (!ui.aresetArm) { ui.aresetArm = true; asgToolsSync(); clearTimeout(ui.aresetT); ui.aresetT = setTimeout(() => { ui.aresetArm = false; asgToolsSync(); }, 5000); break; }
+      ui.aresetArm = false;
+      fetchJSON(DATA_PATH).then((d) => { if (!d.assignments) throw new Error('no data'); aSnap(); state.assignments = d.assignments; commit('أُعيدت الحالات كما في العرض الأصلي', true); asgRefresh(); }).catch(() => toast('تعذّرت إعادة الضبط'));
+      break;
+    }
+    case 'a-save': commit('تم حفظ حالات المشاريع ✓', true); { const b = t; b.classList.add('saved'); setTimeout(() => b.classList.remove('saved'), 1500); } break;
+    case 'a-pptx': {
+      const label = t.textContent; t.disabled = true; t.textContent = 'جارٍ التصدير…';
+      buildAssignPptx().then((blob) => saveFile(blob, `Project-Assignments-${todayStr()}.pptx`)).catch((e) => { console.error(e); toast('تعذّر التصدير'); }).finally(() => { t.disabled = false; t.textContent = label; });
+      break;
+    }
     case 'l-pptx': exportLaunchesPptx(t); break;
     case 'l-edit': launchModal(state.launches.find((l) => l.id === ds.id)); break;
     case 'l-undo': { const prev = lHist.pop(); if (prev) { state.launches = JSON.parse(prev); commit('تم التراجع عن آخر تغيير'); } break; }
@@ -2518,7 +2583,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ws.menu)
 app.addEventListener('change', (e) => {
   if (e.target.dataset.act === 'a-status') {
     const g = (state.assignments.groups || []).find((x) => x.id === e.target.dataset.g); const it = g && g.items.find((x) => x.id === e.target.dataset.i);
-    if (it) { it.status = e.target.value; e.target.parentElement.className = 'asg-st ' + asgClass(it.status); commit(`${it.title}: ${it.status}`, true); }
+    if (it) { aSnap(); it.status = e.target.value; e.target.parentElement.className = 'asg-st ' + asgClass(it.status); commit(`${it.title}: ${it.status}`, true); asgToolsSync(); }
     return;
   }
   if (e.target.dataset.act === 'l-status') {

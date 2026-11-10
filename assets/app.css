@@ -881,3 +881,8 @@ dialog::backdrop{background:var(--scrim)}
   .asg-d{text-align:start}
   .asg-title{font-size:26px}
 }
+.asg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.asg-top .asg-title{margin-bottom:6px}
+.asg-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:6px}
+.asg-tools .ico{width:15px;height:15px}
+.asg-tools .saved{background:#1E7F6E;border-color:#1E7F6E}
