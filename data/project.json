@@ -1,6 +1,6 @@
 {
- "schema": 5,
- "updatedAt": "2026-11-09T15:00:00Z",
+ "schema": 6,
+ "updatedAt": "2026-11-10T06:00:00Z",
  "project": {
   "name": "مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات",
   "announced": "2026-04-23",
@@ -1132,42 +1132,75 @@
    "title": "مختبر تطبيق الذكاء الاصطناعي في الخدمات الحكومية",
    "month": "2026-10",
    "status": "announced",
-   "note": "تم الإعلان"
+   "note": "تم الإعلان",
+   "order": -2,
+   "bg": "assets/launches/bg-image14.jpg",
+   "avatars": [
+    "assets/launches/av-image15.jpg"
+   ]
   },
   {
    "id": "l2",
    "title": "التحدي الحكومي السنوي 2026",
    "month": "2026-10",
    "status": "announced",
-   "note": "تم الإعلان"
+   "note": "تم الإعلان",
+   "order": 18,
+   "bg": "assets/launches/bg-image19.jpg",
+   "avatars": [
+    "assets/launches/av-image6.jpg"
+   ],
+   "logos": [
+    "assets/launches/logo-image20.png"
+   ]
   },
   {
    "id": "l3",
    "title": "مسرعات الذكاء الاصطناعي المساعد",
    "month": "2026-10",
    "status": "ready",
-   "note": "الخبر جاهز + لتحديد تاريخ الإعلان"
+   "note": "الخبر جاهز + لتحديد تاريخ الإعلان",
+   "order": 38,
+   "bg": "assets/launches/bg-image13.jpg",
+   "avatars": [
+    "assets/launches/av-image6.jpg"
+   ]
   },
   {
    "id": "l4",
    "title": "اتفاقيات الشراكات مع شركات التكنولوجيا للتدريب",
    "month": "2026-10",
    "status": "prep",
-   "note": "على هامش اجتماع مجلس الوزراء؟"
+   "note": "على هامش اجتماع مجلس الوزراء؟",
+   "order": 58,
+   "bg": "assets/launches/bg-image16.jpg",
+   "avatars": [
+    "assets/launches/av-image9.jpg"
+   ]
   },
   {
    "id": "l5",
    "title": "اتفاقيات منظومة المساعدين مع شركات التقنية",
    "month": "2026-10",
    "status": "prep",
-   "note": "على هامش اجتماع مجلس الوزراء؟"
+   "note": "على هامش اجتماع مجلس الوزراء؟",
+   "order": 77,
+   "bg": "assets/launches/bg-image17.jpg",
+   "avatars": [
+    "assets/launches/av-image18.jpg"
+   ]
   },
   {
    "id": "l6",
    "title": "تدريب 80% من موظفي الحكومة (64 ألف موظف)",
    "month": "2026-10",
    "status": "ready",
-   "note": "الخبر جاهز + لتحديد تاريخ الإعلان"
+   "note": "الخبر جاهز + لتحديد تاريخ الإعلان",
+   "order": 97,
+   "bg": "assets/launches/bg-image21.jpg",
+   "avatars": [
+    "assets/launches/av-image9.jpg"
+   ]
   },
   {
    "id": "l7",
@@ -1175,65 +1208,131 @@
    "month": "2026-11",
    "status": "scheduled",
    "date": "2026-11-11",
-   "note": "موعد الإطلاق 11 نوفمبر 2026"
+   "note": "موعد الإطلاق 11 نوفمبر 2026",
+   "order": 198,
+   "bg": "assets/launches/bg-image10.jpg",
+   "avatars": [],
+   "logos": [
+    "assets/launches/logo-image12.png",
+    "assets/launches/logo-image11.png"
+   ],
+   "logosTop": true
   },
   {
    "id": "l8",
    "title": "إطلاق 1.ae",
    "month": "2026-11",
    "status": "planned",
-   "group": "الفعالية الكبرى في نوفمبر: إطلاق 1.ae والدفعة الأولى من خدمات الـAgentic AI"
+   "group": "الفعالية الكبرى في نوفمبر: إطلاق 1.ae والدفعة الأولى من خدمات الـAgentic AI",
+   "order": 218,
+   "avatars": [
+    "assets/launches/av-image15.jpg"
+   ],
+   "mark": "1.ae"
   },
   {
    "id": "l9",
    "title": "الدفعة الأولى من الخدمات والباقات الحكومية",
    "month": "2026-11",
    "status": "planned",
-   "group": "الفعالية الكبرى في نوفمبر: إطلاق 1.ae والدفعة الأولى من خدمات الـAgentic AI"
+   "group": "الفعالية الكبرى في نوفمبر: إطلاق 1.ae والدفعة الأولى من خدمات الـAgentic AI",
+   "order": 237,
+   "bg": "assets/launches/bg-image24.jpg",
+   "avatars": [
+    "assets/launches/av-image15.jpg"
+   ]
   },
   {
    "id": "l10",
    "title": "مرسوم بقانون اتحادي للذكاء الاصطناعي المساعد",
    "month": "2026-11",
    "status": "ready",
-   "note": "جاهز + للاعتماد"
+   "note": "جاهز + للاعتماد",
+   "order": 258,
+   "bg": "assets/launches/bg-image25.jpg",
+   "avatars": [
+    "assets/launches/av-image3.jpg"
+   ]
   },
   {
    "id": "l11",
    "title": "فعالية إطلاق منظومة الذكاء التشريعي",
    "month": "2026-11",
-   "status": "planned"
+   "status": "planned",
+   "order": 277,
+   "bg": "assets/launches/bg-image2.jpg",
+   "avatars": [
+    "assets/launches/av-image3.jpg"
+   ],
+   "logos": [
+    "assets/launches/logo-image4.png"
+   ]
   },
   {
    "id": "l12",
    "title": "فعالية إطلاق منصة شاهين",
    "month": "2026-11",
-   "status": "planned"
+   "status": "planned",
+   "order": 297,
+   "bg": "assets/launches/bg-image5.jpg",
+   "avatars": [
+    "assets/launches/av-image6.jpg"
+   ],
+   "logos": [
+    "assets/launches/logo-image7.png"
+   ]
   },
   {
    "id": "l13",
    "title": "المعيار الوطني لتقييم جاهزية مساعدي الذكاء الاصطناعي",
    "month": "2026-11",
-   "status": "planned"
+   "status": "planned",
+   "order": 398,
+   "bg": "assets/launches/bg-image22.jpg",
+   "avatars": [],
+   "logos": [
+    "assets/launches/logo-image12.png",
+    "assets/launches/logo-image11.png"
+   ],
+   "logosTop": true
   },
   {
    "id": "l14",
    "title": "تحول استقطاب وتوظيف المواهب الحكومية",
    "month": "2026-11",
-   "status": "planned"
+   "status": "planned",
+   "order": 418,
+   "bg": "assets/launches/bg-image8.jpg",
+   "avatars": [
+    "assets/launches/av-image9.jpg",
+    "assets/launches/av-image3.jpg"
+   ]
   },
   {
    "id": "l15",
    "title": "إطلاق الدفعة الثانية من الخدمات والباقات",
    "month": "2026-12",
-   "status": "planned"
+   "status": "planned",
+   "order": 438,
+   "bg": "assets/launches/bg-image22.jpg",
+   "avatars": [
+    "assets/launches/av-image15.jpg"
+   ]
   },
   {
    "id": "l16",
    "title": "إطار دولي لقياس الأثر مع WEF",
    "month": null,
    "status": "planned",
-   "note": "للتحديد"
+   "note": "للتحديد",
+   "order": 458,
+   "bg": "assets/launches/bg-image23.jpg",
+   "avatars": [],
+   "logos": [
+    "assets/launches/logo-image12.png",
+    "assets/launches/logo-image11.png"
+   ],
+   "logosTop": true
   }
  ],
  "ideas": [],
@@ -1647,5 +1746,8 @@
    "inProgress": "1",
    "eligible": "16"
   }
+ },
+ "launchBoard": {
+  "bg": "assets/launches/board-bg.jpg"
  }
 }

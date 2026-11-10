@@ -7,7 +7,7 @@
 'use strict';
 
 const TZ = 'Asia/Dubai';
-const SCHEMA = 5;
+const SCHEMA = 6;
 const LS_STATE = 'aai.state.v1';
 const LS_GH = 'aai.github.v1';
 const LS_UI = 'aai.ui.v2';
@@ -145,7 +145,7 @@ function migrate(local, remote) {
   }));
   const have = new Set(remote.meetings.map((m) => m.id)), haveKey = new Set(remote.meetings.filter((m) => m.items.length).map(key));
   (local.meetings || []).forEach((m) => { if (!have.has(m.id) && (m.items || []).length && !haveKey.has(key(m))) remote.meetings.push(m); });
-  ['launches', 'ideas'].forEach((k) => { if ((local[k] || []).length) remote[k] = local[k]; });
+  ['launches', 'ideas'].forEach((k) => { if ((local[k] || []).length) remote[k] = local[k].map((x) => { const r = (remote[k] || []).find((y) => y.id === x.id); if (r) ['bg', 'avatars', 'logos', 'logosTop', 'mark', 'order'].forEach((f) => { if (x[f] === undefined && r[f] !== undefined) x[f] = r[f]; }); return x; }); });
   if (local.deck) remote.deck = local.deck;
   const lev = new Map((local.events || []).map((e) => [e.id, e]));
   (remote.events || []).forEach((e) => { const o = lev.get(e.id); if (o && (o.photos || []).length) e.photos = o.photos; });
@@ -1092,52 +1092,56 @@ const thisYM = () => todayStr().slice(0, 7);
 const isOverdue = (l) => l.status !== 'announced' && ((l.date && l.date < todayStr()) || (!l.date && l.month && l.month < thisYM()));
 const lWhen = (l) => l.date ? fmtDate(l.date) : l.month ? fmtYM(l.month + '-01') : 'للتحديد';
 
+// the launches page is drawn like the A3 launches calendar slide
+const A3_NOTE = (l) => l.status === 'announced' ? '✓ تم الإعلان' : (l.note || (l.date ? `موعد الإطلاق ${fmtDate(l.date)}` : l.status === 'planned' ? '' : LSTN[l.status]));
 function launchCard(l) {
   const nx = lNext(l.status);
-  return `<article class="lc ls-${l.status} ${isOverdue(l) ? 'late' : ''}">
-    <div class="lc-top"><span class="lpill ls-${l.status}">${LSTN[l.status] || l.status}</span>${isOverdue(l) ? '<span class="chip late-chip">متأخر</span>' : ''}
-      <button class="icon-btn sm" data-act="l-edit" data-id="${l.id}" aria-label="تعديل">${ICON.edit}</button></div>
+  const month = l.month ? MONTHS[+l.month.slice(5, 7) - 1] : 'للتحديد';
+  const logos = (l.logos || []).map((g) => `<img data-photo="${esc(g)}" alt="">`).join('');
+  const note = A3_NOTE(l);
+  return `<article class="a3c st-${l.status} ${isOverdue(l) ? 'late' : ''}" data-act="l-edit" data-id="${l.id}" tabindex="0">
+    ${l.bg ? `<img class="a3c-bg" data-photo="${esc(l.bg)}" alt="">` : ''}${l.mark ? `<span class="a3c-mark" dir="ltr">${esc(l.mark)}</span>` : ''}
+    <div class="a3c-top">
+      <span class="a3c-who">${(l.avatars || []).map((a) => `<img data-photo="${esc(a)}" alt="">`).join('')}${l.logosTop ? `<span class="a3c-logos top">${logos}</span>` : ''}</span>
+      ${isOverdue(l) ? '<span class="a3c-late">متأخر</span>' : ''}<span class="a3c-month">${month}</span>
+    </div>
     <h3>${bd(l.title)}</h3>
-    ${l.group ? `<div class="lc-group">${bd(l.group)}</div>` : ''}
-    ${l.note ? `<p class="lc-note">${bd(l.note)}</p>` : ''}
-    <div class="lc-steps" aria-label="مراحل الإطلاق">${LST.map(([k], i) => `<i class="${i <= LST.findIndex(([x]) => x === l.status) ? 'on' : ''}"></i>`).join('')}</div>
-    <div class="lc-foot"><span>${lWhen(l)}${l.owner ? ` · ${esc(l.owner)}` : ''}</span>
-      ${nx ? `<button class="link" data-act="l-next" data-id="${l.id}">${LSTN[nx]} ←</button>` : '<span class="ok-t">مكتمل</span>'}</div>
+    ${!l.logosTop && logos ? `<span class="a3c-logos">${logos}</span>` : ''}
+    ${note ? `<div class="a3c-note">${bd(note)}</div>` : ''}
+    ${nx ? `<button class="a3c-next" data-act="l-next" data-id="${l.id}" title="نقل إلى: ${LSTN[nx]}">${LSTN[nx]} ←</button>` : ''}
   </article>`;
 }
 
 function viewLaunches() {
-  const L = state.launches;
-  const f = ui.lf || 'all';
-  const shown = L.filter((l) => f === 'all' || (f === 'late' ? isOverdue(l) : l.status === f));
+  const L = [...state.launches].sort((a, b) => (a.order ?? 9e9) - (b.order ?? 9e9) || (a.month || '9').localeCompare(b.month || '9'));
   const done = L.filter((l) => l.status === 'announced').length;
-  const late = L.filter(isOverdue).length;
-  const byMonth = ui.lview !== 'status';
-  let cols;
-  if (byMonth) {
-    const months = [...new Set(shown.map((l) => l.month || ''))].sort((a, b) => (a || '9999').localeCompare(b || '9999'));
-    cols = months.map((m) => ({ h: m ? fmtYM(m + '-01') : 'للتحديد', items: shown.filter((l) => (l.month || '') === m).sort((a, b) => LST.findIndex(([k]) => k === b.status) - LST.findIndex(([k]) => k === a.status)) }));
-  } else cols = LST.map(([k, v]) => ({ h: v, cls: 'ls-' + k, items: shown.filter((l) => l.status === k) }));
+  const tiles = [];
+  L.forEach((l) => {
+    const last = tiles[tiles.length - 1];
+    if (l.group && last && last.group === l.group) last.items.push(l);
+    else tiles.push(l.group ? { group: l.group, items: [l] } : { item: l });
+  });
+  const bg = state.launchBoard && state.launchBoard.bg;
   return `
-  <div class="page-head">
-    <div><h1>الإطلاقات والإعلانات</h1><p>تقويم إطلاقات المشروع ومتابعة كل إطلاق حتى الإعلان.</p></div>
-    <button class="btn primary" data-act="l-add">+ إضافة إطلاق</button>
-  </div>
-  <section class="card l-sum">
-    <div class="l-prog"><div class="prog-n"><b class="num">${done}</b> من ${L.length} تم الإعلان عنها</div><div class="bar"><i style="width:${L.length ? done / L.length * 100 : 0}%"></i></div></div>
-    <div class="l-filters">
-      <button class="chip lf ${f === 'all' ? 'on' : ''}" data-act="l-filter" data-f="all">الكل ${L.length}</button>
-      ${LST.map(([k, v]) => `<button class="chip lf ls-${k} ${f === k ? 'on' : ''}" data-act="l-filter" data-f="${k}"><span class="dot"></span>${v} ${L.filter((l) => l.status === k).length}</button>`).join('')}
-      ${late ? `<button class="chip lf late-chip ${f === 'late' ? 'on' : ''}" data-act="l-filter" data-f="late">متأخر ${late}</button>` : ''}
+  <section class="a3">
+    ${bg ? `<img class="a3-bg" data-photo="${esc(bg)}" alt="">` : ''}
+    <header class="a3-h">
+      <h1>تقويم الإطلاقات والإعلانات</h1>
+      <img class="a3-logo" src="assets/logo.svg" alt="مشروع الذكاء الاصطناعي المساعد">
+    </header>
+    <div class="a3-bar">
+      <span class="a3-prog"><b>${done}</b> من ${L.length} تم الإعلان<i style="--p:${L.length ? done / L.length * 100 : 0}%"></i></span>
+      <span class="a3-legend">${LST.map(([k, v]) => `<span class="lg st-${k}"><i></i>${v}</span>`).join('')}</span>
+      <button class="btn sm a3-add" data-act="l-add">+ إضافة</button>
+    </div>
+    <div class="a3-grid">${tiles.map((t) => t.item ? launchCard(t.item) : `
+      <div class="a3-group" style="--n:${t.items.length}">
+        <div class="a3-group-h">${bd(t.group)}</div>
+        <div class="a3-group-c">${t.items.map(launchCard).join('')}</div>
+      </div>`).join('')}
     </div>
   </section>
-  <div class="l-tools"><div class="seg"><button class="${byMonth ? 'on' : ''}" data-act="l-view" data-v="month">حسب الشهر</button><button class="${byMonth ? '' : 'on'}" data-act="l-view" data-v="status">حسب الحالة</button></div></div>
-  <div class="l-board">${cols.map((c) => `
-    <section class="l-col ${c.cls || ''}">
-      <h2>${c.h}<span class="count">${c.items.length}</span></h2>
-      ${c.items.map(launchCard).join('') || '<div class="empty">لا يوجد</div>'}
-    </section>`).join('')}
-  </div>`;
+  <p class="section-note">اضغط على أي بطاقة لتعديل حالتها وموعدها وملاحظتها، أو على زر المرحلة التالية أسفلها.</p>`;
 }
 
 function launchModal(l) {
@@ -1149,12 +1153,15 @@ function launchModal(l) {
       `<div class="row2">${field('الحالة', sel('status', LSTN, l.status))}${field('الشهر المستهدف', inp('month', l.month || '', 'type="month"'), 'اتركه فارغاً إن لم يُحدَّد')}</div>` +
       `<div class="row2">${field('تاريخ الإطلاق', inp('date', l.date || '', 'type="date"'), 'اختياري')}${field('الجهة / المسؤول', inp('owner', l.owner || ''))}</div>` +
       field('ملاحظة الحالة', inp('note', l.note || '', 'placeholder="مثال: الخبر جاهز + لتحديد تاريخ الإعلان"')) +
-      field('الفعالية / المجموعة', inp('group', l.group || ''), 'اختياري، مثل «الفعالية الكبرى في نوفمبر»'),
+      field('الفعالية / المجموعة', inp('group', l.group || ''), 'اختياري، مثل «الفعالية الكبرى في نوفمبر»') +
+      `<div class="field"><label>صورة البطاقة</label><div class="img-pick"><label class="btn sm" for="launchImg">اختر صورة</label><input type="file" id="launchImg" accept="image/*" hidden><small>تظهر خلفية للبطاقة</small></div></div>`,
     del: isNew ? null : () => { state.launches = state.launches.filter((x) => x.id !== l.id); commit('تم حذف الإطلاق'); },
     onSave(d) {
       Object.assign(l, { title: d.title, status: d.status, month: d.month || (d.date ? d.date.slice(0, 7) : null) });
       ['date', 'owner', 'note', 'group'].forEach((k) => { d[k] ? l[k] = d[k] : delete l[k]; });
-      if (isNew) { l.id = uid('l'); state.launches.push(l); }
+      if (isNew) { l.id = uid('l'); l.order = Math.max(0, ...state.launches.map((x) => x.order || 0)) + 1; state.launches.push(l); }
+      const img = $('#launchImg') && $('#launchImg').files[0];
+      if (img) { savePhoto(img).then((src) => { l.bg = src; commit('تم حفظ الإطلاق'); }).catch(() => commit('تم الحفظ، وتعذّر حفظ الصورة')); return; }
       commit(isNew ? 'تمت إضافة الإطلاق' : 'تم حفظ الإطلاق');
     },
   });
@@ -2205,6 +2212,7 @@ app.addEventListener('click', (e) => {
   }
 });
 app.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.matches && e.target.matches('.a3c')) { launchModal(state.launches.find((l) => l.id === e.target.dataset.id)); return; }
   if (e.target.id === 'ag-input' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); agentAsk(e.target.value); }
 });
 app.addEventListener('input', (e) => {
