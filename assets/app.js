@@ -1260,7 +1260,7 @@ async function exportLaunchesPptx(btn) {
     pptx.defineLayout({ name: 'BOARD', width: W, height: H }); pptx.layout = 'BOARD'; pptx.rtlMode = true;
     const slide = pptx.addSlide(); slide.background = { color: '0A1A4A' };
     const box = (el) => { const r = el.getBoundingClientRect(); return { x: (r.left - B.left) * k, y: (r.top - B.top) * k, w: r.width * k, h: r.height * k, r }; };
-    const font = 'Dubai', T = { fontFace: font, rtlMode: true, lang: 'ar-AE', margin: 0 };
+    const font = 'Sakkal Majalla', T = { fontFace: font, rtlMode: true, lang: 'ar-AE', margin: 0 };
     const bg = board.querySelector('.a3-bg'); const bgd = await imgData(bg, B.width, B.height);
     if (bgd) slide.addImage({ data: bgd, x: 0, y: 0, w: W, h: H });
     const h1 = box(board.querySelector('.a3-h h1'));
@@ -1899,7 +1899,7 @@ async function buildFollowupDeck(key) {
   const tasks = kind === 'track' ? asgForTrack(id) : [];
   const PptxGenJS = await loadPptxGen(); const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE'; pptx.rtlMode = true; pptx.title = kind === 'track' ? `متابعة ${id}` : `متابعة ${meetingLabel(m0)}`;
-  const W = 13.333, H = 7.5, F = 'Dubai', T = { fontFace: F, rtlMode: true, lang: 'ar-AE', margin: 0 };
+  const W = 13.333, H = 7.5, F = 'Sakkal Majalla', T = { fontFace: F, rtlMode: true, lang: 'ar-AE', margin: 0 };
   let bg = null, logo = null; try { bg = await urlData(state.assignments?.bg || 'assets/assign/bg.jpg'); } catch {} try { logo = await svgData('assets/logo-mono.svg', 1038, 359); } catch {}
   const base = (title, sub) => {
     const s = pptx.addSlide(); s.background = bg ? { data: bg } : { color: '0A1C4A' };
@@ -2626,6 +2626,14 @@ function settingsModal() {
   };
 }
 
+// Mark the page when Sakkal Majalla is installed (Windows / Office), so its small glyphs can be scaled up.
+(function detectSakkal() {
+  try {
+    const c = document.createElement('canvas').getContext('2d'); const t = 'مشروع الذكاء الاصطناعي abc';
+    c.font = '40px monospace'; const a = c.measureText(t).width; c.font = '40px "Sakkal Majalla", monospace';
+    if (Math.abs(c.measureText(t).width - a) > 1) document.documentElement.classList.add('sakkal');
+  } catch {}
+})();
 function applyTheme() {
   const t = ls.get('aai.theme');
   if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
