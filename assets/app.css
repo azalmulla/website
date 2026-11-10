@@ -890,3 +890,58 @@ dialog::backdrop{background:var(--scrim)}
 .asg-avb:hover{background:rgba(255,255,255,.08)}
 .asg-avb:hover .asg-av{box-shadow:0 0 0 2px #FFFFFF}
 .asg-avb small{font-size:10.5px;line-height:1.3;text-align:center;max-width:90px}
+
+/* ---------- agent: Claude-style chat ---------- */
+.agent.chat{display:flex;flex-direction:column;gap:12px;padding:16px 20px 18px;border-radius:20px;border:1px solid var(--line);background:var(--surface);box-shadow:0 14px 40px -28px rgba(16,40,110,.45);margin-bottom:20px}
+.chat-h{display:flex;align-items:center;gap:10px}
+.chat-name{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-heading);font-weight:700;font-size:16px}
+.chat-name img{width:26px;height:26px}
+.chat-h .engine{margin-inline-start:auto}
+.chat-new .ico{width:14px;height:14px}
+.agent.chat.empty{align-items:stretch}
+.chat-hello{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 0 4px;text-align:center}
+.chat-hello .ag-icon{width:96px;height:96px}
+.chat-hello .ag-title{font-size:26px;margin:4px 0 0}
+.chat-log{display:flex;flex-direction:column;gap:18px;max-height:min(62vh,640px);overflow-y:auto;padding:6px 4px 8px;scroll-behavior:smooth}
+.msg{display:flex;gap:12px;align-items:flex-start;animation:chipin .3s both}
+.msg.user{justify-content:flex-start}
+.msg.user .bubble{max-width:min(78%,720px);background:var(--surface-2);border:1px solid var(--line);border-radius:18px 18px 18px 6px;padding:10px 14px;white-space:pre-wrap;line-height:1.75;font-size:15px}
+.msg.user .bubble img{display:block;max-width:220px;max-height:160px;border-radius:10px;margin-bottom:6px}
+.msg-files{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.msg-files span{font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:2px 8px}
+.msg.ai{flex-direction:row}
+.msg-av{flex:0 0 auto;width:30px;height:30px;margin-top:2px}
+.msg.ai.busy .msg-av{animation:agspin 2.2s linear infinite}
+.msg-body{flex:1;min-width:0;display:grid;gap:8px}
+.msg-title{font-family:var(--font-heading);font-weight:700}
+.msg-body .ag-text{font-size:15px;line-height:1.85;max-height:none;-webkit-line-clamp:unset;overflow:visible}
+.msg-body .ag-text p{margin:0 0 6px}
+.msg-body .ag-text ul{margin:4px 0 8px;padding-inline-start:20px}
+.msg-tools{display:flex;gap:4px;opacity:.6;transition:opacity .2s}
+.msg:hover .msg-tools{opacity:1}
+.msg-tools .ico{width:15px;height:15px}
+.msg-body .ag-res.ag-local{box-shadow:none}
+.composer{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:22px;padding:10px 12px 8px;background:var(--surface);box-shadow:0 6px 22px -14px rgba(16,40,110,.35);transition:border-color .2s,box-shadow .2s}
+.composer:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.agent.chat.empty .composer{width:min(780px,100%);margin-inline:auto}
+.composer textarea{border:0;outline:none;resize:none;background:transparent;color:var(--fg);font:inherit;font-size:15.5px;line-height:1.7;min-height:28px;max-height:220px;padding:4px 6px}
+.composer-row{display:flex;align-items:center;gap:6px}
+.composer-row .spacer{flex:1}
+.composer-row .icon-btn{cursor:pointer}
+.composer-row .icon-btn .ico{width:19px;height:19px}
+.composer .mic{width:38px;height:38px}
+.composer .mic .ico{width:19px;height:19px}
+.send{display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:50%;background:var(--grad-diag);color:#FFFFFF;cursor:pointer;transition:transform .2s,opacity .2s}
+.send:hover{transform:scale(1.06)}
+.send .ico{width:19px;height:19px;stroke-width:2.4}
+.send.stop{background:var(--fg);font-size:13px}
+.att-row{display:flex;flex-wrap:wrap;gap:6px}
+.att{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:3px 6px;background:var(--surface-2);font-size:12px}
+.att img{width:30px;height:30px;object-fit:cover;border-radius:6px}
+.att button{border:0;background:none;cursor:pointer;color:var(--muted)}
+.starters{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:min(860px,100%);margin-inline:auto}
+.starter{border:1px solid var(--line);background:var(--surface);color:var(--fg-2);border-radius:999px;padding:7px 14px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:border-color .2s,color .2s,transform .2s}
+.starter:hover{border-color:var(--accent);color:var(--accent-fg);transform:translateY(-1px)}
+.chat-note{margin:0;text-align:center;font-size:12.5px;color:var(--muted)}
+.agent.chat.listening .composer{border-color:#E5484D}
+@media (max-width:640px){.agent.chat{padding:12px}.msg.user .bubble{max-width:88%}.chat-hello .ag-title{font-size:21px}}

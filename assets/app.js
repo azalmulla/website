@@ -205,7 +205,7 @@ function render() {
   document.querySelectorAll('.tabs a').forEach((a) => a.classList.toggle('active', a.dataset.tab === r));
   app.innerHTML = { minutes: viewMinutes, launches: viewLaunches, archive: viewArchive, ideas: viewIdeas, workspace: viewWorkspace }[r]?.() ?? viewDashboard();
   hydratePhotos(app);
-  if (r === 'dashboard') animateCounts();
+  if (r === 'dashboard') { animateCounts(); chatScroll(); }
   const on = $('.mcard.on'); if (on) on.parentElement.scrollLeft += on.getBoundingClientRect().left - on.parentElement.getBoundingClientRect().left - 8;
   tick();
 }
@@ -638,6 +638,8 @@ const TASKS = [
   { id: 'brief', icon: 'brief', t: 'ملخص تنفيذي', d: 'موجز للقيادات عن مستجدات المشروع', soon: true },
 ];
 Object.assign(ICON, {
+  clip: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg>',
+  send: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
   mic: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>',
   mail: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
   speaker: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
@@ -1784,17 +1786,31 @@ function briefingText(s) {
 const AG_SUGGEST = ['ما الذي يجب أن أركّز عليه هذا الأسبوع؟', 'ما وضع إطلاقات نوفمبر؟', 'جهّز ملخصاً للقيادة عن وضع المشروع', 'أضف فكرة مشروع وصدّر قالبها'];
 
 const AG_STEP = { export_followup_deck: 'جهّز عرض المتابعة', get_assignments: 'راجع تكليفات المشاريع', update_assignment_status: 'حدّث حالة مشروع', get_project_status: 'قرأ حالة المشروع', get_pending_items: 'راجع التوجيهات', mark_items_done: 'حدّد بنوداً كمنجزة', add_item_note: 'أضاف ملاحظة', prepare_minutes_draft: 'جهّز المحضر', open_meeting: 'فتح الاجتماع', get_launches: 'راجع الإطلاقات', update_launch: 'حدّث إطلاقاً', list_ideas: 'راجع بنك الأفكار', add_idea: 'أضاف فكرة', export_project_template: 'جهّز القالب', prepare_committee_deck: 'جهّز عرض الاجتماع' };
+function msgAI(t, k, live) {
+  const busy = live && ag.status === 'running';
+  const steps = t.steps || [];
+  return `<div class="msg ai ${busy ? 'busy' : ''}" ${live ? 'id="agRes"' : ''}>
+    <img class="msg-av" src="assets/agent-icon.png" alt="">
+    <div class="msg-body">
+      ${steps.length || busy ? `<div class="ag-steps">${steps.map((x) => `<span class="step-pill">${ICON.check}${esc(x)}</span>`).join('')}${busy ? `<span class="step-pill live"><span class="dots"><i></i><i></i><i></i></span>${t.text ? 'يكتب' : steps.length ? 'يعمل' : 'يفكّر'}</span>` : ''}</div>` : ''}
+      ${t.title ? `<div class="msg-title">${esc(t.title)}</div>` : ''}
+      ${t.text ? `<div class="ag-text">${fmtAgent(t.text)}</div>` : ''}
+      ${(t.actions || []).map((a, j) => actionCard(a, k, j)).join('')}
+      ${!busy && t.text ? `<div class="msg-tools"><button class="icon-btn sm" data-act="ag-copy" data-k="${k}" title="نسخ" aria-label="نسخ">⧉</button><button class="icon-btn sm" data-act="ag-speak" data-k="${k}" title="استمع" aria-label="استمع">${ICON.speaker}</button>${busy ? '' : ''}</div>` : ''}
+    </div>
+  </div>`;
+}
+function msgUser(t) {
+  return `<div class="msg user"><div class="bubble">${(t.images || []).map((u) => `<img src="${esc(u)}" alt="">`).join('')}${t.files && t.files.length ? `<div class="msg-files">${t.files.map((f) => `<span>📄 ${esc(f)}</span>`).join('')}</div>` : ''}${esc(t.text)}</div></div>`;
+}
 function agentResult() {
   const k = ag.turns.length - 1; const t = ag.turns[k]; if (!t || t.role !== 'assistant') return '';
-  const q = ag.turns[k - 1] ? ag.turns[k - 1].text : '';
-  const busy = ag.status === 'running';
-  return `<div class="ag-res ${busy ? 'busy' : ''} ${ag.more ? 'more' : ''}" id="agRes">
-    <div class="ag-q"><span>${esc(q)}</span>${busy ? '<button class="link" data-act="ag-stop">إيقاف</button>' : `<button class="icon-btn sm" data-act="ag-clear" aria-label="إغلاق">✕</button>`}</div>
-    <div class="ag-steps">${(t.steps || []).map((x) => `<span class="step-pill">${ICON.check}${esc(x)}</span>`).join('')}${busy ? `<span class="step-pill live"><span class="dots"><i></i><i></i><i></i></span>${t.text ? 'يكتب' : (t.steps || []).length ? 'يعمل' : 'يفكّر'}</span>` : ''}</div>
-    ${t.text ? `<div class="ag-text">${fmtAgent(t.text)}</div>` : ''}
-    ${(t.actions || []).map((a, j) => actionCard(a, k, j)).join('')}
-    ${!busy && t.text ? `<div class="ag-res-f"><button class="link" data-act="ag-more">${ag.more ? 'أقل' : 'عرض كامل الرد'}</button><button class="link" data-act="ag-copy" data-k="${k}">نسخ</button><button class="link" data-act="ag-speak" data-k="${k}">استمع</button><button class="link" data-act="ag-open-ask">طلب آخر</button></div>` : ''}
-  </div>`;
+  return msgAI(t, k, true);
+}
+function chatLog() {
+  const last = ag.turns.length - 1;
+  return ag.turns.map((t, k) => t.role === 'user' ? msgUser(t) : msgAI(t, k, k === last)).join('')
+    + (ag.local ? `<div class="msg ai"><img class="msg-av" src="assets/agent-icon.png" alt=""><div class="msg-body">${agentLocal()}</div></div>` : '');
 }
 // Direct actions: each tile does the job itself (draft, file, export, page), no chat needed.
 function agentActions(s) {
@@ -1810,26 +1826,45 @@ function agentTile(a, i) {
     : `<button class="atile" style="--i:${i}" data-act="${a.act}" ${a.k ? `data-k="${esc(a.k)}"` : ''} ${a.c ? `data-c="${a.c}"` : ''}>${inner}</button>`;
 }
 const canVoice = () => !!(cap.dictation || window.SpeechRecognition || window.webkitSpeechRecognition);
+const AG_STARTERS = [
+  { act: 'ag-follow-top', t: 'جهّز رسالة متابعة للمسارات' },
+  { act: 'ag-fdeck-top', t: 'عرض PowerPoint للمتابعة' },
+  { act: 'ag-ask', q: 'لخّص لي وضع المشروع اليوم وما الذي يحتاج انتباهي', t: 'لخّص وضع المشروع' },
+  { act: 'ag-deck', t: 'عرض الاجتماع القادم' },
+  { act: 'ag-idea', t: 'أضف فكرة مشروع' },
+];
 function agentPanel() {
-  const s = projectSnapshot();
   const eng = engine();
   const busy = ag.status === 'running';
+  const empty = !ag.turns.length && !ag.local;
+  const files = ag.files || [];
   return `
-  <section class="agent big ${busy ? 'busy' : ''} ${voice.on ? 'listening' : ''}" aria-label="المساعد">
-    <span class="engine ${eng ? 'on' : ''}">${eng === 'claude' ? 'Claude' : eng === 'api' ? 'Claude API' : 'بدون اتصال'}</span>
-    <button class="ag-icon" data-act="${canVoice() ? 'ag-voice' : 'ag-focus'}" aria-label="${canVoice() ? 'تحدّث إلى المساعد' : 'اسأل المساعد'}"><img src="assets/agent-icon.png" alt=""></button>
-    <h2 class="ag-title">${esc(greeting())}، كيف أساعدك اليوم؟</h2>
-    <p class="ag-sub" id="agSub">${voice.on ? 'أستمع إليك…' : 'اختر إجراءً، أو اكتب أو تحدّث بطلبك.'}</p>
-    <form class="ag-ask" onsubmit="return false">
-      <input id="ag-input" autocomplete="off" placeholder="أنا مساعدك، اكتب أو تحدّث.." value="${esc(ag.draft)}" aria-label="اطلب من المساعد">
-      ${canVoice() ? `<button type="button" class="mic ${voice.on ? 'on' : ''}" id="ag-mic" data-act="ag-voice" aria-label="${voice.on ? 'إيقاف الاستماع' : 'تحدّث'}" title="تحدّث">${ICON.mic}</button>` : ''}
-      <button type="button" class="btn primary" data-act="ag-send" ${busy ? 'disabled' : ''}>أرسل</button>
+  <section class="agent chat ${busy ? 'busy' : ''} ${voice.on ? 'listening' : ''} ${empty ? 'empty' : ''}" aria-label="المساعد">
+    <div class="chat-h">
+      <span class="chat-name"><img src="assets/agent-icon.png" alt="">المساعد</span>
+      <span class="engine ${eng ? 'on' : ''}">${eng === 'claude' ? 'Claude' : eng === 'api' ? 'Claude API' : 'بدون اتصال'}</span>
+      ${empty ? '' : `<button class="btn sm chat-new" data-act="ag-clear">${ICON.edit} محادثة جديدة</button>`}
+    </div>
+    ${empty ? `<div class="chat-hello">
+      <button class="ag-icon" data-act="${canVoice() ? 'ag-voice' : 'ag-focus'}" aria-label="${canVoice() ? 'تحدّث إلى المساعد' : 'اسأل المساعد'}"><img src="assets/agent-icon.png" alt=""></button>
+      <h2 class="ag-title">${esc(greeting())}، كيف أساعدك اليوم؟</h2>
+    </div>` : `<div class="chat-log" id="chatLog">${chatLog()}</div>`}
+    <form class="composer" onsubmit="return false">
+      ${files.length ? `<div class="att-row">${files.map((f, i) => `<span class="att">${f.url ? `<img src="${esc(f.url)}" alt="">` : '📄'}<small>${esc(f.name)}</small><button type="button" data-act="ag-unattach" data-i="${i}" aria-label="إزالة">✕</button></span>`).join('')}</div>` : ''}
+      <textarea id="ag-input" rows="1" autocomplete="off" placeholder="${voice.on ? 'أستمع إليك…' : 'أنا مساعدك، اكتب أو تحدّث..'}" aria-label="اكتب رسالتك">${esc(ag.draft)}</textarea>
+      <div class="composer-row">
+        <label class="icon-btn" for="agFile" title="إرفاق صورة أو ملف نصي" aria-label="إرفاق">${ICON.clip}</label>
+        <input type="file" id="agFile" accept="image/*,.txt,.md,.csv,.json" multiple hidden>
+        <span class="spacer"></span>
+        ${canVoice() ? `<button type="button" class="mic ${voice.on ? 'on' : ''}" id="ag-mic" data-act="ag-voice" aria-label="${voice.on ? 'إيقاف الاستماع' : 'تحدّث'}" title="تحدّث">${ICON.mic}</button>` : ''}
+        ${busy ? `<button type="button" class="send stop" data-act="ag-stop" aria-label="إيقاف">■</button>` : `<button type="button" class="send" data-act="ag-send" aria-label="أرسل">${ICON.send}</button>`}
+      </div>
     </form>
-    <div class="ag-tiles">${agentActions(s).map(agentTile).join('')}</div>
-    ${agentLocal()}
-    ${agentResult()}
+    ${empty ? `<div class="starters">${AG_STARTERS.map((x) => `<button class="starter" data-act="${x.act}" ${x.q ? `data-q="${esc(x.q)}"` : ''}>${esc(x.t)}</button>`).join('')}</div>` : ''}
+    ${eng ? '' : '<p class="chat-note">للأسئلة المفتوحة اربط Claude من <button class="link" data-act="open-settings">الإعدادات</button>. الأوامر مثل «رسالة متابعة» و«عرض بوربوينت لمعالي عمر» تعمل دائماً.</p>'}
   </section>`;
 }
+function chatScroll() { const l = $('#chatLog'); if (l) l.scrollTop = l.scrollHeight; }
 
 // follow-up drafts built from the tracker, ready to copy, email or listen to
 function followupDraft(key) {
@@ -2034,9 +2069,9 @@ function agentSubmit(q) {
   agentAsk(q);
 }
 function openFollowup(key) {
-  ag.local = followupDraft(key); ag.turns = []; ag.api = [];
+  ag.local = followupDraft(key);
   if (route() !== 'dashboard') location.hash = '#dashboard'; else render();
-  setTimeout(() => $('.ag-local')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 50);
+  setTimeout(chatScroll, 50);
 }
 function runAction(act, o = {}) {
   if (act === 'ag-minutes') { ws.task = 'minutes'; ws.committee = o.c || 'national'; seedMeetingFields(true); saveDraft(); location.hash = '#workspace'; }
@@ -2296,7 +2331,7 @@ function persistQuiet() {
   if (ghOn()) { clearTimeout(saveTimer); saveTimer = setTimeout(() => ghSave().then(() => setSync('ok', 'تمت المزامنة ✓')).catch(() => setSync('err', 'تعذّرت المزامنة')), 1200); }
 }
 
-const AG_SYSTEM = `قدراتك في هذه الصفحة (استخدمها ولا تقل إنك لا تستطيع ما دامت هناك أداة تغطيه): قراءة حالة المشروع والتوجيهات المعلّقة وتحديدها كمنجزة وإضافة ملاحظات، وإعداد رسائل المتابعة، وإعداد عرض PowerPoint للمتابعة لأي مسار أو اجتماع يشمل التوجيهات المعلّقة وتكليفات المشاريع (export_followup_deck)، وقراءة تكليفات المشاريع وتحديث حالاتها، وإعداد المحاضر وعرض اللجنة الوطنية، والإطلاقات، وبنك الأفكار وقالب المشروع. لا يمكنك إرسال البريد بنفسك: جهّز الملف والمسودة وأخبر المستخدم بإرفاق الملف. إن لم تغطِّ أي أداة الطلب فنفّذ أقرب ما يمكن وقل بوضوح ما الذي يستطيع المستخدم فعله.\n\nأجب باختصار شديد (جملة أو جملتان)، وفضّل تنفيذ المطلوب بالأدوات التي تعطي المستخدم أزراراً وبطاقات جاهزة (مثل prepare_followup وprepare_minutes_draft وprepare_committee_deck وexport_project_template) بدلاً من الشرح النصي الطويل.\n\nأنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
+const AG_SYSTEM = `قدراتك في هذه الصفحة (استخدمها ولا تقل إنك لا تستطيع ما دامت هناك أداة تغطيه): قراءة حالة المشروع والتوجيهات المعلّقة وتحديدها كمنجزة وإضافة ملاحظات، وإعداد رسائل المتابعة، وإعداد عرض PowerPoint للمتابعة لأي مسار أو اجتماع يشمل التوجيهات المعلّقة وتكليفات المشاريع (export_followup_deck)، وقراءة تكليفات المشاريع وتحديث حالاتها، وإعداد المحاضر وعرض اللجنة الوطنية، والإطلاقات، وبنك الأفكار وقالب المشروع. لا يمكنك إرسال البريد بنفسك: جهّز الملف والمسودة وأخبر المستخدم بإرفاق الملف. إن لم تغطِّ أي أداة الطلب فنفّذ أقرب ما يمكن وقل بوضوح ما الذي يستطيع المستخدم فعله.\n\nأنت أيضاً مساعد عام مثل Claude تماماً: أجب عن أي سؤال أو مهمة (كتابة، ترجمة، تحليل، تلخيص، أفكار، صياغة رسائل وتقارير، شرح الصور والملفات المرفقة، حسابات، برمجة) بنفسك مباشرة وبجودة عالية، واستخدم أدوات الصفحة عندما يتعلق الطلب ببيانات المشروع أو بتنفيذ إجراء. أجب بوضوح وبالقدر الذي يحتاجه السؤال، وفضّل تنفيذ المطلوب بالأدوات التي تعطي المستخدم أزراراً وبطاقات جاهزة (مثل prepare_followup وprepare_minutes_draft وprepare_committee_deck وexport_project_template) بدلاً من الشرح النصي الطويل.\n\nأنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
 
 - اكتب بالعربية الفصحى بأسلوب حكومي واضح ومختصر، واستخدم قوائم قصيرة عند الحاجة.
 - اعتمد على الأدوات للاطلاع على البيانات الفعلية قبل الإجابة عن المراحل أو التوجيهات أو المحاضر، ولا تخمّن أرقاماً أو أسماء.
@@ -2351,10 +2386,11 @@ async function agentRunSDK(signal, onText, acts) {
 async function agentRunSample(signal, onText, acts) {
   const lim = await cap.sample.limits().catch(() => null);
   const ctx = lim && lim.tools ? '' : `\n\nبيانات المشروع الحالية (JSON):\n${JSON.stringify({ status: AG_TOOLS[0].run(), pending: AG_TOOLS[1].run({}) }).slice(0, 60000)}`;
-  const turns = [{ role: 'user', content: AG_SYSTEM + ctx }, ...ag.turns.filter((t) => t.text).map((t) => ({ role: t.role === 'user' ? 'user' : 'assistant', content: t.text }))];
+  const turns = [{ role: 'user', content: AG_SYSTEM + ctx }, ...ag.turns.filter((t) => t.text).map((t) => ({ role: t.role === 'user' ? 'user' : 'assistant', content: t.send || (t.title ? t.title + '\n' + t.text : t.text) }))].reduce((a, m) => { if (a.length && a[a.length - 1].role === m.role) a[a.length - 1].content += '\n\n' + m.content; else a.push({ ...m }); return a; }, []);
   try {
     const { text } = await cap.sample(turns, {
       signal, onText: ({ text }) => onText(text),
+      ...(ag.pendingImages && ag.pendingImages.length && cap.sampleImages ? { images: ag.pendingImages } : {}),
       ...(lim && lim.tools ? { tools: pickTools(turns, lim.tools.maxCount).map((t) => ({ name: t.name, description: t.description, inputSchema: t.schema, execute: (input) => runTool(t, input || {}, acts) })) } : { cache: false }),
     });
     return text;
@@ -2366,7 +2402,7 @@ async function agentRunSample(signal, onText, acts) {
 }
 
 let agReply = null;
-function agLive() { const el = $('#agRes'); if (el) el.outerHTML = agentResult(); }
+function agLive() { const el = $('#agRes'); if (el) { el.outerHTML = agentResult(); chatScroll(); } }
 function runTool(tool, input, acts) {
   if (agReply) { (agReply.steps ||= []).push(AG_STEP[tool.name] || tool.name); agLive(); }
   return tool.run(input, acts);
@@ -2375,11 +2411,21 @@ async function agentAsk(q) {
   q = String(q || '').trim(); const eng = engine();
   if (!q || !eng || ag.status === 'running') return;
   if (route() !== 'dashboard') location.hash = '#dashboard';
-  ag.turns.push({ role: 'user', text: q });
+  if (ag.local) { ag.turns.push({ role: 'assistant', title: ag.local.title, text: ag.local.text }); ag.local = null; }
+  const files = ag.files || []; ag.files = [];
+  const imgs = files.filter((f) => f.blob && /^image\//.test(f.blob.type));
+  const texts = files.filter((f) => f.text != null);
+  const full = q + texts.map((f) => `\n\n--- الملف المرفق: ${f.name} ---\n${f.text.slice(0, 40000)}`).join('');
+  ag.turns.push({ role: 'user', text: q, send: full, images: imgs.map((f) => f.url), files: texts.map((f) => f.name) });
+  ag.pendingImages = imgs.map((f) => f.blob);
   const reply = { role: 'assistant', text: '', actions: [], steps: [] };
   agReply = reply;
   ag.turns.push(reply);
-  if (eng === 'api') ag.api.push({ role: 'user', content: q });
+  if (eng === 'api') {
+    const blocks = [];
+    for (const b of ag.pendingImages) { const d = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(b); }); blocks.push({ type: 'image', source: { type: 'base64', media_type: b.type, data: String(d).split(',')[1] } }); }
+    ag.api.push({ role: 'user', content: blocks.length ? [...blocks, { type: 'text', text: full }] : full });
+  }
   ag.draft = ''; ag.status = 'running'; ag.more = false; ag.open = false; ag.ctl = new AbortController();
   render();
   let last = 0;
@@ -2392,8 +2438,8 @@ async function agentAsk(q) {
     else reply.text = (reply.text ? reply.text + '\n\n' : '') + '⚠ ' + ((e && e.message) || 'حدث خطأ غير متوقع.');
     if (eng === 'api' && ag.api.length && ag.api[ag.api.length - 1].role === 'user' && typeof ag.api[ag.api.length - 1].content !== 'string') ag.api.pop();
   }
-  ag.status = 'idle'; ag.ctl = null; agReply = null;
-  render();
+  ag.status = 'idle'; ag.ctl = null; agReply = null; ag.pendingImages = [];
+  render(); $('#ag-input')?.focus({ preventScroll: true });
 }
 
 function typeBriefing() {
@@ -2677,6 +2723,9 @@ app.addEventListener('click', (e) => {
     case 'ag-ask': agentAsk(ds.q); break;
     case 'ag-send': agentSubmit($('#ag-input')?.value); break;
     case 'ag-voice': voiceToggle(); break;
+    case 'ag-follow-top': { const sn = projectSnapshot(); if (sn.topTrack) openFollowup('track:' + sn.topTrack[0]); break; }
+    case 'ag-fdeck-top': { const sn = projectSnapshot(); if (sn.topTrack) { openFollowup('track:' + sn.topTrack[0]); setTimeout(() => downloadFollowupDeck('track:' + sn.topTrack[0], $('[data-act=ag-fdeck]')), 60); } break; }
+    case 'ag-unattach': (ag.files || []).splice(+ds.i, 1); render(); break;
     case 'ag-follow': openFollowup(ds.k); break;
     case 'ag-deck': case 'ag-lpptx': runAction(ds.act); break;
     case 'ag-idea': ideaModal(); break;
@@ -2687,7 +2736,7 @@ app.addEventListener('click', (e) => {
     case 'ag-speak': speak(ds.src === 'local' ? $('#agLocalText').value : (ag.turns[+ds.k] || {}).text); break;
     case 'ag-refine': { const body = $('#agLocalText').value; ag.local = null; agentAsk(`حسّن صياغة رسالة المتابعة التالية واجعلها رسمية ومختصرة، وأعد النص كاملاً فقط:\n\n${body}`); break; }
     case 'ag-stop': ag.ctl?.abort(); break;
-    case 'ag-clear': ag.turns = []; ag.api = []; ag.more = false; render(); break;
+    case 'ag-clear': ag.turns = []; ag.api = []; ag.more = false; ag.local = null; ag.files = []; render(); break;
     case 'ag-open-ask': case 'ag-focus': { const i = $('#ag-input'); if (i) { i.scrollIntoView({ block: 'center', behavior: 'smooth' }); i.focus(); } break; }
     case 'ag-more': ag.more = !ag.more; agLive(); break;
     case 'ag-goto': location.hash = '#' + ds.view; break;
@@ -2707,10 +2756,10 @@ app.addEventListener('click', (e) => {
 });
 app.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target.matches && e.target.matches('.a3c')) { launchModal(state.launches.find((l) => l.id === e.target.dataset.id)); return; }
-  if (e.target.id === 'ag-input' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); agentSubmit(e.target.value); }
+  if (e.target.id === 'ag-input' && e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); agentSubmit(e.target.value); }
 });
 app.addEventListener('input', (e) => {
-  if (e.target.id === 'ag-input') { ag.draft = e.target.value; return; }
+  if (e.target.id === 'ag-input') { ag.draft = e.target.value; e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 220) + 'px'; return; }
   if (e.target.dataset.deck) { const path = e.target.dataset.deck.split('.'); let o = deckWorking(); while (path.length > 1) { const k = path.shift(); o = o[k] ??= {}; } o[path[0]] = e.target.value; return; }
   if (e.target.dataset.wsd) { ws[e.target.dataset.wsd] = e.target.value; return; }
   const f = e.target.dataset.ws;
@@ -2727,6 +2776,12 @@ app.addEventListener('drop', (e) => { const z = e.target.closest('[data-drop]');
 document.addEventListener('click', (e) => { if (ws.menu && !e.target.closest('.picker')) { ws.menu = false; render(); } });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ws.menu) { ws.menu = false; render(); $('.picker-btn')?.focus(); } });
 app.addEventListener('change', (e) => {
+  if (e.target.id === 'agFile') {
+    const fs = [...e.target.files]; e.target.value = '';
+    Promise.all(fs.slice(0, 6).map(async (f) => /^image\//.test(f.type) ? { name: f.name, blob: f, url: URL.createObjectURL(f) } : { name: f.name, text: await f.text() }))
+      .then((list) => { ag.files = [...(ag.files || []), ...list].slice(0, 6); render(); $('#ag-input')?.focus(); });
+    return;
+  }
   if (e.target.dataset.act === 'a-status') {
     const g = (state.assignments.groups || []).find((x) => x.id === e.target.dataset.g); const it = g && g.items.find((x) => x.id === e.target.dataset.i);
     if (it) { aSnap(); it.status = e.target.value; e.target.parentElement.className = 'asg-st ' + asgClass(it.status); commit(`${it.title}: ${it.status}`, true); asgToolsSync(); }
