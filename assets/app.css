@@ -561,11 +561,11 @@ details.att p{margin:6px 0 0;line-height:1.9;max-width:90ch}
 .a3-h{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .a3-h h1{margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(22px,3vw,34px);letter-spacing:.01em;color:#FFFFFF;text-shadow:0 2px 12px rgba(0,0,0,.35)}
 .a3-logo{height:38px;width:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
-.a3-bar{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin:12px 0 16px;font-size:12.5px}
+.a3-bar{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;margin:12px 0 16px;font-size:12.5px}
 .a3-prog{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:3px 12px}
 .a3-prog b{font-family:var(--font-heading);font-size:15px}
 .a3-prog i{display:inline-block;width:80px;height:5px;border-radius:9px;background:linear-gradient(90deg,var(--a3-green) var(--p),rgba(255,255,255,.25) var(--p))}
-.a3-legend{display:flex;gap:10px;flex-wrap:wrap}
+.a3-legend{display:flex;gap:6px 10px;flex-wrap:wrap;flex:1 1 260px;min-width:0}
 .lg{display:inline-flex;align-items:center;gap:5px;opacity:.92}
 .lg i{width:10px;height:10px;border-radius:3px;background:var(--c-st)}
 .a3-add{margin-inline-start:auto;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.4);color:#FFFFFF;border-radius:999px}
@@ -771,3 +771,12 @@ dialog::backdrop{background:var(--scrim)}
   .topbar,.foot-band,.btn,.icon-btn,.mstrip,.subtabs{display:none!important}
   .card{box-shadow:none}
 }
+
+/* launches: status bar is a dropdown */
+.a3c-sel{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:filter .15s,box-shadow .15s}
+.a3c-sel:hover{filter:brightness(1.06);box-shadow:0 0 0 2px rgba(255,255,255,.55)}
+.a3c-sel:focus-within{box-shadow:0 0 0 2px #FFFFFF}
+.a3c-sel i{font-style:normal;font-size:10px;opacity:.75}
+.a3c-sel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font:inherit;color:#0A1A4A}
+.a3c-sel select option{background:#FFFFFF;color:#0A1A4A}
+.a3-logo{filter:none}
