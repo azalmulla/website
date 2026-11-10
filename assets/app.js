@@ -60,6 +60,7 @@ let state = null;
 let news = null;
 let fileSha = null;
 const ui = Object.assign({ committee: 'national', meeting: {}, showDone: false }, ls.get(LS_UI) || {});
+ui.lresetArm = false;
 const saveUI = () => ls.set(LS_UI, ui);
 
 const gh = () => ls.get(LS_GH);
@@ -1092,6 +1093,9 @@ const thisYM = () => todayStr().slice(0, 7);
 const isOverdue = (l) => l.status !== 'announced' && ((l.date && l.date < todayStr()) || (!l.date && l.month && l.month < thisYM()));
 const lWhen = (l) => l.date ? fmtDate(l.date) : l.month ? fmtYM(l.month + '-01') : 'للتحديد';
 
+// undo history for the launches board (last 20 changes, this session)
+const lHist = [];
+const lSnap = () => { lHist.push(JSON.stringify(state.launches)); if (lHist.length > 20) lHist.shift(); };
 // the launches page is drawn like the A3 launches calendar slide
 const A3_NOTE = (l) => l.status === 'announced' ? '✓ تم الإعلان' : (l.note || (l.date ? `موعد الإطلاق ${fmtDate(l.date)}` : l.status === 'planned' ? '' : LSTN[l.status]));
 function launchCard(l) {
@@ -1133,6 +1137,8 @@ function viewLaunches() {
       <span class="a3-prog"><b>${done}</b> من ${L.length} تم الإعلان<i style="--p:${L.length ? done / L.length * 100 : 0}%"></i></span>
       <span class="a3-legend">${LST.map(([k, v]) => `<span class="lg st-${k}"><i></i>${v}</span>`).join('')}</span>
       <button class="btn sm a3-add" data-act="l-add">+ إضافة</button>
+      <button class="btn sm a3-reset" data-act="l-undo" ${lHist.length ? '' : 'disabled'} title="التراجع عن آخر تغيير">↶ تراجع${lHist.length ? ` (${lHist.length})` : ''}</button>
+      <button class="btn sm a3-reset ${ui.lresetArm ? 'armed' : ''}" data-act="l-reset" title="إعادة الإطلاقات إلى حالاتها الأصلية كما في تقويم A3">${ui.lresetArm ? 'تأكيد إعادة الضبط' : '↺ إعادة الضبط'}</button>
     </div>
     <div class="a3-grid">${tiles.map((t) => t.item ? launchCard(t.item) : `
       <div class="a3-group" style="--n:${t.items.length}">
@@ -1155,8 +1161,9 @@ function launchModal(l) {
       field('ملاحظة الحالة', inp('note', l.note || '', 'placeholder="مثال: الخبر جاهز + لتحديد تاريخ الإعلان"')) +
       field('الفعالية / المجموعة', inp('group', l.group || ''), 'اختياري، مثل «الفعالية الكبرى في نوفمبر»') +
       `<div class="field"><label>صورة البطاقة</label><div class="img-pick"><label class="btn sm" for="launchImg">اختر صورة</label><input type="file" id="launchImg" accept="image/*" hidden><small>تظهر خلفية للبطاقة</small></div></div>`,
-    del: isNew ? null : () => { state.launches = state.launches.filter((x) => x.id !== l.id); commit('تم حذف الإطلاق'); },
+    del: isNew ? null : () => { lSnap(); state.launches = state.launches.filter((x) => x.id !== l.id); commit('تم حذف الإطلاق'); },
     onSave(d) {
+      lSnap();
       Object.assign(l, { title: d.title, status: d.status, month: d.month || (d.date ? d.date.slice(0, 7) : null) });
       ['date', 'owner', 'note', 'group'].forEach((k) => { d[k] ? l[k] = d[k] : delete l[k]; });
       if (isNew) { l.id = uid('l'); l.order = Math.max(0, ...state.launches.map((x) => x.order || 0)) + 1; state.launches.push(l); }
@@ -2174,8 +2181,16 @@ app.addEventListener('click', (e) => {
     case 'ws-templates': templatesModal(); break;
     case 'open-settings': settingsModal(); break;
     case 'l-add': launchModal(); break;
+    case 'l-reset': {
+      if (!ui.lresetArm) { ui.lresetArm = true; render(); setTimeout(() => { if (ui.lresetArm) { ui.lresetArm = false; if (route() === 'launches') render(); } }, 5000); break; }
+      ui.lresetArm = false;
+      fetchJSON(DATA_PATH).then((d) => { if (!Array.isArray(d.launches)) throw 0; lSnap(); state.launches = d.launches; commit('أُعيدت الإطلاقات إلى حالاتها الأصلية'); })
+        .catch(() => { toast('تعذّر تحميل البيانات الأصلية'); render(); });
+      break;
+    }
     case 'l-edit': launchModal(state.launches.find((l) => l.id === ds.id)); break;
-    case 'l-next': { const l = state.launches.find((x) => x.id === ds.id); const nx = l && lNext(l.status); if (nx) { l.status = nx; if (nx === 'announced') l.note = 'تم الإعلان'; commit(`${l.title}: ${LSTN[nx]}`); } break; }
+    case 'l-undo': { const prev = lHist.pop(); if (prev) { state.launches = JSON.parse(prev); commit('تم التراجع عن آخر تغيير'); } break; }
+    case 'l-next': { const l = state.launches.find((x) => x.id === ds.id); const nx = l && lNext(l.status); if (nx) { lSnap(); l.status = nx; if (nx === 'announced') l.note = 'تم الإعلان'; commit(`${l.title}: ${LSTN[nx]}`); } break; }
     case 'l-filter': ui.lf = ds.f; saveUI(); render(); break;
     case 'l-view': ui.lview = ds.v; saveUI(); render(); break;
     case 'ev-add': eventModal(); break;
