@@ -1750,7 +1750,7 @@ function agentPanel() {
     <h2 class="ag-title">${esc(greeting())}، كيف أساعدك اليوم؟</h2>
     <p class="ag-sub" id="agSub">${voice.on ? 'أستمع إليك…' : 'اختر إجراءً، أو اكتب أو تحدّث بطلبك.'}</p>
     <form class="ag-ask" onsubmit="return false">
-      <input id="ag-input" autocomplete="off" placeholder="${eng ? 'اكتب أو تحدّث… مثال: جهّز متابعة لمسار الخدمات الحكومية' : 'اكتب أو تحدّث… مثل «رسالة متابعة» أو «صدّر الإطلاقات»'}" value="${esc(ag.draft)}" aria-label="اطلب من المساعد">
+      <input id="ag-input" autocomplete="off" placeholder="أنا مساعدك، اكتب أو تحدّث.." value="${esc(ag.draft)}" aria-label="اطلب من المساعد">
       ${canVoice() ? `<button type="button" class="mic ${voice.on ? 'on' : ''}" id="ag-mic" data-act="ag-voice" aria-label="${voice.on ? 'إيقاف الاستماع' : 'تحدّث'}" title="تحدّث">${ICON.mic}</button>` : ''}
       <button type="button" class="btn primary" data-act="ag-send" ${busy ? 'disabled' : ''}>أرسل</button>
     </form>
