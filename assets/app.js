@@ -195,7 +195,7 @@ function render() {
   document.querySelectorAll('.tabs a').forEach((a) => a.classList.toggle('active', a.dataset.tab === r));
   app.innerHTML = { minutes: viewMinutes, launches: viewLaunches, archive: viewArchive, ideas: viewIdeas, workspace: viewWorkspace }[r]?.() ?? viewDashboard();
   hydratePhotos(app);
-  if (r === 'dashboard') { typeBriefing(); const t = $('#agThread'); if (t) t.scrollTop = t.scrollHeight; }
+  if (r === 'dashboard') animateCounts();
   const on = $('.mcard.on'); if (on) on.parentElement.scrollLeft += on.getBoundingClientRect().left - on.parentElement.getBoundingClientRect().left - 8;
   tick();
 }
@@ -212,36 +212,27 @@ function viewDashboard() {
 
   const track = stages.map((s, i) => {
     const st = s === cur && now >= startMs(s) ? 'now' : (endMs(s) <= now ? 'done' : 'next');
-    return `<li class="ts ${st}">
+    return `<li class="ts ${st}" title="${esc(s.name)}: ${esc(s.title || '')} · ${fmtMonths(s.start, s.end)}">
       <span class="ts-bar"><i ${st === 'now' ? 'id="trackNow"' : ''}></i></span>
       <span class="ts-n">${st === 'done' ? ICON.check : i + 1}</span>
-      <span class="ts-t">${esc(s.title || s.name)}</span>
-      <span class="ts-d">${fmtMonths(s.start, s.end)}</span>
     </li>`;
   }).join('');
 
   const hero = cur ? `
-    <div class="hero-main">
-      <div class="eyebrow">المرحلة الحالية · ${idx + 1} من ${stages.length}</div>
-      <h2>${esc(cur.name)}</h2>
-      <div class="hero-sub">${esc(cur.title || '')}</div>
-      <div class="range">${fmtDate(cur.start)} — ${fmtDate(cur.end)}</div>
-      <button class="btn sm" data-act="edit-stages">تعديل المراحل</button>
-    </div>
-    <div class="hero-count">
-      <div class="cd-label" id="cdLabel"></div>
-      <div class="countdown" id="countdown">
-        ${['يوم', 'ساعة', 'دقيقة', 'ثانية'].map((l, i) => `<div class="cd-unit"><b data-cd="${i}">--</b><span>${l}</span></div>`).join('')}
+    <div class="hc-head">
+      <div class="hc-title">
+        <span class="eyebrow">المرحلة ${idx + 1} من ${stages.length} · ${fmtDate(cur.start)} — ${fmtDate(cur.end)}</span>
+        <h2>${esc(cur.name)}<span> · ${esc(cur.title || '')}</span></h2>
       </div>
-      <div class="bar"><i id="stageBar" style="width:0"></i></div>
-      <div class="bar-meta"><span id="stagePct"></span><span>تنتهي ${fmtDate(cur.end)}</span></div>
+      <div class="hc-count" title="الوقت المتبقي على نهاية المرحلة">
+        <div class="countdown" id="countdown">${['يوم', 'ساعة', 'دقيقة', 'ثانية'].map((l, i) => `<div class="cd-unit"><b data-cd="${i}">--</b><span>${l}</span></div>`).join('')}</div>
+      </div>
+      <button class="icon-btn hc-edit" data-act="edit-stages" aria-label="تعديل المراحل" title="تعديل المراحل">${ICON.edit}</button>
     </div>
     <ol class="track" aria-label="مراحل المشروع">${track}</ol>
-    ${p.start && p.end ? `<div class="target">
-      <div class="t">${esc(p.targetLabel || 'الإطار الزمني للمشروع')} · ${fmtYM(p.start)} – ${fmtYM(p.end)}</div>
-      <div class="bar"><i id="targetBar" style="width:0"></i></div>
-      <div class="bar-meta"><span id="targetPct"></span><span id="targetLeft"></span></div>
-    </div>` : ''}
+    <div class="hc-meta"><span id="cdLabel"></span><span id="stagePct"></span>${p.start && p.end ? `<span class="hc-target" title="${esc(p.targetLabel || '')}">مدة المشروع: <span id="targetPct"></span> · <span id="targetLeft"></span></span>` : ''}</div>
+    <div class="bar" hidden><i id="stageBar"></i></div>
+    ${p.start && p.end ? '<div class="hc-strip"><i id="targetBar" style="width:0"></i></div>' : ''}
   ` : `<div class="hero-main"><h2>لم تُحدَّد مراحل المشروع بعد</h2><button class="btn sm" data-act="edit-stages">إضافة المراحل</button></div>`;
 
   const pendCard = (c) => {
@@ -252,19 +243,16 @@ function viewDashboard() {
     return `<div class="card pend-card">
       <div class="card-h"><h2><span class="dot" style="--c:var(--c-${c})"></span>${COMMITTEES[c]} <span class="count">${list.length} معلّق</span></h2>
         <a class="link" href="#minutes" data-act="goto-committee" data-c="${c}">المحاضر ←</a></div>
-      <div class="card-b pend-body">${groups.length ? groups.map((g) => `
-        <div class="pend-group">
-          <a class="pend-gh" href="#minutes" data-act="goto-meeting" data-c="${c}" data-mid="${g.m.id}">${esc(meetingLabel(g.m))}${g.m.date ? ` · ${fmtDate(g.m.date)}` : ''}<span>${g.items.length}</span></a>
-          <ul class="list">${g.items.map((i) => `
-            <li>
-              <input type="checkbox" class="tick" data-act="toggle-item" data-mid="${g.m.id}" data-iid="${i.id}" aria-label="تم الإنجاز: ${esc(i.topic)}">
-              <div class="li-main">
-                <div class="li-title"><span class="pf-l">الموضوع:</span> ${bd(i.topic)}</div>
-                ${i.directive ? `<div class="pf-dir"><span class="pf-l">التوجيه:</span> ${bd(i.directive)}</div>` : ''}
-                ${i.owners ? `<div class="li-sub"><span class="pf-l">صاحب العلاقة:</span> ${bd(i.owners)}</div>` : ''}
-              </div>
-            </li>`).join('')}</ul>
-        </div>`).join('') : `<div class="empty">${meetingsOf(c).some((m) => m.items.length) ? 'لا توجد بنود معلّقة.' : 'لم تُرفع محاضر بعد.'}</div>`}
+      <div class="pend-strip">${groups.length ? groups.map((g) => g.items.map((i) => `
+        <article class="pcard">
+          <div class="pc-top">
+            <input type="checkbox" class="tick" data-act="toggle-item" data-mid="${g.m.id}" data-iid="${i.id}" aria-label="تم الإنجاز: ${esc(i.topic)}">
+            <a class="pc-m" href="#minutes" data-act="goto-meeting" data-c="${c}" data-mid="${g.m.id}">${esc(meetingLabel(g.m))}</a>
+          </div>
+          <b class="pc-t"><span class="pf-l">الموضوع:</span> ${bd(i.topic)}</b>
+          ${i.directive ? `<p class="pc-d" title="${esc(i.directive)}"><span class="pf-l">التوجيه:</span> ${bd(i.directive)}</p>` : ''}
+          ${i.owners ? `<span class="pc-o" title="${esc(i.owners)}"><span class="pf-l">صاحب العلاقة:</span> ${bd(i.owners)}</span>` : ''}
+        </article>`).join('')).join('') : `<div class="empty">${meetingsOf(c).some((m) => m.items.length) ? 'لا توجد بنود معلّقة.' : 'لم تُرفع محاضر بعد.'}</div>`}
       </div>
     </div>`;
   };
@@ -329,7 +317,7 @@ function tick() {
   const ms = Math.max(0, (before ? start : end) - now);
   const parts = [Math.floor(ms / 864e5), Math.floor(ms / 36e5) % 24, Math.floor(ms / 6e4) % 60, Math.floor(ms / 1e3) % 60];
   el.querySelectorAll('[data-cd]').forEach((b) => b.textContent = parts[b.dataset.cd]);
-  $('#cdLabel').textContent = before ? `متبقٍّ على بدء ${cur.name}` : (ms ? `متبقٍّ على نهاية ${cur.name}` : `انتهت ${cur.name}`);
+  $('#cdLabel').textContent = before ? `متبقٍّ على بدء ${cur.name}` : (ms ? 'متبقٍّ على نهاية المرحلة' : `انتهت ${cur.name}`);
   const pct = before ? 0 : Math.min(100, (now - start) / (end - start) * 100);
   $('#stageBar').style.width = pct + '%';
   const tn = $('#trackNow'); if (tn) tn.style.width = pct + '%';
@@ -339,7 +327,7 @@ function tick() {
     const s = uaeMidnight(p.start), t = uaeMidnight(dayAfter(p.end));
     const tp = Math.min(100, Math.max(0, (now - s) / (t - s) * 100));
     $('#targetBar').style.width = tp + '%';
-    $('#targetPct').textContent = `مضى ${tp.toFixed(1)}% من مدة المشروع`;
+    $('#targetPct').textContent = `مضى ${tp.toFixed(0)}%`;
     $('#targetLeft').textContent = `متبقٍّ ${Math.max(0, Math.ceil((t - now) / 864e5))} يوماً`;
   }
 }
@@ -1571,7 +1559,7 @@ Reply with only JSON: {"points":["…","…","…"]}`);
 // The briefing and recommendations are computed locally from the project data, so they
 // show instantly and work without Claude. Typed requests go to Claude with a small set
 // of page tools (read pending items, tick items done, add notes, prepare a minutes draft).
-const ag = { turns: [], api: [], status: 'idle', draft: '', ctl: null, typed: false, actions: {} };
+const ag = { turns: [], api: [], status: 'idle', draft: '', ctl: null, counted: false, open: false, more: false };
 const daysSince = (s) => s ? Math.max(0, dayDiffStr(s, todayStr())) : 0;
 function dayDiffStr(a, b) { const A = parse(a), B = parse(b); return Math.round((Date.UTC(B.y, B.m - 1, B.d) - Date.UTC(A.y, A.m - 1, A.d)) / 864e5); }
 const greeting = () => { const h = +new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: 'numeric', hour12: false }).format(new Date()); return h < 12 ? 'صباح الخير' : 'مساء الخير'; };
@@ -1594,20 +1582,20 @@ function projectSnapshot() {
 
 function agentRecs(s) {
   const recs = [];
-  if (s.awaiting.length) recs.push({ icon: 'upload', t: `${s.awaiting.length} اجتماعات بانتظار رفع محاضرها`, d: s.awaiting.slice(0, 3).map((m) => `${COMMITTEES[m.committee]} · ${meetingLabel(m)}`).join('، '), act: 'ag-goto', view: 'minutes', label: 'ارفع المحاضر' });
+  if (s.awaiting.length) recs.push({ icon: 'upload', t: `${s.awaiting.length} اجتماعات بانتظار رفع محاضرها`, d: s.awaiting.slice(0, 3).map((m) => `${COMMITTEES[m.committee]} · ${meetingLabel(m)}`).join('، '), act: 'ag-goto', view: 'minutes', label: 'ارفع المحاضر', s: `ارفع ${s.awaiting.length} محاضر` });
   if (s.lLate.length || s.lReady.length) {
     const l = s.lLate[0] || s.lReady[0];
-    recs.push({ icon: 'spark', t: s.lLate.length ? `${s.lLate.length} إطلاقات تجاوزت موعدها` : `${s.lReady.length} إطلاقات جاهزة بانتظار تحديد الموعد`, d: l.title, act: 'ag-goto', view: 'launches', label: 'افتح الإطلاقات' });
+    recs.push({ icon: 'spark', t: s.lLate.length ? `${s.lLate.length} إطلاقات تجاوزت موعدها` : `${s.lReady.length} إطلاقات جاهزة بانتظار تحديد الموعد`, d: l.title, act: 'ag-goto', view: 'launches', label: 'افتح الإطلاقات', s: s.lLate.length ? `${s.lLate.length} إطلاقات متأخرة` : `${s.lReady.length} إطلاقات بلا موعد` });
   }
   if (s.oldest && daysSince(s.oldest.m.date) > 21) {
     const n = s.pending.filter((x) => x.m === s.oldest.m).length;
-    recs.push({ icon: 'note', t: `${n} توجيهات معلّقة منذ ${daysSince(s.oldest.m.date)} يوماً`, d: `${COMMITTEES[s.oldest.m.committee]} · ${meetingLabel(s.oldest.m)}`, act: 'ag-ask', q: `جهّز رسالة متابعة رسمية مختصرة للتوجيهات المعلّقة من ${meetingLabel(s.oldest.m)} لـ${COMMITTEES[s.oldest.m.committee]}، مجمّعة حسب أصحاب العلاقة.`, label: 'جهّز رسالة متابعة' });
+    recs.push({ icon: 'note', t: `${n} توجيهات معلّقة منذ ${daysSince(s.oldest.m.date)} يوماً`, d: `${COMMITTEES[s.oldest.m.committee]} · ${meetingLabel(s.oldest.m)}`, act: 'ag-ask', q: `جهّز رسالة متابعة رسمية مختصرة للتوجيهات المعلّقة من ${meetingLabel(s.oldest.m)} لـ${COMMITTEES[s.oldest.m.committee]}، مجمّعة حسب أصحاب العلاقة.`, label: 'جهّز رسالة متابعة', s: `متابعة ${meetingLabel(s.oldest.m)} (${n})` });
   }
-  if (s.topOwner && s.topOwner[1] > 1) recs.push({ icon: 'user', t: `${s.topOwner[0]}: ${s.topOwner[1]} توجيهات معلّقة`, d: 'الأكثر توجيهات معلّقة بين أصحاب العلاقة', act: 'ag-ask', q: `ما التوجيهات المعلّقة على ${s.topOwner[0]}؟ وجهّز لي رسالة متابعة قصيرة له.`, label: 'اعرض وجهّز متابعة' });
-  if (s.cur && s.daysLeft <= 30) recs.push({ icon: 'spark', t: `${s.daysLeft} يوماً على نهاية ${s.cur.name}`, d: s.cur.title || '', act: 'ag-ask', q: `لخّص وضع ${s.cur.name} (${s.cur.title}): ما أُنجز من توجيهات وما زال معلّقاً، وما الذي يجب أن نركّز عليه قبل نهايتها.`, label: 'لخّص الوضع' });
+  if (s.topOwner && s.topOwner[1] > 1) recs.push({ icon: 'user', t: `${s.topOwner[0]}: ${s.topOwner[1]} توجيهات معلّقة`, d: 'الأكثر توجيهات معلّقة بين أصحاب العلاقة', act: 'ag-ask', q: `ما التوجيهات المعلّقة على ${s.topOwner[0]}؟ وجهّز لي رسالة متابعة قصيرة له.`, label: 'اعرض وجهّز متابعة', s: `${s.topOwner[0].replace(/^(معالي|سعادة)\s+/, '')} · ${s.topOwner[1]}` });
+  if (s.cur && s.daysLeft <= 30) recs.push({ icon: 'spark', t: `${s.daysLeft} يوماً على نهاية ${s.cur.name}`, d: s.cur.title || '', act: 'ag-ask', q: `لخّص وضع ${s.cur.name} (${s.cur.title}): ما أُنجز من توجيهات وما زال معلّقاً، وما الذي يجب أن نركّز عليه قبل نهايتها.`, label: 'لخّص الوضع', s: 'لخّص وضع المرحلة' });
   const nat = meetingsOf('national'); const next = nat.reduce((n, m) => Math.max(n, m.items.length ? m.number || 0 : 0), 0) + 1;
-  recs.push({ icon: 'doc', t: `حضّر محضر الاجتماع ${ORD[next] || next} للجنة الوطنية`, d: 'من ملاحظاتك أو صورها في مساحة العمل', act: 'ag-minutes', c: 'national', label: 'ابدأ المحضر' });
-  return recs.slice(0, 4);
+  recs.push({ icon: 'doc', t: `حضّر محضر الاجتماع ${ORD[next] || next} للجنة الوطنية`, d: 'من ملاحظاتك أو صورها في مساحة العمل', act: 'ag-minutes', c: 'national', label: 'ابدأ المحضر', s: `المحضر ${ORD[next] || next}` });
+  return recs.slice(0, 5);
 }
 
 function briefingText(s) {
@@ -1620,43 +1608,57 @@ function briefingText(s) {
 
 const AG_SUGGEST = ['ما الذي يجب أن أركّز عليه هذا الأسبوع؟', 'ما وضع إطلاقات نوفمبر؟', 'جهّز ملخصاً للقيادة عن وضع المشروع', 'أضف فكرة مشروع وصدّر قالبها'];
 
+const AG_STEP = { get_project_status: 'قرأ حالة المشروع', get_pending_items: 'راجع التوجيهات', mark_items_done: 'حدّد بنوداً كمنجزة', add_item_note: 'أضاف ملاحظة', prepare_minutes_draft: 'جهّز المحضر', open_meeting: 'فتح الاجتماع', get_launches: 'راجع الإطلاقات', update_launch: 'حدّث إطلاقاً', list_ideas: 'راجع بنك الأفكار', add_idea: 'أضاف فكرة', export_project_template: 'جهّز القالب', prepare_committee_deck: 'جهّز عرض الاجتماع' };
+function agentResult() {
+  const k = ag.turns.length - 1; const t = ag.turns[k]; if (!t || t.role !== 'assistant') return '';
+  const q = ag.turns[k - 1] ? ag.turns[k - 1].text : '';
+  const busy = ag.status === 'running';
+  return `<div class="ag-res ${busy ? 'busy' : ''} ${ag.more ? 'more' : ''}" id="agRes">
+    <div class="ag-q"><span>${esc(q)}</span>${busy ? '<button class="link" data-act="ag-stop">إيقاف</button>' : `<button class="icon-btn sm" data-act="ag-clear" aria-label="إغلاق">✕</button>`}</div>
+    <div class="ag-steps">${(t.steps || []).map((x) => `<span class="step-pill">${ICON.check}${esc(x)}</span>`).join('')}${busy ? `<span class="step-pill live"><span class="dots"><i></i><i></i><i></i></span>${t.text ? 'يكتب' : (t.steps || []).length ? 'يعمل' : 'يفكّر'}</span>` : ''}</div>
+    ${t.text ? `<div class="ag-text">${fmtAgent(t.text)}</div>` : ''}
+    ${(t.actions || []).map((a, j) => actionCard(a, k, j)).join('')}
+    ${!busy && t.text ? `<div class="ag-res-f"><button class="link" data-act="ag-more">${ag.more ? 'أقل' : 'عرض كامل الرد'}</button><button class="link" data-act="ag-copy" data-k="${k}">نسخ</button><button class="link" data-act="ag-open-ask">طلب آخر</button></div>` : ''}
+  </div>`;
+}
 function agentPanel() {
   const s = projectSnapshot();
   const eng = engine();
   const recs = agentRecs(s);
-  const brief = briefingText(s);
-  const thread = ag.turns.map((t, k) => t.role === 'user'
-    ? `<div class="msg me"><p>${esc(t.text)}</p></div>`
-    : `<div class="msg ai"><span class="orb sm" aria-hidden="true"></span><div class="msg-body">
-        <div class="msg-text" ${k === ag.turns.length - 1 && ag.status === 'running' ? 'id="agLive"' : ''}>${t.text ? fmtAgent(t.text) : '<span class="dots"><i></i><i></i><i></i></span>'}</div>
-        ${(t.actions || []).map((a, j) => actionCard(a, k, j)).join('')}
-        ${t.text && !(k === ag.turns.length - 1 && ag.status === 'running') ? `<button class="link sm-link" data-act="ag-copy" data-k="${k}">نسخ الرد</button>` : ''}
-      </div></div>`).join('');
+  const metrics = [
+    s.cur && { n: s.daysLeft, t: 'يوماً للمرحلة', act: 'ag-ask', q: recs.find((r) => r.s === 'لخّص وضع المرحلة')?.q || `لخّص وضع ${s.cur.name}` },
+    { n: s.pending.length, t: 'معلّق', act: 'ag-goto', view: 'minutes' },
+    s.lLate.length && { n: s.lLate.length, t: 'إطلاق متأخر', act: 'ag-goto', view: 'launches', warn: true },
+  ].filter(Boolean);
+  const chips = recs.filter((r) => r.s && r.s !== 'لخّص وضع المرحلة' && !/إطلاقات متأخرة/.test(r.s));
+  const busy = ag.status === 'running';
   return `
-  <section class="agent ${ag.turns.length ? 'has-thread' : ''}" aria-label="المساعد">
-    <div class="ag-top">
-      <span class="orb" aria-hidden="true"></span>
-      <div class="ag-brief">
-        <div class="ag-name">المساعد <span class="engine ${eng ? 'on' : ''}">${eng === 'claude' ? 'Claude' : eng === 'api' ? 'Claude API' : 'بدون اتصال'}</span></div>
-        <p id="agBrief" data-full="${esc(brief)}">${ag.typed ? esc(brief) : ''}</p>
+  <section class="agent ${busy ? 'busy' : ''}" aria-label="المساعد">
+    <div class="ag-bar">
+      <button class="orb" data-act="ag-open-ask" aria-label="اسأل المساعد" title="${esc(greeting())} · المساعد ${eng === 'claude' ? '(Claude)' : eng === 'api' ? '(Claude API)' : '(بدون اتصال)'}"></button>
+      <div class="ag-chips">
+        ${metrics.map((m, i) => `<button class="mchip ${m.warn ? 'warn' : ''}" style="--i:${i}" data-act="${m.act}" ${m.q ? `data-q="${esc(m.q)}"` : ''} ${m.view ? `data-view="${m.view}"` : ''}><b data-count="${m.n}">${ag.counted ? m.n : 0}</b>${m.t}</button>`).join('')}
+        <span class="ag-sep" aria-hidden="true"></span>
+        ${chips.map((r, i) => `<button class="achip" style="--i:${i + metrics.length}" title="${esc(r.t)}${r.d ? ' · ' + esc(r.d) : ''}" data-act="${r.act}" ${r.q ? `data-q="${esc(r.q)}"` : ''} ${r.view ? `data-view="${r.view}"` : ''} ${r.c ? `data-c="${r.c}"` : ''}>${ICON[r.icon] || ICON.spark}${esc(r.s)}</button>`).join('')}
       </div>
-      ${ag.turns.length ? '<button class="btn sm ghost-w" data-act="ag-clear">محادثة جديدة</button>' : ''}
+      <button class="ask-btn ${ag.open ? 'on' : ''}" data-act="ag-open-ask" ${eng ? '' : 'title="اربط Claude من الإعدادات"'}>${ICON.spark}<span>اسأل</span></button>
     </div>
-    ${ag.turns.length ? `<div class="ag-thread" id="agThread">${thread}</div>` : `
-    <div class="ag-recs">${recs.map((r) => `
-      <button class="rec" data-act="${r.act}" ${r.q ? `data-q="${esc(r.q)}"` : ''} ${r.view ? `data-view="${r.view}"` : ''} ${r.c ? `data-c="${r.c}"` : ''}>
-        <span class="rec-ico">${ICON[r.icon] || ICON.spark}</span>
-        <span class="rec-txt"><b>${esc(r.t)}</b>${r.d ? `<small>${esc(r.d)}</small>` : ''}</span>
-        <span class="rec-go">${r.label} ←</span>
-      </button>`).join('')}
-    </div>`}
-    <form class="ag-ask" data-agform onsubmit="return false">
-      <input id="ag-input" autocomplete="off" placeholder="${eng ? 'اطلب من المساعد… مثال: ما المعلّق على معالي عمر العلماء؟' : 'اربط Claude من الإعدادات لتفعيل أوامر المساعد'}" value="${esc(ag.draft)}" ${eng ? '' : 'disabled'} aria-label="اطلب من المساعد">
-      ${ag.status === 'running' ? '<button type="button" class="btn sm" data-act="ag-stop">إيقاف</button>' : `<button type="button" class="btn primary sm" data-act="ag-send" ${eng ? '' : 'disabled'}>${ICON.spark} أرسل</button>`}
+    ${ag.open ? `<form class="ag-ask" onsubmit="return false">
+      <input id="ag-input" autocomplete="off" placeholder="${eng ? 'مثال: ما المعلّق على معالي عمر العلماء؟' : 'اربط Claude من الإعدادات لتفعيل المساعد'}" value="${esc(ag.draft)}" ${eng ? '' : 'disabled'} aria-label="اطلب من المساعد">
+      <button type="button" class="btn primary sm" data-act="ag-send" ${eng && !busy ? '' : 'disabled'}>أرسل</button>
+      ${eng ? '' : '<button type="button" class="link" data-act="open-settings">الإعدادات</button>'}
     </form>
-    ${!ag.turns.length && eng ? `<div class="ag-sugg">${AG_SUGGEST.map((q) => `<button class="chip sugg" data-act="ag-ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}
-    ${!eng && cap.ready ? `<p class="ag-note">التوصيات أعلاه تعمل دائماً. لتنفيذ الطلبات، افتح اللوحة من رابطها على claude.ai أو أضف مفتاح Claude API من <button class="link" data-act="open-settings">الإعدادات</button>.</p>` : ''}
+    ${eng && !ag.turns.length ? `<div class="ag-sugg">${AG_SUGGEST.map((q) => `<button class="chip sugg" data-act="ag-ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}` : ''}
+    ${agentResult()}
   </section>`;
+}
+function animateCounts() {
+  if (ag.counted) return; ag.counted = true;
+  const els = [...document.querySelectorAll('.agent [data-count]')];
+  if (!els.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { els.forEach((e) => { e.textContent = e.dataset.count; }); return; }
+  const t0 = performance.now();
+  const step = (t) => { const k = Math.min(1, (t - t0) / 900), e = 1 - Math.pow(1 - k, 3); els.forEach((el) => { el.textContent = Math.round(+el.dataset.count * e); }); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
 }
 
 // light formatting for agent replies: paragraphs, bullet lists, **bold**
@@ -1883,7 +1885,7 @@ async function agentRunSDK(signal, onText, acts) {
       try {
         const input = u.input && typeof u.input === 'object' ? u.input : {};
         if (!tool) throw new Error('Unknown tool');
-        return { type: 'tool_result', tool_use_id: u.id, content: JSON.stringify(tool.run(input, acts)) };
+        return { type: 'tool_result', tool_use_id: u.id, content: JSON.stringify(runTool(tool, input, acts)) };
       } catch (err) { return { type: 'tool_result', tool_use_id: u.id, content: String(err.message || err), is_error: true }; }
     });
     ag.api.push({ role: 'user', content: results });
@@ -1898,7 +1900,7 @@ async function agentRunSample(signal, onText, acts) {
   try {
     const { text } = await cap.sample(turns, {
       signal, onText: ({ text }) => onText(text),
-      ...(lim && lim.tools ? { tools: AG_TOOLS.map((t) => ({ name: t.name, description: t.description, inputSchema: t.schema, execute: (input) => t.run(input || {}, acts) })) } : { cache: false }),
+      ...(lim && lim.tools ? { tools: AG_TOOLS.map((t) => ({ name: t.name, description: t.description, inputSchema: t.schema, execute: (input) => runTool(t, input || {}, acts) })) } : { cache: false }),
     });
     return text;
   } catch (e) {
@@ -1908,21 +1910,25 @@ async function agentRunSample(signal, onText, acts) {
   }
 }
 
+let agReply = null;
+function agLive() { const el = $('#agRes'); if (el) el.outerHTML = agentResult(); }
+function runTool(tool, input, acts) {
+  if (agReply) { (agReply.steps ||= []).push(AG_STEP[tool.name] || tool.name); agLive(); }
+  return tool.run(input, acts);
+}
 async function agentAsk(q) {
   q = String(q || '').trim(); const eng = engine();
   if (!q || !eng || ag.status === 'running') return;
   if (route() !== 'dashboard') location.hash = '#dashboard';
   ag.turns.push({ role: 'user', text: q });
-  const reply = { role: 'assistant', text: '', actions: [] };
+  const reply = { role: 'assistant', text: '', actions: [], steps: [] };
+  agReply = reply;
   ag.turns.push(reply);
   if (eng === 'api') ag.api.push({ role: 'user', content: q });
-  ag.draft = ''; ag.status = 'running'; ag.ctl = new AbortController();
-  render(); $('#agThread')?.scrollIntoView({ block: 'nearest' });
+  ag.draft = ''; ag.status = 'running'; ag.more = false; ag.open = false; ag.ctl = new AbortController();
+  render();
   let last = 0;
-  const onText = (t) => {
-    reply.text = t; const now = Date.now();
-    if (now - last > 120) { last = now; const el = $('#agLive'); if (el) el.innerHTML = fmtAgent(t); }
-  };
+  const onText = (t) => { reply.text = t; const now = Date.now(); if (now - last > 150) { last = now; agLive(); } };
   try {
     reply.text = eng === 'claude' ? await agentRunSample(ag.ctl.signal, onText, reply.actions) : await agentRunSDK(ag.ctl.signal, onText, reply.actions);
     if (!reply.text.trim()) reply.text = reply.actions.length ? 'تم.' : 'لم يصل رد. حاول مرة أخرى.';
@@ -1931,9 +1937,8 @@ async function agentAsk(q) {
     else reply.text = (reply.text ? reply.text + '\n\n' : '') + '⚠ ' + ((e && e.message) || 'حدث خطأ غير متوقع.');
     if (eng === 'api' && ag.api.length && ag.api[ag.api.length - 1].role === 'user' && typeof ag.api[ag.api.length - 1].content !== 'string') ag.api.pop();
   }
-  ag.status = 'idle'; ag.ctl = null;
+  ag.status = 'idle'; ag.ctl = null; agReply = null;
   render();
-  setTimeout(() => { const t = $('#agThread'); if (t) t.scrollTop = t.scrollHeight; }, 0);
 }
 
 function typeBriefing() {
@@ -2178,7 +2183,9 @@ app.addEventListener('click', (e) => {
     case 'ag-ask': agentAsk(ds.q); break;
     case 'ag-send': agentAsk($('#ag-input')?.value); break;
     case 'ag-stop': ag.ctl?.abort(); break;
-    case 'ag-clear': ag.turns = []; ag.api = []; render(); break;
+    case 'ag-clear': ag.turns = []; ag.api = []; ag.more = false; render(); break;
+    case 'ag-open-ask': ag.open = !ag.open; render(); $('#ag-input')?.focus(); break;
+    case 'ag-more': ag.more = !ag.more; agLive(); break;
     case 'ag-goto': location.hash = '#' + ds.view; break;
     case 'ag-minutes': ws.task = 'minutes'; ws.committee = ds.c; seedMeetingFields(true); saveDraft(); location.hash = '#workspace'; break;
     case 'ag-copy': navigator.clipboard.writeText(ag.turns[+ds.k].text).then(() => toast('تم نسخ الرد'), () => toast('تعذّر النسخ')); break;
