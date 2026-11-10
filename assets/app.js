@@ -1421,6 +1421,21 @@ async function aiJSON(prompt) {
   return parseJSONLoose(msg.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
 }
 
+// Turn an SVG from Claude into a PNG, after stripping anything active.
+async function svgToPng(svg, w, h) {
+  const doc = new DOMParser().parseFromString(svg, 'image/svg+xml'); const root = doc.documentElement;
+  if (!root || root.localName !== 'svg' || doc.getElementsByTagName('parsererror').length) throw new Error('bad svg');
+  root.querySelectorAll('script,foreignObject,image,use[href^="http"],a').forEach((n) => n.remove());
+  root.querySelectorAll('*').forEach((n) => [...n.attributes].forEach((a) => { if (/^on/i.test(a.name) || /^\s*(javascript|https?):/i.test(a.value)) n.removeAttribute(a.name); }));
+  root.setAttribute('width', w); root.setAttribute('height', h);
+  const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(root)], { type: 'image/svg+xml' }));
+  try {
+    const img = new Image(); img.src = url; await img.decode();
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+    return await new Promise((res, rej) => c.toBlob((b) => b ? res(b) : rej(new Error('png')), 'image/png'));
+  } finally { URL.revokeObjectURL(url); }
+}
+
 function ideaModal(x) {
   const isNew = !x;
   x ||= { type: 'project', status: 'idea', name: '', outputs: ['', '', ''] };
@@ -1436,7 +1451,7 @@ function ideaModal(x) {
       <div class="field"><label>أهم المخرجات</label><div class="outs">${[0, 1, 2].map((i) => `<input name="out${i}" id="f-out${i}" value="${esc(o[i] || '')}" placeholder="المخرج ${i + 1}">`).join('')}</div></div>
       <div class="row2">${field('تاريخ البدء', inp('start', x.start || '', 'type="date"'))}${field('تاريخ الانتهاء', inp('end', x.end || '', 'type="date"'))}</div>
       ${field('الجهة المسؤولة', inp('owner', x.owner || '', 'list="ownerList" placeholder="اختر مساراً أو الأمانة العامة أو جهات حكومية، أو اكتب جهة أخرى"') + `<datalist id="ownerList">${[...trackList().map((t) => t.name), 'الأمانة العامة للجنة الوطنية للذكاء الاصطناعي المساعد', 'جهات حكومية'].map((v) => `<option value="${esc(v)}">`).join('')}</datalist>`)}
-      <div class="field"><label>الصورة التعبيرية</label><div class="img-pick">${x.image ? `<img data-photo="${esc(x.image)}" alt="" id="ideaImgPrev">` : '<img alt="" id="ideaImgPrev" hidden>'}<label class="btn sm" for="ideaImg">اختر صورة</label><input type="file" id="ideaImg" accept="image/*" hidden><small>تظهر في الجانب الأيمن من شريحة القالب</small></div></div>
+      <div class="field"><label>الصورة التعبيرية</label><div class="img-pick">${x.image ? `<img data-photo="${esc(x.image)}" alt="" id="ideaImgPrev">` : '<img alt="" id="ideaImgPrev" hidden>'}<label class="btn sm" for="ideaImg">اختر صورة</label>${engine() ? `<button type="button" class="btn sm primary" id="aiImgBtn">${ICON.spark} صمّم بالمساعد</button>` : ''}<input type="file" id="ideaImg" accept="image/*" hidden><small>تظهر في الجانب الأيمن من شريحة القالب</small></div></div>
       ${field('ملاحظات', area('notes', x.notes || '', 'rows="2"'))}`,
     del: isNew ? null : () => { state.ideas = state.ideas.filter((y) => y.id !== x.id); commit('تم الحذف'); },
     onSave(d) {
@@ -1448,6 +1463,23 @@ function ideaModal(x) {
   });
   hydratePhotos(form);
   $('#ideaImg').onchange = (e) => { newImage = e.target.files[0]; if (newImage) { const p = $('#ideaImgPrev'); p.hidden = false; p.removeAttribute('data-photo'); p.src = URL.createObjectURL(newImage); } };
+  const imgBtn = $('#aiImgBtn');
+  if (imgBtn) imgBtn.onclick = async () => {
+    const brief = [form.querySelector('[name=name]').value, form.querySelector('[name=name_en]').value, form.querySelector('[name=what]').value, $('#ai-brief') && $('#ai-brief').value].filter(Boolean).join(' — ').trim();
+    if (!brief) { toast('اكتب اسم المشروع أو وصفه أولاً'); form.querySelector('[name=name]').focus(); return; }
+    imgBtn.disabled = true; imgBtn.textContent = 'جارٍ التصميم…';
+    try {
+      const r = await aiJSON(`Design an illustration for a UAE government project card. Project: ${brief}
+
+Draw it as one self-contained SVG, viewBox="0 0 1200 800": a modern, clean, flat/isometric illustration that shows what the project is about, using simple shapes and icons. Palette: deep blue #0A1C4A background or white, blues #0062FD #00AEEF, gold accent #B68A35, white. No text, no letters, no logos, no flags, no people's faces, no external images or fonts, no scripts. Keep it under 12000 characters.
+
+Reply with only JSON: {"svg":"<svg ...>...</svg>"}`);
+      const blob = await svgToPng(String(r && r.svg || ''), 1200, 800);
+      newImage = blob; const pv = $('#ideaImgPrev'); pv.hidden = false; pv.removeAttribute('data-photo'); pv.src = URL.createObjectURL(blob);
+      toast('صمّم المساعد صورة. احفظ لاعتمادها');
+    } catch (e) { console.error(e); toast('تعذّر تصميم الصورة، حاول مرة أخرى'); }
+    imgBtn.disabled = false; imgBtn.innerHTML = `${ICON.spark} صمّم بالمساعد`;
+  };
   const btn = $('#aiFillBtn');
   if (btn) btn.onclick = async () => {
     const brief = ($('#ai-brief').value || form.querySelector('[name=what]').value || form.querySelector('[name=name]').value).trim();
