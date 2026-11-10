@@ -209,7 +209,6 @@ function viewDashboard() {
   const all = state.meetings.flatMap((m) => m.items);
   const doneN = all.filter(isDone).length;
   const pend = { national: pendingOf('national'), ministry: pendingOf('ministry') };
-  const withMinutes = state.meetings.filter((m) => m.items.length).length;
 
   const track = stages.map((s, i) => {
     const st = s === cur && now >= startMs(s) ? 'now' : (endMs(s) <= now ? 'done' : 'next');
@@ -276,8 +275,7 @@ function viewDashboard() {
   <section class="kpis">
     <div class="card kpi"><div class="l"><span class="dot" style="--c:var(--c-national)"></span>معلّق · اللجنة الوطنية</div><div class="v">${pend.national.length}</div><div class="s">${meetingsOf('national').filter((m) => m.items.length).length} محاضر مرفوعة</div></div>
     <div class="card kpi"><div class="l"><span class="dot" style="--c:var(--c-ministry)"></span>معلّق · لجنة الوزارة</div><div class="v">${pend.ministry.length}</div><div class="s">${meetingsOf('ministry').filter((m) => m.items.length).length} محاضر مرفوعة</div></div>
-    <div class="card kpi"><div class="l">نسبة إنجاز التوجيهات</div><div class="v" style="color:var(--ok)">${all.length ? Math.round(doneN / all.length * 100) : 0}%</div><div class="s">${doneN} من ${all.length} بنداً</div></div>
-    <div class="card kpi"><div class="l">المحاضر المرفوعة</div><div class="v" style="color:var(--accent-fg)">${withMinutes}</div><div class="s">من ${state.meetings.length} اجتماعاً مسجلاً</div></div>
+    <div class="card kpi"><div class="l">نسبة إنجاز التوجيهات</div><div class="v" style="color:var(--ok)">${all.length ? Math.round(doneN / all.length * 100) : 0}%</div><div class="s">${doneN} من ${all.length} بنداً من محاضر اجتماعات اللجنة الوطنية ولجنة الوزارة</div></div>
   </section>
 
   <h2 class="sec-h">ما زال معلّقاً</h2>
