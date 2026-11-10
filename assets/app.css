@@ -1,7 +1,9 @@
 /* Sakkal Majalla from the viewer's device (Windows, or Mac with Microsoft Office), drawn larger:
    its glyphs are much smaller than other fonts at the same size. */
-@font-face{font-family:'Sakkal Majalla Site';src:local('Sakkal Majalla'),local('SakkalMajalla');font-weight:400;size-adjust:138%}
-@font-face{font-family:'Sakkal Majalla Site';src:local('Sakkal Majalla Bold'),local('SakkalMajalla-Bold'),local('Sakkal Majalla');font-weight:600 800;size-adjust:138%}
+@font-face{font-family:'Sakkal Majalla Site';src:local('Sakkal Majalla'),local('SakkalMajalla'),local('Sakkal Majalla Regular');font-weight:300 500;size-adjust:138%}
+@font-face{font-family:'Sakkal Majalla Site';src:local('Sakkal Majalla Bold'),local('SakkalMajalla-Bold'),local('Sakkal Majalla Bold Regular');font-weight:600 900;size-adjust:138%}
+html{font-synthesis:weight}
+h1,h2,h3,h4,th,.sec-h,.card-h h2,.m-h h3{font-weight:700}
 /* Agentic AI for UAE Government — brand guideline colours with a UAE-gold government layer.
    Layout: white page, sticky header with the cyan→blue signature line, gradient stage panel,
    cards on white; gold marks the federal layer (national committee, counts, dates, footer).
