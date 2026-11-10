@@ -954,3 +954,6 @@ dialog::backdrop{background:var(--scrim)}
 .chat-note{margin:0;text-align:center;font-size:12.5px;color:var(--muted)}
 .agent.chat.listening .composer{border-color:#E5484D}
 @media (max-width:640px){.agent.chat{padding:12px}.msg.user .bubble{max-width:88%}.chat-hello .ag-title{font-size:21px}}
+.agent.chat.locked .composer{opacity:.55;pointer-events:none;filter:grayscale(.4)}
+.agent.chat.locked .ag-icon img{animation-duration:40s}
+.wip{margin-inline-start:auto;font-size:12.5px;font-weight:700;color:var(--gold-fg);background:var(--gold-soft);border-radius:999px;padding:3px 12px}
