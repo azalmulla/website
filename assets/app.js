@@ -253,7 +253,7 @@ function viewDashboard() {
     list.forEach((i) => { const g = groups.find((x) => x.m === i.meeting); g ? g.items.push(i) : groups.push({ m: i.meeting, items: [i] }); });
     groups.sort((a, b) => (b.m.number || 0) - (a.m.number || 0));
     return `<div class="card pend-card">
-      <div class="card-h"><h2><span class="dot" style="--c:var(--c-${c})"></span>${COMMITTEES[c]} <span class="count">${list.length} معلّق</span></h2>
+      <div class="card-h"><h2>${c === 'national' ? `<img class="nc-logo" src="assets/national-committee-logo.png" alt="${COMMITTEES[c]}">` : `<span class="dot" style="--c:var(--c-${c})"></span>${COMMITTEES[c]}`} <span class="count">${list.length} معلّق</span></h2>
         <a class="link" href="#minutes" data-act="goto-committee" data-c="${c}">المحاضر ←</a></div>
       <div class="card-b pend-body">${groups.length ? groups.map((g) => `
         <div class="pend-group">
@@ -424,7 +424,8 @@ function viewMinutes() {
       <input type="file" id="docxInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden>
     </div>
   </div>
-  <div class="subtabs" role="tablist">${Object.entries(COMMITTEES).map(([k, v]) => `<button role="tab" aria-selected="${k === c}" class="${k === c ? 'on' : ''}" data-act="committee" data-c="${k}"><span class="dot" style="--c:var(--c-${k})"></span>${v}<span class="count">${pendingOf(k).length} معلّق</span></button>`).join('')}</div>`;
+  <div class="subtabs" role="tablist">${Object.entries(COMMITTEES).map(([k, v]) => `<button role="tab" aria-selected="${k === c}" class="${k === c ? 'on' : ''}" data-act="committee" data-c="${k}"><span class="dot" style="--c:var(--c-${k})"></span>${v}<span class="count">${pendingOf(k).length} معلّق</span></button>`).join('')}</div>
+  ${c === 'national' ? `<div class="nc-banner"><img src="assets/national-committee-logo.png" alt="اللجنة الوطنية للذكاء الاصطناعي المساعد"></div>` : ''}`;
 
   const strip = `<div class="mstrip">${list.map((m) => {
     const n = m.items.length, d = m.items.filter(isDone).length;
