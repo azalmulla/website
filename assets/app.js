@@ -562,6 +562,10 @@ const TASKS = [
   { id: 'brief', icon: 'brief', t: 'ملخص تنفيذي', d: 'موجز للقيادات عن مستجدات المشروع', soon: true },
 ];
 Object.assign(ICON, {
+  mic: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>',
+  mail: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+  speaker: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+  bulb: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>',
   deck: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg>',
   news: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5"/></svg>',
   brief: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
@@ -573,7 +577,7 @@ Object.assign(ICON, {
 
 const ws = Object.assign({ task: null, menu: false, committee: 'national', number: '', date: '', time: '', attendees: '', notes: '' }, ls.get(LS_DRAFT) || {}, { menu: false, images: [], status: 'idle', progress: '', result: null, error: '', ctl: null });
 const saveDraft = () => ls.set(LS_DRAFT, { task: ws.task, committee: ws.committee, number: ws.number, date: ws.date, time: ws.time, attendees: ws.attendees, notes: ws.notes });
-const cap = { sample: null, sampleImages: false, downloads: null, assets: null, ready: false };
+const cap = { sample: null, sampleImages: false, downloads: null, assets: null, dictation: null, tts: null, ready: false };
 
 function initCapabilities() {
   if (!window.claude || typeof window.claude.use !== 'function') { cap.ready = true; return; }
@@ -583,6 +587,8 @@ function initCapabilities() {
   }).catch(() => {}).finally(() => { cap.ready = true; if (state && route() !== 'minutes') render(); });
   window.claude.use('downloads').then((d) => { cap.downloads = d; }).catch(() => {});
   window.claude.use('assets').then((a) => { cap.assets = a; }).catch(() => {});
+  window.claude.use('dictation').then((d) => { cap.dictation = d; if (d) wireDictation(d); if (state && route() === 'dashboard') render(); }).catch(() => {});
+  window.claude.use('tts').then((t) => { cap.tts = t; }).catch(() => {});
 }
 const engine = () => cap.sample ? 'claude' : (ls.get(LS_KEY) ? 'api' : null);
 
@@ -1641,7 +1647,7 @@ Reply with only JSON: {"points":["…","…","…"]}`);
 // The briefing and recommendations are computed locally from the project data, so they
 // show instantly and work without Claude. Typed requests go to Claude with a small set
 // of page tools (read pending items, tick items done, add notes, prepare a minutes draft).
-const ag = { turns: [], api: [], status: 'idle', draft: '', ctl: null, counted: false, open: false, more: false };
+const ag = { turns: [], api: [], status: 'idle', draft: '', ctl: null, counted: false, open: false, more: false, local: null };
 const daysSince = (s) => s ? Math.max(0, dayDiffStr(s, todayStr())) : 0;
 function dayDiffStr(a, b) { const A = parse(a), B = parse(b); return Math.round((Date.UTC(B.y, B.m - 1, B.d) - Date.UTC(A.y, A.m - 1, A.d)) / 864e5); }
 const greeting = () => { const h = +new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: 'numeric', hour12: false }).format(new Date()); return h < 12 ? 'صباح الخير' : 'مساء الخير'; };
@@ -1711,34 +1717,157 @@ function agentResult() {
     <div class="ag-steps">${(t.steps || []).map((x) => `<span class="step-pill">${ICON.check}${esc(x)}</span>`).join('')}${busy ? `<span class="step-pill live"><span class="dots"><i></i><i></i><i></i></span>${t.text ? 'يكتب' : (t.steps || []).length ? 'يعمل' : 'يفكّر'}</span>` : ''}</div>
     ${t.text ? `<div class="ag-text">${fmtAgent(t.text)}</div>` : ''}
     ${(t.actions || []).map((a, j) => actionCard(a, k, j)).join('')}
-    ${!busy && t.text ? `<div class="ag-res-f"><button class="link" data-act="ag-more">${ag.more ? 'أقل' : 'عرض كامل الرد'}</button><button class="link" data-act="ag-copy" data-k="${k}">نسخ</button><button class="link" data-act="ag-open-ask">طلب آخر</button></div>` : ''}
+    ${!busy && t.text ? `<div class="ag-res-f"><button class="link" data-act="ag-more">${ag.more ? 'أقل' : 'عرض كامل الرد'}</button><button class="link" data-act="ag-copy" data-k="${k}">نسخ</button><button class="link" data-act="ag-speak" data-k="${k}">استمع</button><button class="link" data-act="ag-open-ask">طلب آخر</button></div>` : ''}
   </div>`;
 }
+// Direct actions: each tile does the job itself (draft, file, export, page), no chat needed.
+function agentActions(s) {
+  const out = [];
+  if (s.topTrack) out.push({ act: 'ag-follow', k: 'track:' + s.topTrack[0], icon: 'note', t: 'رسالة متابعة', d: `${s.topTrack[0].replace(/^مسار\s+/, '')} · ${s.topTrack[1]} بنود` });
+  if (s.oldest && daysSince(s.oldest.m.date) > 21) out.push({ act: 'ag-follow', k: 'meeting:' + s.oldest.m.id, icon: 'note', t: `متابعة ${meetingLabel(s.oldest.m)}`, d: `${s.pending.filter((x) => x.m === s.oldest.m).length} بنود منذ ${daysSince(s.oldest.m.date)} يوماً` });
+  const nat = meetingsOf('national'); const next = nat.reduce((n, m) => Math.max(n, m.items.length ? m.number || 0 : 0), 0) + 1;
+  out.push({ act: 'ag-minutes', c: 'national', icon: 'doc', t: `حضّر المحضر ${ORD[next] || next}`, d: 'من ملاحظاتك أو صورها' });
+  out.push({ upload: true, icon: 'upload', t: 'ارفع محضراً', d: s.awaiting.length ? `${s.awaiting.length} اجتماعات بانتظار محاضرها` : 'ملف Word ← قائمة التوجيهات' });
+  out.push({ act: 'ag-deck', icon: 'deck', t: 'عرض الاجتماع القادم', d: 'عرض اللجنة الوطنية PowerPoint' });
+  out.push({ act: 'ag-lpptx', icon: 'spark', t: 'صدّر تقويم الإطلاقات', d: 'شريحة PowerPoint' });
+  out.push({ act: 'ag-idea', icon: 'bulb', t: 'أضف فكرة مشروع', d: 'إلى بنك الأفكار' });
+  return out;
+}
+function agentTile(a, i) {
+  const inner = `<span class="at-ico">${ICON[a.icon] || ICON.spark}</span><b>${esc(a.t)}</b><small>${esc(a.d)}</small>`;
+  return a.upload ? `<label class="atile" style="--i:${i}" for="docxInput" tabindex="0">${inner}</label>`
+    : `<button class="atile" style="--i:${i}" data-act="${a.act}" ${a.k ? `data-k="${esc(a.k)}"` : ''} ${a.c ? `data-c="${a.c}"` : ''}>${inner}</button>`;
+}
+const canVoice = () => !!(cap.dictation || window.SpeechRecognition || window.webkitSpeechRecognition);
 function agentPanel() {
   const s = projectSnapshot();
   const eng = engine();
-  const recs = agentRecs(s);
-  const chips = recs.filter((r) => r.s && r.s !== 'لخّص وضع المرحلة' && !/إطلاقات متأخرة/.test(r.s));
   const busy = ag.status === 'running';
   return `
-  <section class="agent big ${busy ? 'busy' : ''}" aria-label="المساعد">
-    <div class="ag-head">
-      <button class="orb" data-act="ag-focus" aria-label="اسأل المساعد"></button>
-      <div class="ag-hello"><b>المساعد</b><span>${esc(greeting())}، هذا أبرز ما يحتاج انتباهك اليوم.</span></div>
-      <span class="engine ${eng ? 'on' : ''}">${eng === 'claude' ? 'Claude' : eng === 'api' ? 'Claude API' : 'بدون اتصال'}</span>
-    </div>
-    <div class="ag-tiles">
-      ${chips.map((r, i) => `<button class="atile" style="--i:${i}" title="${esc(r.t)}${r.d ? ' · ' + esc(r.d) : ''}" data-act="${r.act}" ${r.q ? `data-q="${esc(r.q)}"` : ''} ${r.view ? `data-view="${r.view}"` : ''} ${r.c ? `data-c="${r.c}"` : ''}><span class="at-ico">${ICON[r.icon] || ICON.spark}</span><span>${esc(r.s)}</span><i>${r.label} ←</i></button>`).join('')}
-    </div>
+  <section class="agent big ${busy ? 'busy' : ''} ${voice.on ? 'listening' : ''}" aria-label="المساعد">
+    <span class="engine ${eng ? 'on' : ''}">${eng === 'claude' ? 'Claude' : eng === 'api' ? 'Claude API' : 'بدون اتصال'}</span>
+    <button class="ag-icon" data-act="${canVoice() ? 'ag-voice' : 'ag-focus'}" aria-label="${canVoice() ? 'تحدّث إلى المساعد' : 'اسأل المساعد'}"><img src="assets/agent-icon.png" alt=""></button>
+    <h2 class="ag-title">${esc(greeting())}، كيف أساعدك اليوم؟</h2>
+    <p class="ag-sub" id="agSub">${voice.on ? 'أستمع إليك…' : 'اختر إجراءً، أو اكتب أو تحدّث بطلبك.'}</p>
     <form class="ag-ask" onsubmit="return false">
-      <span class="ag-ask-ico">${ICON.spark}</span>
-      <input id="ag-input" autocomplete="off" placeholder="${eng ? 'اطلب من المساعد… مثال: ما المعلّق على مسار الخدمات الحكومية؟' : 'اربط Claude من الإعدادات لتفعيل المساعد'}" value="${esc(ag.draft)}" ${eng ? '' : 'disabled'} aria-label="اطلب من المساعد">
-      <button type="button" class="btn primary" data-act="ag-send" ${eng && !busy ? '' : 'disabled'}>أرسل</button>
-      ${eng ? '' : '<button type="button" class="link" data-act="open-settings">الإعدادات</button>'}
+      <input id="ag-input" autocomplete="off" placeholder="${eng ? 'اكتب أو تحدّث… مثال: جهّز متابعة لمسار الخدمات الحكومية' : 'اكتب أو تحدّث… مثل «رسالة متابعة» أو «صدّر الإطلاقات»'}" value="${esc(ag.draft)}" aria-label="اطلب من المساعد">
+      ${canVoice() ? `<button type="button" class="mic ${voice.on ? 'on' : ''}" id="ag-mic" data-act="ag-voice" aria-label="${voice.on ? 'إيقاف الاستماع' : 'تحدّث'}" title="تحدّث">${ICON.mic}</button>` : ''}
+      <button type="button" class="btn primary" data-act="ag-send" ${busy ? 'disabled' : ''}>أرسل</button>
     </form>
-    ${eng && !ag.turns.length ? `<div class="ag-sugg">${AG_SUGGEST.map((q) => `<button class="chip sugg" data-act="ag-ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}
+    <input type="file" id="docxInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden>
+    <div class="ag-tiles">${agentActions(s).map(agentTile).join('')}</div>
+    ${agentLocal()}
     ${agentResult()}
   </section>`;
+}
+
+// follow-up drafts built from the tracker, ready to copy, email or listen to
+function followupDraft(key) {
+  const [kind, id] = [key.slice(0, key.indexOf(':')), key.slice(key.indexOf(':') + 1)];
+  const pend = projectSnapshot().pending;
+  const items = kind === 'track' ? pend.filter(({ i }) => tracksOfItem(i).includes(id)) : pend.filter(({ m }) => m.id === id);
+  const m0 = kind === 'meeting' ? findMeeting(id) : null;
+  const to = kind === 'track' ? id : COMMITTEES[m0.committee];
+  const subject = kind === 'track' ? `متابعة التوجيهات المعلّقة – ${id}` : `متابعة توجيهات ${meetingLabel(m0)} – ${COMMITTEES[m0.committee]}`;
+  const lines = items.slice(0, 15).map(({ i, m }, n) => `${n + 1}. ${i.topic.replace(/\.$/, '')}: ${i.directive}${kind === 'track' ? ` (${meetingLabel(m)})` : ''}`);
+  const body = ['السلام عليكم ورحمة الله وبركاته،', '', `تحية طيبة وبعد، نود متابعة التوجيهات المعلّقة الخاصة بـ${to}:`, '', ...lines, '', 'نأمل التكرم بتزويدنا بآخر المستجدات والموعد المتوقع للإنجاز.', '', 'وتفضلوا بقبول فائق الاحترام،', 'فريق مشروع الذكاء الاصطناعي المساعد'].join('\n');
+  return { title: subject, subject, text: body, n: items.length };
+}
+function agentLocal() {
+  const d = ag.local; if (!d) return '';
+  return `<div class="ag-res ag-local">
+    <div class="ag-q"><span>${esc(d.title)}${d.n ? ` · ${d.n} بنود` : ''}</span><button class="icon-btn sm" data-act="ag-local-close" aria-label="إغلاق">✕</button></div>
+    <textarea id="agLocalText" rows="9" dir="rtl">${esc(d.text)}</textarea>
+    <div class="ag-acts">
+      <button class="btn primary sm" data-act="ag-mail">${ICON.mail} فتح في البريد</button>
+      <button class="btn sm" data-act="ag-local-copy">نسخ</button>
+      <button class="btn sm" data-act="ag-speak" data-src="local">${ICON.speaker} استمع</button>
+      ${engine() ? '<button class="btn sm" data-act="ag-refine">حسّنها مع Claude</button>' : ''}
+    </div>
+  </div>`;
+}
+
+// voice: claude.ai dictation when offered, else the browser's speech recognition
+const voice = { on: false, base: '', rec: null };
+function setVoice(on) {
+  voice.on = on;
+  $('.agent')?.classList.toggle('listening', on);
+  const b = $('#ag-mic'); if (b) b.classList.toggle('on', on);
+  const sub = $('#agSub'); if (sub) sub.textContent = on ? 'أستمع إليك…' : 'اختر إجراءً، أو اكتب أو تحدّث بطلبك.';
+}
+function voiceText(t, final) {
+  const i = $('#ag-input'); const v = (voice.base + ' ' + t).trim();
+  if (final) voice.base = v;
+  if (i) i.value = v; ag.draft = v;
+}
+function voiceDone() {
+  setVoice(false);
+  const q = (ag.draft || '').trim(); if (q) agentSubmit(q);
+}
+function wireDictation(d) {
+  d.onPartial(({ text }) => voiceText(text, false));
+  d.onFinal(({ text }) => voiceText(text, true));
+  d.onState(({ state: st, reason }) => {
+    if (st === 'listening') setVoice(true);
+    if (st === 'idle') { if (reason === 'not_granted') { toast('لم يُسمح باستخدام الميكروفون'); setVoice(false); } else voiceDone(); }
+  });
+}
+function voiceToggle() {
+  if (cap.dictation) {
+    if (voice.on || cap.dictation.active()) { cap.dictation.stop().catch(() => {}); return; }
+    voice.base = ''; ag.draft = '';
+    cap.dictation.start({ language: 'ar-AE' }).catch((e) => { setVoice(false); if (e && e.code === 'not_granted') toast('لم يُسمح باستخدام الميكروفون'); else if (e && e.code !== 'dismissed') toast('تعذّر تشغيل الإملاء الصوتي'); });
+    setVoice(true); return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+  if (voice.rec) { voice.rec.stop(); return; }
+  const r = new SR(); voice.rec = r; voice.base = ''; ag.draft = '';
+  r.lang = 'ar-AE'; r.interimResults = true; r.continuous = false;
+  r.onresult = (e) => { let fin = '', tmp = ''; for (let k = e.resultIndex; k < e.results.length; k++) (e.results[k].isFinal ? (fin += e.results[k][0].transcript) : (tmp += e.results[k][0].transcript)); if (fin) voiceText(fin, true); else voiceText(tmp, false); };
+  r.onerror = (e) => { if (e.error === 'not-allowed') toast('لم يُسمح باستخدام الميكروفون'); };
+  r.onend = () => { voice.rec = null; voiceDone(); };
+  try { r.start(); setVoice(true); } catch { voice.rec = null; }
+}
+function speak(text) {
+  text = String(text || '').replace(/[*#_`>]/g, '').slice(0, 2000); if (!text) return;
+  if (cap.tts) { cap.tts.speak(text).catch((e) => { if (e && e.code === 'not_granted') toast('القراءة الصوتية غير مفعّلة'); }); return; }
+  if (window.speechSynthesis) { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'ar-AE'; speechSynthesis.speak(u); return; }
+  toast('القراءة الصوتية غير متاحة هنا');
+}
+
+// typed or spoken requests: simple commands run directly; anything else goes to Claude
+function localIntent(q) {
+  const s = projectSnapshot();
+  const words = q.split(/\s+/).map((w) => w.replace(/^(ل|و|ب)?(ل)?/, '')).filter((w) => w.length > 3);
+  const score = (t) => (t.leads.some((n) => q.includes(n)) ? 9 : 0) + t.name.replace(/^مسار\s+/, '').split(/\s+/).filter((w) => w.length > 3 && words.some((x) => x === w || x === w.replace(/^ال/, '') || ('ال' + x) === w || x.includes(w))).length;
+  const tr = trackList().map((t) => [t, score(t)]).filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1])[0]?.[0];
+  if (/متابع/.test(q)) {
+    if (tr) return () => openFollowup('track:' + tr.name);
+    if (s.topTrack) return () => openFollowup('track:' + s.topTrack[0]);
+  }
+  if (/صد[ّ]?ر.*إطلاق|إطلاق.*(باوربوينت|pptx|powerpoint|بوربوينت)/i.test(q)) return () => runAction('ag-lpptx');
+  if (/عرض.*(اجتماع|لجنة)|(اجتماع|لجنة).*عرض/.test(q)) return () => runAction('ag-deck');
+  if (/(حض|جه|اكتب).*محضر/.test(q)) return () => runAction('ag-minutes', { c: /وزار/.test(q) ? 'ministry' : 'national' });
+  if (/فكر/.test(q) && /(أضف|اضف|جديد)/.test(q)) return () => ideaModal();
+  if (/إطلاق|اطلاق/.test(q)) return () => { location.hash = '#launches'; };
+  if (/محاضر|توجيه/.test(q)) return () => { location.hash = '#minutes'; };
+  return null;
+}
+function agentSubmit(q) {
+  q = String(q || '').trim(); if (!q) return;
+  const eng = engine(); const fn = localIntent(q);
+  if (!eng) { if (fn) { ag.draft = ''; fn(); } else toast('اربط Claude من الإعدادات للطلبات المفتوحة، أو اختر أحد الإجراءات'); return; }
+  agentAsk(q);
+}
+function openFollowup(key) {
+  ag.local = followupDraft(key); ag.turns = []; ag.api = [];
+  if (route() !== 'dashboard') location.hash = '#dashboard'; else render();
+  setTimeout(() => $('.ag-local')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 50);
+}
+function runAction(act, o = {}) {
+  if (act === 'ag-minutes') { ws.task = 'minutes'; ws.committee = o.c || 'national'; seedMeetingFields(true); saveDraft(); location.hash = '#workspace'; }
+  if (act === 'ag-deck') { ws.task = 'committee'; saveDraft(); location.hash = '#workspace'; }
+  if (act === 'ag-lpptx') { location.hash = '#launches'; setTimeout(() => { const b = $('[data-act=l-pptx]'); if (b) exportLaunchesPptx(b); }, 1200); }
 }
 function animateCounts() {
   if (ag.counted) return; ag.counted = true;
@@ -1898,6 +2027,19 @@ const AG_TOOLS = [
     },
   },
   {
+    name: 'prepare_followup',
+    description: 'Builds a ready follow-up message for the pending directives of one track (track name, e.g. "مسار الخدمات الحكومية") or one meeting (meeting_id), and shows it to the user as a card with Email, Copy and Listen buttons. Prefer this over writing a follow-up message in your reply.',
+    schema: { type: 'object', properties: { track: { type: 'string' }, meeting_id: { type: 'string' } }, additionalProperties: false },
+    run(inp) {
+      let key = '';
+      if (inp.meeting_id && findMeeting(inp.meeting_id)) key = 'meeting:' + inp.meeting_id;
+      else if (inp.track) { const t = trackList().find((x) => x.name.includes(String(inp.track).replace(/^مسار\s+/, ''))); if (t) key = 'track:' + t.name; }
+      if (!key) throw new Error('unknown track or meeting');
+      ag.local = followupDraft(key);
+      return { ok: true, items: ag.local.n, shown_to_user: true };
+    },
+  },
+  {
     name: 'prepare_committee_deck',
     description: "Prepares the National Committee meeting presentation in the workspace (cover, agenda, launches calendar statuses, batch figures, points to consider, FedAI figures) for a meeting number and date, and gives the user a button to open it. Optionally replaces the three 'points to consider'.",
     schema: { type: 'object', properties: { meeting_number: { type: 'integer' }, date: { type: 'string', description: 'YYYY-MM-DD' }, points: { type: 'array', items: { type: 'string' } } }, additionalProperties: false },
@@ -1930,7 +2072,7 @@ function persistQuiet() {
   if (ghOn()) { clearTimeout(saveTimer); saveTimer = setTimeout(() => ghSave().then(() => setSync('ok', 'تمت المزامنة ✓')).catch(() => setSync('err', 'تعذّرت المزامنة')), 1200); }
 }
 
-const AG_SYSTEM = `أنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
+const AG_SYSTEM = `أجب باختصار شديد (جملة أو جملتان)، وفضّل تنفيذ المطلوب بالأدوات التي تعطي المستخدم أزراراً وبطاقات جاهزة (مثل prepare_followup وprepare_minutes_draft وprepare_committee_deck وexport_project_template) بدلاً من الشرح النصي الطويل.\n\nأنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
 
 - اكتب بالعربية الفصحى بأسلوب حكومي واضح ومختصر، واستخدم قوائم قصيرة عند الحاجة.
 - اعتمد على الأدوات للاطلاع على البيانات الفعلية قبل الإجابة عن المراحل أو التوجيهات أو المحاضر، ولا تخمّن أرقاماً أو أسماء.
@@ -2291,13 +2433,22 @@ app.addEventListener('click', (e) => {
     case 'dk-suggest': suggestDeckPoints(t); break;
     case 'dk-build': generateDeck(); break;
     case 'ag-ask': agentAsk(ds.q); break;
-    case 'ag-send': agentAsk($('#ag-input')?.value); break;
+    case 'ag-send': agentSubmit($('#ag-input')?.value); break;
+    case 'ag-voice': voiceToggle(); break;
+    case 'ag-follow': openFollowup(ds.k); break;
+    case 'ag-deck': case 'ag-lpptx': runAction(ds.act); break;
+    case 'ag-idea': ideaModal(); break;
+    case 'ag-local-close': ag.local = null; render(); break;
+    case 'ag-local-copy': navigator.clipboard.writeText($('#agLocalText').value).then(() => toast('تم النسخ'), () => toast('تعذّر النسخ')); break;
+    case 'ag-mail': { const d = ag.local; const body = $('#agLocalText').value; location.href = `mailto:?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(body)}`; break; }
+    case 'ag-speak': speak(ds.src === 'local' ? $('#agLocalText').value : (ag.turns[+ds.k] || {}).text); break;
+    case 'ag-refine': { const body = $('#agLocalText').value; ag.local = null; agentAsk(`حسّن صياغة رسالة المتابعة التالية واجعلها رسمية ومختصرة، وأعد النص كاملاً فقط:\n\n${body}`); break; }
     case 'ag-stop': ag.ctl?.abort(); break;
     case 'ag-clear': ag.turns = []; ag.api = []; ag.more = false; render(); break;
     case 'ag-open-ask': case 'ag-focus': { const i = $('#ag-input'); if (i) { i.scrollIntoView({ block: 'center', behavior: 'smooth' }); i.focus(); } break; }
     case 'ag-more': ag.more = !ag.more; agLive(); break;
     case 'ag-goto': location.hash = '#' + ds.view; break;
-    case 'ag-minutes': ws.task = 'minutes'; ws.committee = ds.c; seedMeetingFields(true); saveDraft(); location.hash = '#workspace'; break;
+    case 'ag-minutes': runAction('ag-minutes', { c: ds.c }); break;
     case 'ag-copy': navigator.clipboard.writeText(ag.turns[+ds.k].text).then(() => toast('تم نسخ الرد'), () => toast('تعذّر النسخ')); break;
     case 'ag-undo': {
       const a = ag.turns[+ds.k].actions[+ds.j];
@@ -2313,7 +2464,7 @@ app.addEventListener('click', (e) => {
 });
 app.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && e.target.matches && e.target.matches('.a3c')) { launchModal(state.launches.find((l) => l.id === e.target.dataset.id)); return; }
-  if (e.target.id === 'ag-input' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); agentAsk(e.target.value); }
+  if (e.target.id === 'ag-input' && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); agentSubmit(e.target.value); }
 });
 app.addEventListener('input', (e) => {
   if (e.target.id === 'ag-input') { ag.draft = e.target.value; return; }
