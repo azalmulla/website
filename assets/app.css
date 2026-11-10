@@ -821,3 +821,20 @@ dialog::backdrop{background:var(--scrim)}
   .agent.big .atile{flex:1 1 calc(50% - 12px);padding:12px 10px}
   .agent.big .ag-ask .btn{padding-inline:14px}
 }
+
+/* stage panel: finer (same content, tighter) */
+.hero{padding:20px 24px 22px;gap:14px 36px;margin-bottom:20px}
+.hero h2{font-size:clamp(24px,2.6vw,32px)}
+.hero-sub{font-size:clamp(15px,1.4vw,17px)}
+.hero .range{font-size:13px;margin:2px 0 0}
+.hero .countdown{gap:8px;margin:6px 0 10px}
+.hero .cd-unit{padding:7px 4px 5px;border-radius:12px}
+.hero .cd-unit b{font-size:clamp(20px,2.2vw,26px)}
+.hero .cd-unit span{font-size:12px}
+.hero .cd-label{font-size:13px}
+.hero .track{gap:8px}
+.hero .ts-bar{height:4px;margin-bottom:4px}
+.hero .ts-n{width:22px;height:22px;font-size:12px}
+.hero .ts-t{font-size:12px}
+.hero .ts-d{font-size:11px}
+.hero::after{height:4px}
