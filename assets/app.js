@@ -153,6 +153,7 @@ function migrate(local, remote) {
   (local.meetings || []).forEach((m) => { if (!have.has(m.id) && (m.items || []).length && !haveKey.has(key(m))) remote.meetings.push(m); });
   ['launches', 'ideas'].forEach((k) => { if ((local[k] || []).length) remote[k] = local[k].map((x) => { const r = (remote[k] || []).find((y) => y.id === x.id); if (r) ['bg', 'avatars', 'logos', 'logosTop', 'mark', 'order'].forEach((f) => { if (x[f] === undefined && r[f] !== undefined) x[f] = r[f]; }); return x; }); });
   if (local.deck) remote.deck = local.deck;
+  if (local.assignments && remote.assignments) { const st = new Map(local.assignments.groups.flatMap((g) => g.items.map((i) => [i.id, i.status]))); remote.assignments.groups.forEach((g) => g.items.forEach((i) => { if (st.has(i.id)) i.status = st.get(i.id); })); }
   const lev = new Map((local.events || []).map((e) => [e.id, e]));
   (remote.events || []).forEach((e) => { const o = lev.get(e.id); if (o && (o.photos || []).length) e.photos = o.photos; });
   const rids = new Set((remote.events || []).map((e) => e.id));
@@ -173,6 +174,7 @@ async function load() {
   else if (local && remote) { const st = local.stages, pr = local.project; state = migrate(local, remote); if ((st || []).length) state.stages = st; if (pr) state.project = { ...state.project, ...pr }; state.updatedAt = new Date().toISOString(); ls.set(LS_STATE, state); }
   else state = remote;
   if (!state) state = { schema: SCHEMA, updatedAt: '', project: {}, stages: [], meetings: [] };
+  if (!state.assignments && remote && remote.assignments) state.assignments = remote.assignments;
   state.meetings ||= []; state.stages ||= []; state.project ||= {}; state.launches ||= []; state.ideas ||= []; state.events ||= [];
   state.events.forEach((e) => { e.photos ||= []; });
   state.meetings.forEach((m) => (m.items ||= []).forEach((it) => { if (it.status !== 'done') it.status = 'pending'; }));
@@ -282,7 +284,30 @@ function viewDashboard() {
   <h2 class="sec-h">بنود للمتابعة</h2>
   <section class="dash-cols">${pendCard('national')}${pendCard('ministry')}</section>
 
+  ${assignSection()}
+
   `;
+}
+
+// Project assignments board (from the «تكليفات المشاريع» slides), with a status dropdown per project.
+const ASG_ST = ['لم يتم البدء بعد', 'قيد التطوير', 'تم الانتهاء – في مرحلة الاعتماد', 'تم الإنجاز'];
+const asgClass = (st) => st === 'لم يتم البدء بعد' ? 'st-none' : /تم الإنجاز/.test(st) ? 'st-done' : 'st-on';
+function assignSection() {
+  const A = state.assignments; if (!A || !(A.groups || []).length) return '';
+  const all = [...new Set([...ASG_ST, ...A.groups.flatMap((g) => g.items.map((i) => i.status))])];
+  return `<section class="asg" aria-label="تكليفات المشاريع">
+    ${A.bg ? `<img class="asg-bg" data-photo="${esc(A.bg)}" alt="">` : ''}
+    <h2 class="asg-title">تكليفـــــــات المشـــــاريـــــع</h2>
+    <div class="asg-head"><span>قائد المشروع</span><span>المشروع</span><span>تاريخ البدء والانتهاء</span><span>حالة المشروع</span></div>
+    ${A.groups.map((g) => `<div class="asg-card">
+      <img class="asg-av" data-photo="${esc(g.avatar)}" alt="">
+      <div class="asg-rows">${g.items.map((i) => `<div class="asg-row">
+        <b class="asg-t">${bd(i.title)}</b>
+        <span class="asg-d">${esc(i.dates)}</span>
+        <label class="asg-st ${asgClass(i.status)}"><select data-act="a-status" data-g="${g.id}" data-i="${i.id}" aria-label="حالة: ${esc(i.title)}">${all.map((o) => `<option ${o === i.status ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></label>
+      </div>`).join('')}</div>
+    </div>`).join('')}
+  </section>`;
 }
 
 function launchesDashCard() {
@@ -2420,7 +2445,7 @@ app.addEventListener('click', (e) => {
         .catch(() => { toast('تعذّر تحميل البيانات الأصلية'); render(); });
       break;
     }
-    case 'l-status': break;
+    case 'l-status': case 'a-status': break;
     case 'l-pptx': exportLaunchesPptx(t); break;
     case 'l-edit': launchModal(state.launches.find((l) => l.id === ds.id)); break;
     case 'l-undo': { const prev = lHist.pop(); if (prev) { state.launches = JSON.parse(prev); commit('تم التراجع عن آخر تغيير'); } break; }
@@ -2491,6 +2516,11 @@ app.addEventListener('drop', (e) => { const z = e.target.closest('[data-drop]');
 document.addEventListener('click', (e) => { if (ws.menu && !e.target.closest('.picker')) { ws.menu = false; render(); } });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ws.menu) { ws.menu = false; render(); $('.picker-btn')?.focus(); } });
 app.addEventListener('change', (e) => {
+  if (e.target.dataset.act === 'a-status') {
+    const g = (state.assignments.groups || []).find((x) => x.id === e.target.dataset.g); const it = g && g.items.find((x) => x.id === e.target.dataset.i);
+    if (it) { it.status = e.target.value; e.target.parentElement.className = 'asg-st ' + asgClass(it.status); commit(`${it.title}: ${it.status}`, true); }
+    return;
+  }
   if (e.target.dataset.act === 'l-status') {
     const l = state.launches.find((x) => x.id === e.target.dataset.id);
     if (l && l.status !== e.target.value) { lSnap(); l.status = e.target.value; delete l.note; commit(`${l.title}: ${LSTN[l.status]}`); }
