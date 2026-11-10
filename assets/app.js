@@ -282,12 +282,6 @@ function viewDashboard() {
   <h2 class="sec-h">بنود للمتابعة</h2>
   <section class="dash-cols">${pendCard('national')}${pendCard('ministry')}</section>
 
-  ${launchesDashCard()}
-  <section class="news-cols">
-    ${newsCard('أخبار الذكاء الاصطناعي المساعد في الإمارات', 'UAE', news.uae)}
-    ${newsCard('أخبار Agentic AI عالمياً', 'Global', news.global)}
-  </section>
-  <p class="section-note">تُحدَّث الأخبار تلقائياً يومياً الساعة 7:00 صباحاً بتوقيت الإمارات (أحدث 3 أخبار، وتبقى السابقة إن لم يوجد جديد)${news.updatedAt ? ` · آخر تحديث ${newsDate(news.updatedAt)}` : ''}.</p>
   `;
 }
 

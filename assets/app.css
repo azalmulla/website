@@ -847,3 +847,4 @@ dialog::backdrop{background:var(--scrim)}
 @keyframes need{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
 .pend-body .list>li.leaving{animation:pendleave .32s ease forwards;pointer-events:none}
 @keyframes pendleave{to{opacity:0;transform:translateX(-24px)}}
+.tabs a[hidden]{display:none}
