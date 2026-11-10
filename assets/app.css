@@ -549,6 +549,50 @@ details.att p{margin:6px 0 0;line-height:1.9;max-width:90ch}
 .l-dash .bar{margin-bottom:6px}
 .l-dash .bar>i{background:linear-gradient(90deg,oklch(0.627 0.126 148.7),oklch(0.461 0.090 149.4))}
 .l-dash .list>li{align-items:center;padding:10px 0}
+/* ---------- launches: A3 board (always dark, like the slide) ---------- */
+.a3{--a3-ink:#FFFFFF;--a3-navy:#0A1A4A;--a3-green:#00B050;--a3-yellow:#FFC000;--a3-blue:#2E75FF;--a3-gray:#E8ECF4;
+  position:relative;overflow:hidden;border-radius:18px;padding:18px 18px 22px;background:linear-gradient(160deg,#071a52,#0a2f8a 55%,#0b4fd6);color:var(--a3-ink);isolation:isolate}
+.a3-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;opacity:.9}
+.a3-h{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.a3-h h1{margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(22px,3vw,34px);letter-spacing:.01em;color:#FFFFFF;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.a3-logo{height:38px;width:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+.a3-bar{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin:12px 0 16px;font-size:12.5px}
+.a3-prog{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:3px 12px}
+.a3-prog b{font-family:var(--font-heading);font-size:15px}
+.a3-prog i{display:inline-block;width:80px;height:5px;border-radius:9px;background:linear-gradient(90deg,var(--a3-green) var(--p),rgba(255,255,255,.25) var(--p))}
+.a3-legend{display:flex;gap:10px;flex-wrap:wrap}
+.lg{display:inline-flex;align-items:center;gap:5px;opacity:.92}
+.lg i{width:10px;height:10px;border-radius:3px;background:var(--c-st)}
+.a3-add{margin-inline-start:auto;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.4);color:#FFFFFF;border-radius:999px}
+.a3-add:hover{background:rgba(255,255,255,.25);color:#FFFFFF}
+.st-announced{--c-st:var(--a3-green,#00B050)}.st-ready,.st-prep{--c-st:var(--a3-yellow,#FFC000)}.st-scheduled{--c-st:var(--a3-blue,#2E75FF)}.st-planned{--c-st:var(--a3-gray,#E8ECF4)}
+.a3-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:stretch}
+.a3c{position:relative;overflow:hidden;isolation:isolate;min-height:178px;border-radius:14px;padding:10px 11px 10px;display:flex;flex-direction:column;gap:8px;cursor:pointer;
+  background:linear-gradient(180deg,rgba(16,40,110,.55),rgba(6,16,52,.92));border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 24px -14px rgba(0,0,0,.6);transition:transform .2s,box-shadow .2s;animation:chipin .45s both}
+.a3c:hover,.a3c:focus-visible{transform:translateY(-3px);box-shadow:0 18px 34px -16px rgba(0,0,0,.7);outline:none;border-color:rgba(255,255,255,.4)}
+.a3c-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;opacity:.55}
+.a3c::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,26,80,.35) 0%,rgba(6,16,52,.88) 70%)}
+.a3c-mark{position:absolute;inset-inline-start:8px;bottom:6px;font-family:var(--font-heading);font-weight:800;font-size:44px;color:rgba(255,255,255,.18);z-index:-1}
+.a3c-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.a3c-who{display:flex;align-items:center}
+.a3c-who img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.85);background:#0b1f5c}
+.a3c-who img+img{margin-inline-start:-8px}
+.a3c-month{font-family:var(--font-heading);font-weight:700;font-size:13px;line-height:24px;padding:0 12px;border-radius:999px;background:var(--c-st);color:#0A1A4A;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.st-planned .a3c-month{background:#FFFFFF}
+.a3c h3{margin:0;font-family:var(--font-heading);font-weight:800;font-size:15.5px;line-height:1.45;color:#FFFFFF;text-shadow:0 1px 6px rgba(0,0,0,.35);flex:1}
+.a3c-logos{display:flex;gap:6px;align-items:center}
+.a3c-logos img{max-height:28px;max-width:90px;object-fit:contain;filter:brightness(0) invert(1);opacity:.85}
+.a3c-logos.top img{max-height:16px;filter:none;opacity:1}
+.a3c-note{font-size:11.5px;font-weight:700;text-align:center;line-height:1.4;padding:4px 6px;border-radius:6px;background:var(--c-st);color:#0A1A4A}
+.st-announced .a3c-note,.st-scheduled .a3c-note{color:#FFFFFF}
+.a3c-late{margin-inline-start:auto;margin-inline-end:6px;font-size:10.5px;font-weight:700;padding:0 6px;line-height:18px;border-radius:5px;background:#E5484D;color:#FFFFFF}
+.a3c-next{position:absolute;inset-inline:10px;bottom:10px;border:0;border-radius:8px;padding:6px;font-size:12px;font-weight:700;background:#FFFFFF;color:#0A3A9E;cursor:pointer;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
+.a3c:hover .a3c-next,.a3c:focus-within .a3c-next{opacity:1;transform:none}
+.a3-group{grid-column:span var(--n);display:flex;flex-direction:column;gap:8px;padding:8px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.28)}
+.a3-group-h{font-size:12px;font-weight:700;text-align:center;padding:4px 10px;border-radius:8px;background:#FFFFFF;color:#0A1A4A}
+.a3-group-c{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:10px;flex:1}
+.a3-group .a3c{min-height:150px}
+
 /* ---------- archive ---------- */
 .chip.fchip{cursor:pointer;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);line-height:30px;padding:0 10px}
 .chip.fchip.off{opacity:.45;text-decoration:line-through}
@@ -648,6 +692,8 @@ dialog::backdrop{background:var(--scrim)}
 /* ---------- responsive ---------- */
 @media (max-width:1040px){
   .ws-grid,.deck-grid{grid-template-columns:1fr}
+  .a3-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .a3-group{grid-column:span min(var(--n),3)}
   .deck-side{position:static}
   .ws-out{position:static}
   .hero{grid-template-columns:1fr}
@@ -679,6 +725,11 @@ dialog::backdrop{background:var(--scrim)}
   .ck-note{margin-inline-start:0}
   .ck-n{display:none}
   .row2,.stage-row,.imp-fields,.ws-fields,.cpick,.ag-recs,.outs{grid-template-columns:1fr}
+  .a3-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .a3-group{grid-column:1/-1}
+  .a3{padding:14px 10px 16px}
+  .a3c{min-height:160px}
+  .a3c-next{opacity:1;transform:none;position:static;margin-top:2px}
   .dash-cols{grid-template-columns:1fr}
   .pend-body{max-height:440px}
   .ag-row{grid-template-columns:22px 1fr 34px}
