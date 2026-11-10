@@ -838,3 +838,7 @@ dialog::backdrop{background:var(--scrim)}
 .hero .ts-t{font-size:12px}
 .hero .ts-d{font-size:11px}
 .hero::after{height:4px}
+.ag-tracks{display:flex;flex-wrap:wrap;gap:6px}
+.ag-tracks .chip{cursor:pointer}
+.ag-tracks .chip b{font-variant-numeric:tabular-nums;opacity:.7;margin-inline-start:4px}
+.ag-tracks .chip.on{background:var(--accent);border-color:var(--accent);color:#FFFFFF}

@@ -1723,13 +1723,8 @@ function agentResult() {
 // Direct actions: each tile does the job itself (draft, file, export, page), no chat needed.
 function agentActions(s) {
   const out = [];
-  if (s.topTrack) out.push({ act: 'ag-follow', k: 'track:' + s.topTrack[0], icon: 'note', t: 'رسالة متابعة', d: `${s.topTrack[0].replace(/^مسار\s+/, '')} · ${s.topTrack[1]} بنود` });
-  if (s.oldest && daysSince(s.oldest.m.date) > 21) out.push({ act: 'ag-follow', k: 'meeting:' + s.oldest.m.id, icon: 'note', t: `متابعة ${meetingLabel(s.oldest.m)}`, d: `${s.pending.filter((x) => x.m === s.oldest.m).length} بنود منذ ${daysSince(s.oldest.m.date)} يوماً` });
-  const nat = meetingsOf('national'); const next = nat.reduce((n, m) => Math.max(n, m.items.length ? m.number || 0 : 0), 0) + 1;
-  out.push({ act: 'ag-minutes', c: 'national', icon: 'doc', t: `حضّر المحضر ${ORD[next] || next}`, d: 'من ملاحظاتك أو صورها' });
-  out.push({ upload: true, icon: 'upload', t: 'ارفع محضراً', d: s.awaiting.length ? `${s.awaiting.length} اجتماعات بانتظار محاضرها` : 'ملف Word ← قائمة التوجيهات' });
+  if (s.topTrack) out.push({ act: 'ag-follow', k: 'track:' + s.topTrack[0], icon: 'note', t: 'جهّز رسالة متابعة للمسارات', d: 'اختر المسار ← رسالة جاهزة للإرسال' });
   out.push({ act: 'ag-deck', icon: 'deck', t: 'عرض الاجتماع القادم', d: 'عرض اللجنة الوطنية PowerPoint' });
-  out.push({ act: 'ag-lpptx', icon: 'spark', t: 'صدّر تقويم الإطلاقات', d: 'شريحة PowerPoint' });
   out.push({ act: 'ag-idea', icon: 'bulb', t: 'أضف فكرة مشروع', d: 'إلى بنك الأفكار' });
   return out;
 }
@@ -1754,7 +1749,6 @@ function agentPanel() {
       ${canVoice() ? `<button type="button" class="mic ${voice.on ? 'on' : ''}" id="ag-mic" data-act="ag-voice" aria-label="${voice.on ? 'إيقاف الاستماع' : 'تحدّث'}" title="تحدّث">${ICON.mic}</button>` : ''}
       <button type="button" class="btn primary" data-act="ag-send" ${busy ? 'disabled' : ''}>أرسل</button>
     </form>
-    <input type="file" id="docxInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden>
     <div class="ag-tiles">${agentActions(s).map(agentTile).join('')}</div>
     ${agentLocal()}
     ${agentResult()}
@@ -1771,12 +1765,14 @@ function followupDraft(key) {
   const subject = kind === 'track' ? `متابعة التوجيهات المعلّقة – ${id}` : `متابعة توجيهات ${meetingLabel(m0)} – ${COMMITTEES[m0.committee]}`;
   const lines = items.slice(0, 15).map(({ i, m }, n) => `${n + 1}. ${i.topic.replace(/\.$/, '')}: ${i.directive}${kind === 'track' ? ` (${meetingLabel(m)})` : ''}`);
   const body = ['السلام عليكم ورحمة الله وبركاته،', '', `تحية طيبة وبعد، نود متابعة التوجيهات المعلّقة الخاصة بـ${to}:`, '', ...lines, '', 'نأمل التكرم بتزويدنا بآخر المستجدات والموعد المتوقع للإنجاز.', '', 'وتفضلوا بقبول فائق الاحترام،', 'فريق مشروع الذكاء الاصطناعي المساعد'].join('\n');
-  return { title: subject, subject, text: body, n: items.length };
+  return { key, title: subject, subject, text: body, n: items.length };
 }
+const trackCounts = () => { const p = projectSnapshot().pending; return trackList().map((t) => [t.name, p.filter(({ i }) => tracksOfItem(i).includes(t.name)).length]); };
 function agentLocal() {
   const d = ag.local; if (!d) return '';
   return `<div class="ag-res ag-local">
     <div class="ag-q"><span>${esc(d.title)}${d.n ? ` · ${d.n} بنود` : ''}</span><button class="icon-btn sm" data-act="ag-local-close" aria-label="إغلاق">✕</button></div>
+    ${d.key.startsWith('track:') ? `<div class="ag-tracks" role="group" aria-label="المسار">${trackCounts().map(([t, n]) => `<button class="chip ${d.key === 'track:' + t ? 'on' : ''}" data-act="ag-follow" data-k="${esc('track:' + t)}">${esc(t.replace(/^مسار\s+/, ''))} <b>${n}</b></button>`).join('')}</div>` : ''}
     <textarea id="agLocalText" rows="9" dir="rtl">${esc(d.text)}</textarea>
     <div class="ag-acts">
       <button class="btn primary sm" data-act="ag-mail">${ICON.mail} فتح في البريد</button>
