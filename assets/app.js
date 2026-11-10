@@ -243,16 +243,19 @@ function viewDashboard() {
     return `<div class="card pend-card">
       <div class="card-h"><h2><span class="dot" style="--c:var(--c-${c})"></span>${COMMITTEES[c]} <span class="count">${list.length} معلّق</span></h2>
         <a class="link" href="#minutes" data-act="goto-committee" data-c="${c}">المحاضر ←</a></div>
-      <div class="pend-strip">${groups.length ? groups.map((g) => g.items.map((i) => `
-        <article class="pcard">
-          <div class="pc-top">
-            <input type="checkbox" class="tick" data-act="toggle-item" data-mid="${g.m.id}" data-iid="${i.id}" aria-label="تم الإنجاز: ${esc(i.topic)}">
-            <a class="pc-m" href="#minutes" data-act="goto-meeting" data-c="${c}" data-mid="${g.m.id}">${esc(meetingLabel(g.m))}</a>
-          </div>
-          <b class="pc-t"><span class="pf-l">الموضوع:</span> ${bd(i.topic)}</b>
-          ${i.directive ? `<p class="pc-d" title="${esc(i.directive)}"><span class="pf-l">التوجيه:</span> ${bd(i.directive)}</p>` : ''}
-          ${i.owners ? `<span class="pc-o" title="${esc(i.owners)}"><span class="pf-l">صاحب العلاقة:</span> ${bd(i.owners)}</span>` : ''}
-        </article>`).join('')).join('') : `<div class="empty">${meetingsOf(c).some((m) => m.items.length) ? 'لا توجد بنود معلّقة.' : 'لم تُرفع محاضر بعد.'}</div>`}
+      <div class="card-b pend-body">${groups.length ? groups.map((g) => `
+        <div class="pend-group">
+          <a class="pend-gh" href="#minutes" data-act="goto-meeting" data-c="${c}" data-mid="${g.m.id}">${esc(meetingLabel(g.m))}${g.m.date ? ` · ${fmtDate(g.m.date)}` : ''}<span>${g.items.length}</span></a>
+          <ul class="list">${g.items.map((i) => `
+            <li>
+              <input type="checkbox" class="tick" data-act="toggle-item" data-mid="${g.m.id}" data-iid="${i.id}" aria-label="تم الإنجاز: ${esc(i.topic)}">
+              <div class="li-main">
+                <div class="li-title"><span class="pf-l">الموضوع:</span> ${bd(i.topic)}</div>
+                ${i.directive ? `<div class="pf-dir"><span class="pf-l">التوجيه:</span> ${bd(i.directive)}</div>` : ''}
+                ${i.owners ? `<div class="li-sub"><span class="pf-l">صاحب العلاقة:</span> ${bd(i.owners)}</div>` : ''}
+              </div>
+            </li>`).join('')}</ul>
+        </div>`).join('') : `<div class="empty">${meetingsOf(c).some((m) => m.items.length) ? 'لا توجد بنود معلّقة.' : 'لم تُرفع محاضر بعد.'}</div>`}
       </div>
     </div>`;
   };
