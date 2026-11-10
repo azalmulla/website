@@ -771,3 +771,12 @@ dialog::backdrop{background:var(--scrim)}
   .topbar,.foot-band,.btn,.icon-btn,.mstrip,.subtabs{display:none!important}
   .card{box-shadow:none}
 }
+
+/* launches: status bar is a dropdown */
+.a3c-sel{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:filter .15s,box-shadow .15s}
+.a3c-sel:hover{filter:brightness(1.06);box-shadow:0 0 0 2px rgba(255,255,255,.55)}
+.a3c-sel:focus-within{box-shadow:0 0 0 2px #FFFFFF}
+.a3c-sel i{font-style:normal;font-size:10px;opacity:.75}
+.a3c-sel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font:inherit;color:#0A1A4A}
+.a3c-sel select option{background:#FFFFFF;color:#0A1A4A}
+.a3-logo{filter:none}

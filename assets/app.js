@@ -1095,7 +1095,6 @@ const lSnap = () => { lHist.push(JSON.stringify(state.launches)); if (lHist.leng
 // the launches page is drawn like the A3 launches calendar slide
 const A3_NOTE = (l) => l.status === 'announced' ? '✓ تم الإعلان' : (l.note || (l.date ? `موعد الإطلاق ${fmtDate(l.date)}` : l.status === 'planned' ? '' : LSTN[l.status]));
 function launchCard(l) {
-  const nx = lNext(l.status);
   const month = l.month ? MONTHS[+l.month.slice(5, 7) - 1] : 'للتحديد';
   const logos = (l.logos || []).map((g) => `<img data-photo="${esc(g)}" alt="">`).join('');
   const note = A3_NOTE(l);
@@ -1107,8 +1106,8 @@ function launchCard(l) {
     </div>
     <h3>${bd(l.title)}</h3>
     ${!l.logosTop && logos ? `<span class="a3c-logos">${logos}</span>` : ''}
-    ${note ? `<div class="a3c-note">${bd(note)}</div>` : ''}
-    ${nx ? `<button class="a3c-next" data-act="l-next" data-id="${l.id}" title="نقل إلى: ${LSTN[nx]}">${LSTN[nx]} ←</button>` : ''}
+    <label class="a3c-note a3c-sel" title="تغيير الحالة"><span>${bd(note || LSTN[l.status])}</span><i aria-hidden="true">▾</i>
+      <select data-act="l-status" data-id="${l.id}" aria-label="حالة: ${esc(l.title)}">${LST.map(([k, v]) => `<option value="${k}" ${k === l.status ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
   </article>`;
 }
 
@@ -1127,12 +1126,13 @@ function viewLaunches() {
     ${bg ? `<img class="a3-bg" data-photo="${esc(bg)}" alt="">` : ''}
     <header class="a3-h">
       <h1>تقويم الإطلاقات والإعلانات</h1>
-      <img class="a3-logo" src="assets/logo.svg" alt="مشروع الذكاء الاصطناعي المساعد">
+      <img class="a3-logo" src="assets/logo-mono.svg" alt="مشروع الذكاء الاصطناعي المساعد">
     </header>
     <div class="a3-bar">
       <span class="a3-prog"><b>${done}</b> من ${L.length} تم الإعلان<i style="--p:${L.length ? done / L.length * 100 : 0}%"></i></span>
       <span class="a3-legend">${LST.map(([k, v]) => `<span class="lg st-${k}"><i></i>${v}</span>`).join('')}</span>
       <button class="btn sm a3-add" data-act="l-add">+ إضافة</button>
+      <button class="btn sm a3-reset" data-act="l-pptx" title="تصدير التقويم إلى PowerPoint">⇩ PowerPoint</button>
       <button class="btn sm a3-reset" data-act="l-undo" ${lHist.length ? '' : 'disabled'} title="التراجع عن آخر تغيير">↶ تراجع${lHist.length ? ` (${lHist.length})` : ''}</button>
       <button class="btn sm a3-reset ${ui.lresetArm ? 'armed' : ''}" data-act="l-reset" title="إعادة الإطلاقات إلى حالاتها الأصلية كما في تقويم A3">${ui.lresetArm ? 'تأكيد إعادة الضبط' : '↺ إعادة الضبط'}</button>
     </div>
@@ -1143,7 +1143,76 @@ function viewLaunches() {
       </div>`).join('')}
     </div>
   </section>
-  <p class="section-note">اضغط على أي بطاقة لتعديل حالتها وموعدها وملاحظتها، أو على زر المرحلة التالية أسفلها.</p>`;
+  <p class="section-note">غيّر حالة أي إطلاق من القائمة المنسدلة أسفل بطاقته، أو اضغط على البطاقة لتعديل موعدها وملاحظتها.</p>`;
+}
+
+// Export the launches board as a one-slide PowerPoint, laid out exactly as drawn on screen.
+const PPTXGEN_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js';
+function loadPptxGen() {
+  if (window.PptxGenJS) return Promise.resolve(window.PptxGenJS);
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = PPTXGEN_URL; s.onload = () => res(window.PptxGenJS); s.onerror = () => rej(new Error('pptxgenjs')); document.head.appendChild(s); });
+}
+async function imgData(img, w, h, round) {
+  if (!img || !img.complete || !img.naturalWidth) return null;
+  try {
+    const c = document.createElement('canvas'); const k = img.classList.contains('a3-logo') ? 6 : 2;
+    c.width = Math.round(w * k); c.height = Math.round(h * k);
+    const x = c.getContext('2d');
+    if (round) { x.beginPath(); x.arc(c.width / 2, c.height / 2, Math.min(c.width, c.height) / 2, 0, Math.PI * 2); x.clip(); }
+    const r = Math.max(c.width / img.naturalWidth, c.height / img.naturalHeight), contain = img.classList.contains('a3-logo') || img.closest('.a3c-logos');
+    const s = contain ? Math.min(c.width / img.naturalWidth, c.height / img.naturalHeight) : r;
+    const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+    x.drawImage(img, (c.width - dw) / 2, (c.height - dh) / 2, dw, dh);
+    return c.toDataURL(contain || round ? 'image/png' : 'image/jpeg', .85);
+  } catch { return null; }
+}
+async function exportLaunchesPptx(btn) {
+  const board = $('.a3'); if (!board) return;
+  btn.disabled = true; const label = btn.textContent; btn.textContent = 'جارٍ التصدير…';
+  try {
+    const PptxGenJS = await loadPptxGen();
+    const pptx = new PptxGenJS();
+    const B = board.getBoundingClientRect(), W = 13.333, H = +(W * B.height / B.width).toFixed(3), k = W / B.width;
+    pptx.defineLayout({ name: 'BOARD', width: W, height: H }); pptx.layout = 'BOARD'; pptx.rtlMode = true;
+    const slide = pptx.addSlide(); slide.background = { color: '0A1A4A' };
+    const box = (el) => { const r = el.getBoundingClientRect(); return { x: (r.left - B.left) * k, y: (r.top - B.top) * k, w: r.width * k, h: r.height * k, r }; };
+    const font = 'Dubai', T = { fontFace: font, rtlMode: true, lang: 'ar-AE', margin: 0 };
+    const bg = board.querySelector('.a3-bg'); const bgd = await imgData(bg, B.width, B.height);
+    if (bgd) slide.addImage({ data: bgd, x: 0, y: 0, w: W, h: H });
+    const h1 = box(board.querySelector('.a3-h h1'));
+    slide.addText('تقويم الإطلاقات والإعلانات', { ...T, x: h1.x, y: h1.y, w: h1.w, h: h1.h, fontSize: 26, bold: true, color: 'FFFFFF', align: 'right', valign: 'middle' });
+    const lg = board.querySelector('.a3-logo'); if (lg) { const b = box(lg); const d = await imgData(lg, b.r.width, b.r.height); if (d) slide.addImage({ data: d, x: b.x, y: b.y, w: b.w, h: b.h }); }
+    const pr = board.querySelector('.a3-prog'); if (pr) { const b = box(pr); slide.addText(pr.textContent.trim(), { ...T, x: b.x, y: b.y, w: b.w, h: b.h, fontSize: 10, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, rectRadius: .15, fill: { color: 'FFFFFF', transparency: 85 } }); }
+    for (const it of board.querySelectorAll('.a3-legend .lg')) {
+      const b = box(it), dot = box(it.querySelector('i')), col = { announced: '00B050', ready: 'FFC000', prep: 'FFC000', scheduled: '2E75FF', planned: 'E8ECF4' }[[...it.classList].find((x) => x.startsWith('st-')).slice(3)];
+      slide.addShape(pptx.ShapeType.roundRect, { x: dot.x, y: dot.y, w: dot.w, h: dot.h, rectRadius: .02, fill: { color: col }, line: { type: 'none' } });
+      slide.addText(it.textContent.trim(), { ...T, x: b.x, y: b.y, w: Math.max(0, dot.x - b.x - .03), h: b.h, fontSize: 9, color: 'FFFFFF', align: 'right', valign: 'middle' });
+    }
+    for (const g of board.querySelectorAll('.a3-group')) {
+      const b = box(g); slide.addShape(pptx.ShapeType.roundRect, { x: b.x, y: b.y, w: b.w, h: b.h, rectRadius: .12, fill: { color: 'FFFFFF', transparency: 88 }, line: { color: 'FFFFFF', transparency: 70, width: .75 } });
+      const gh = g.querySelector('.a3-group-h'); const hb = box(gh);
+      slide.addText(gh.textContent.trim(), { ...T, x: hb.x, y: hb.y, w: hb.w, h: hb.h, fontSize: 10, bold: true, color: '0A1A4A', align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, rectRadius: .08, fill: { color: 'FFFFFF' } });
+    }
+    for (const c of board.querySelectorAll('.a3c')) {
+      const b = box(c);
+      const stc = { announced: '00B050', ready: 'FFC000', prep: 'FFC000', scheduled: '2E75FF', planned: 'E8ECF4' }[[...c.classList].find((x) => x.startsWith('st-')).slice(3)] || 'E8ECF4';
+      slide.addShape(pptx.ShapeType.roundRect, { x: b.x, y: b.y, w: b.w, h: b.h, rectRadius: .1, fill: { color: '0B1F5C' }, line: { color: 'FFFFFF', transparency: 80, width: .75 } });
+      const cb = c.querySelector('.a3c-bg'); const d = await imgData(cb, b.r.width, b.r.height);
+      if (d) { slide.addImage({ data: d, x: b.x, y: b.y, w: b.w, h: b.h, transparency: 45 }); slide.addShape(pptx.ShapeType.rect, { x: b.x, y: b.y + b.h * .35, w: b.w, h: b.h * .65, fill: { color: '06103A', transparency: 30 }, line: { type: 'none' } }); }
+      for (const a of c.querySelectorAll('.a3c-who img')) { const ab = box(a); const ad = await imgData(a, ab.r.width, ab.r.height, true); if (ad) slide.addImage({ data: ad, x: ab.x, y: ab.y, w: ab.w, h: ab.h }); }
+      for (const a of c.querySelectorAll('.a3c-logos img')) { const ab = box(a); const ad = await imgData(a, ab.r.width, ab.r.height); if (ad) slide.addImage({ data: ad, x: ab.x, y: ab.y, w: ab.w, h: ab.h }); }
+      const mo = c.querySelector('.a3c-month'), mb = box(mo);
+      slide.addText(mo.textContent.trim(), { ...T, x: mb.x, y: mb.y, w: mb.w, h: mb.h, fontSize: 10, bold: true, color: '0A1A4A', align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, rectRadius: .1, fill: { color: stc === 'E8ECF4' ? 'FFFFFF' : stc } });
+      const late = c.querySelector('.a3c-late'); if (late) { const lb = box(late); slide.addText('متأخر', { ...T, x: lb.x, y: lb.y, w: lb.w, h: lb.h, fontSize: 8, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, rectRadius: .05, fill: { color: 'E5484D' } }); }
+      const t = c.querySelector('h3'), tb = box(t);
+      slide.addText(t.textContent.trim(), { ...T, x: tb.x, y: tb.y, w: tb.w, h: Math.max(tb.h, .3), fontSize: 11, bold: true, color: 'FFFFFF', align: 'right', valign: 'top', fit: 'shrink' });
+      const n = c.querySelector('.a3c-note span'), nb = box(c.querySelector('.a3c-note'));
+      slide.addText(n.textContent.trim(), { ...T, x: nb.x, y: nb.y, w: nb.w, h: nb.h, fontSize: 9, bold: true, color: ['00B050', '2E75FF'].includes(stc) ? 'FFFFFF' : '0A1A4A', align: 'center', valign: 'middle', shape: pptx.ShapeType.roundRect, rectRadius: .05, fill: { color: stc } });
+    }
+    const blob = await pptx.write({ outputType: 'blob' });
+    await saveFile(blob, `Launches-Calendar-${todayStr()}.pptx`);
+  } catch (e) { console.error(e); toast('تعذّر التصدير: ' + (e.message || e)); }
+  finally { btn.disabled = false; btn.textContent = label; }
 }
 
 function launchModal(l) {
@@ -2202,6 +2271,8 @@ app.addEventListener('click', (e) => {
         .catch(() => { toast('تعذّر تحميل البيانات الأصلية'); render(); });
       break;
     }
+    case 'l-status': break;
+    case 'l-pptx': exportLaunchesPptx(t); break;
     case 'l-edit': launchModal(state.launches.find((l) => l.id === ds.id)); break;
     case 'l-undo': { const prev = lHist.pop(); if (prev) { state.launches = JSON.parse(prev); commit('تم التراجع عن آخر تغيير'); } break; }
     case 'l-next': { const l = state.launches.find((x) => x.id === ds.id); const nx = l && lNext(l.status); if (nx) { lSnap(); l.status = nx; if (nx === 'announced') l.note = 'تم الإعلان'; commit(`${l.title}: ${LSTN[nx]}`); } break; }
@@ -2262,6 +2333,11 @@ app.addEventListener('drop', (e) => { const z = e.target.closest('[data-drop]');
 document.addEventListener('click', (e) => { if (ws.menu && !e.target.closest('.picker')) { ws.menu = false; render(); } });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ws.menu) { ws.menu = false; render(); $('.picker-btn')?.focus(); } });
 app.addEventListener('change', (e) => {
+  if (e.target.dataset.act === 'l-status') {
+    const l = state.launches.find((x) => x.id === e.target.dataset.id);
+    if (l && l.status !== e.target.value) { lSnap(); l.status = e.target.value; delete l.note; commit(`${l.title}: ${LSTN[l.status]}`); }
+    return;
+  }
   if (e.target.id === 'ws-img') { addImages([...e.target.files]); e.target.value = ''; return; }
   if (e.target.id !== 'docxInput') return;
   const files = [...e.target.files];
