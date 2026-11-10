@@ -1867,7 +1867,7 @@ const AG_STARTERS = [
   { act: 'ag-idea', t: 'أضف فكرة مشروع' },
 ];
 // The chat is paused while it is being finished («جاري العمل»); set to false to turn it back on.
-const AG_LOCKED = true;
+const AG_LOCKED = false;
 function agentLockedPanel() {
   return `
   <section class="agent chat empty locked" aria-label="المساعد">
@@ -1907,7 +1907,6 @@ function agentPanel() {
         ${busy ? `<button type="button" class="send stop" data-act="ag-stop" aria-label="إيقاف">■</button>` : `<button type="button" class="send" data-act="ag-send" aria-label="أرسل">${ICON.send}</button>`}
       </div>
     </form>
-    ${empty ? `<div class="starters">${AG_STARTERS.map((x) => `<button class="starter" data-act="${x.act}" ${x.q ? `data-q="${esc(x.q)}"` : ''}>${esc(x.t)}</button>`).join('')}</div>` : ''}
     ${eng ? '' : '<p class="chat-note">للأسئلة المفتوحة اربط Claude من <button class="link" data-act="open-settings">الإعدادات</button>. الأوامر مثل «رسالة متابعة» و«عرض بوربوينت لمعالي عمر» تعمل دائماً.</p>'}
   </section>`;
 }
