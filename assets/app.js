@@ -111,7 +111,7 @@ function setSync(kind, text) {
 }
 
 let saveTimer = null;
-function commit(msg) {
+function commit(msg, quiet) {
   state.updatedAt = new Date().toISOString();
   ls.set(LS_STATE, state);
   if (msg) toast(msg);
@@ -123,7 +123,7 @@ function commit(msg) {
       catch (e) { console.error(e); setSync('err', 'تعذّرت المزامنة'); }
     }, 1200);
   }
-  render();
+  if (!quiet) render();
 }
 
 async function fetchJSON(path) {
@@ -142,6 +142,7 @@ function migrate(local, remote) {
   remote.meetings.forEach((m) => (m.items || []).forEach((it) => {
     const old = byId.get(it.id) || byTopic.get(key(m) + '|' + String(it.topic).trim());
     if (old && old.status === 'done') { it.status = 'done'; if (old.doneDate) it.doneDate = old.doneDate; }
+    else if (old && old.status === 'pending' && it.status === 'done' && old.untickedAt) { it.status = 'pending'; delete it.doneDate; }
     if (old && old.note) it.note = old.note;
   }));
   const have = new Set(remote.meetings.map((m) => m.id)), haveKey = new Set(remote.meetings.filter((m) => m.items.length).map(key));
@@ -165,6 +166,7 @@ async function load() {
   const local = ls.get(LS_STATE);
   if (local && remote && (local.schema || 1) < (remote.schema || 1)) { state = migrate(local, remote); ls.set(LS_STATE, state); }
   else if (local && (!remote || (local.updatedAt || '') >= (remote.updatedAt || ''))) state = local;
+  else if (local && remote) { const st = local.stages, pr = local.project; state = migrate(local, remote); if ((st || []).length) state.stages = st; if (pr) state.project = { ...state.project, ...pr }; state.updatedAt = new Date().toISOString(); ls.set(LS_STATE, state); }
   else state = remote;
   if (!state) state = { schema: SCHEMA, updatedAt: '', project: {}, stages: [], meetings: [] };
   state.meetings ||= []; state.stages ||= []; state.project ||= {}; state.launches ||= []; state.ideas ||= []; state.events ||= [];
@@ -2176,8 +2178,18 @@ app.addEventListener('click', (e) => {
   switch (ds.act) {
     case 'toggle-item': {
       const it = findItem(ds.mid, ds.iid); if (!it) return;
-      if (isDone(it)) { it.status = 'pending'; delete it.doneDate; } else { it.status = 'done'; it.doneDate = todayStr(); }
-      commit(isDone(it) ? 'تم: أُنجز التوجيه' : 'أُعيد التوجيه إلى المعلّق');
+      if (isDone(it)) { it.status = 'pending'; delete it.doneDate; it.untickedAt = todayStr(); } else { it.status = 'done'; it.doneDate = todayStr(); delete it.untickedAt; }
+      // save without re-rendering the page, then update the row and counters in place
+      commit(isDone(it) ? 'تم: أُنجز التوجيه' : 'أُعيد التوجيه إلى المعلّق', true);
+      const row = t.closest('li'); if (row) row.classList.toggle('is-done', isDone(it));
+      t.checked = isDone(it);
+      const card = t.closest('.pend-card');
+      if (card) {
+        const n = card.querySelectorAll('.tick').length - card.querySelectorAll('.tick:checked').length;
+        const cnt = card.querySelector('.count'); if (cnt) cnt.textContent = `${n} معلّق`;
+        const g = t.closest('.pend-group')?.querySelector('.pend-gh span'); if (g) g.textContent = t.closest('.pend-group').querySelectorAll('.tick:not(:checked)').length;
+      }
+      if (route() === 'minutes') { const m = findMeeting(ds.mid); const d = m.items.filter(isDone).length; const b = $('.seg button[data-v="0"]'); if (b) b.textContent = `المعلّق (${m.items.length - d})`; }
       break;
     }
     case 'edit-item': itemModal(findMeeting(ds.mid), findItem(ds.mid, ds.iid)); break;
