@@ -1818,7 +1818,7 @@ function briefingText(s) {
 
 const AG_SUGGEST = ['ما الذي يجب أن أركّز عليه هذا الأسبوع؟', 'ما وضع إطلاقات نوفمبر؟', 'جهّز ملخصاً للقيادة عن وضع المشروع', 'أضف فكرة مشروع وصدّر قالبها'];
 
-const AG_STEP = { export_followup_deck: 'جهّز عرض المتابعة', get_assignments: 'راجع تكليفات المشاريع', update_assignment_status: 'حدّث حالة مشروع', get_project_status: 'قرأ حالة المشروع', get_pending_items: 'راجع التوجيهات', mark_items_done: 'حدّد بنوداً كمنجزة', add_item_note: 'أضاف ملاحظة', prepare_minutes_draft: 'جهّز المحضر', open_meeting: 'فتح الاجتماع', get_launches: 'راجع الإطلاقات', update_launch: 'حدّث إطلاقاً', list_ideas: 'راجع بنك الأفكار', add_idea: 'أضاف فكرة', export_project_template: 'جهّز القالب', prepare_committee_deck: 'جهّز عرض الاجتماع' };
+const AG_STEP = { create_presentation: 'أنشأ عرضاً', create_document: 'أنشأ مستنداً', create_file: 'أنشأ ملفاً', export_followup_deck: 'جهّز عرض المتابعة', get_assignments: 'راجع تكليفات المشاريع', update_assignment_status: 'حدّث حالة مشروع', get_project_status: 'قرأ حالة المشروع', get_pending_items: 'راجع التوجيهات', mark_items_done: 'حدّد بنوداً كمنجزة', add_item_note: 'أضاف ملاحظة', prepare_minutes_draft: 'جهّز المحضر', open_meeting: 'فتح الاجتماع', get_launches: 'راجع الإطلاقات', update_launch: 'حدّث إطلاقاً', list_ideas: 'راجع بنك الأفكار', add_idea: 'أضاف فكرة', export_project_template: 'جهّز القالب', prepare_committee_deck: 'جهّز عرض الاجتماع' };
 function msgAI(t, k, live) {
   const busy = live && ag.status === 'running';
   const steps = t.steps || [];
@@ -2136,19 +2136,89 @@ function animateCounts() {
 }
 
 // light formatting for agent replies: paragraphs, bullet lists, **bold**
+// Markdown for chat replies: headings, lists, tables, code, quotes, links, bold/italic.
+function mdInline(t) {
+  return esc(t)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/__(.+?)__/g, '<b>$1</b>')
+    .replace(/(^|[^*])\*([^*\s][^*]*?)\*(?!\*)/g, '$1<i>$2</i>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
 function fmtAgent(t) {
-  const lines = esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').split(/\n/);
-  let html = '', inList = false;
-  for (const l of lines) {
-    const m = l.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)/);
-    if (m) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${m[1]}</li>`; continue; }
-    if (inList) { html += '</ul>'; inList = false; }
-    if (l.trim()) html += `<p>${l.replace(/^#+\s*/, '')}</p>`;
+  const L = String(t || '').replace(/\r/g, '').split('\n'); let h = '', i = 0;
+  while (i < L.length) {
+    const l = L[i];
+    if (/^```/.test(l)) { const buf = []; i++; while (i < L.length && !/^```/.test(L[i])) buf.push(L[i++]); i++; h += `<pre dir="ltr"><code>${esc(buf.join('\n'))}</code></pre>`; continue; }
+    if (/^\s*\|.*\|\s*$/.test(l) && i + 1 < L.length && /^\s*\|?\s*:?-{2,}/.test(L[i + 1])) {
+      const row = (r) => r.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+      const head = row(l); i += 2; const body = [];
+      while (i < L.length && /^\s*\|.*\|\s*$/.test(L[i])) body.push(row(L[i++]));
+      h += `<div class="md-table"><table><thead><tr>${head.map((c) => `<th>${mdInline(c)}</th>`).join('')}</tr></thead><tbody>${body.map((r) => `<tr>${r.map((c) => `<td>${mdInline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; continue;
+    }
+    const hm = l.match(/^(#{1,4})\s+(.*)/); if (hm) { const n = Math.min(4, hm[1].length + 2); h += `<h${n}>${mdInline(hm[2])}</h${n}>`; i++; continue; }
+    if (/^\s*(---|\*\*\*|___)\s*$/.test(l)) { h += '<hr>'; i++; continue; }
+    if (/^\s*>/.test(l)) { const buf = []; while (i < L.length && /^\s*>/.test(L[i])) buf.push(L[i++].replace(/^\s*>\s?/, '')); h += `<blockquote>${buf.map(mdInline).join('<br>')}</blockquote>`; continue; }
+    if (/^\s*([-•*]|\d+[.)])\s+/.test(l)) {
+      const ol = /^\s*\d+[.)]/.test(l); const items = [];
+      while (i < L.length && /^\s*([-•*]|\d+[.)])\s+/.test(L[i])) items.push(L[i++].replace(/^\s*([-•*]|\d+[.)])\s+/, ''));
+      h += `<${ol ? 'ol' : 'ul'}>${items.map((x) => `<li>${mdInline(x)}</li>`).join('')}</${ol ? 'ol' : 'ul'}>`; continue;
+    }
+    if (l.trim()) { const buf = [l]; i++; while (i < L.length && L[i].trim() && !/^(#{1,4}\s|```|\s*>|\s*([-•*]|\d+[.)])\s+|\s*\|)/.test(L[i])) buf.push(L[i++]); h += `<p>${buf.map(mdInline).join('<br>')}</p>`; continue; }
+    i++;
   }
-  return html + (inList ? '</ul>' : '');
+  return h;
 }
 
+// Files the agent creates for the user (kept in memory until the page is closed).
+const agFiles = new Map();
+const MIME = { csv: 'text/csv', md: 'text/markdown', txt: 'text/plain', html: 'text/html', json: 'application/json', xml: 'application/xml', svg: 'image/svg+xml' };
+const safeName = (n, ext) => (String(n || 'file').replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-').slice(0, 80) || 'file') + (ext && !String(n).toLowerCase().endsWith('.' + ext) ? '.' + ext : '');
+function docxXml(title, md) {
+  const x = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const run = (t, b, sz) => `<w:r><w:rPr><w:rFonts w:ascii="Sakkal Majalla" w:hAnsi="Sakkal Majalla" w:cs="Sakkal Majalla"/>${b ? '<w:b/><w:bCs/>' : ''}<w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/><w:rtl/></w:rPr><w:t xml:space="preserve">${x(t)}</w:t></w:r>`;
+  const runs = (t, sz, bold) => String(t).split(/(\*\*.+?\*\*)/g).filter(Boolean).map((p) => /^\*\*.+\*\*$/.test(p) ? run(p.slice(2, -2), true, sz) : run(p.replace(/`/g, ''), bold, sz)).join('');
+  const para = (inner, extra = '') => `<w:p><w:pPr><w:bidi/><w:jc w:val="both"/>${extra}<w:spacing w:after="120"/></w:pPr>${inner}</w:p>`;
+  const out = [para(runs(title, 40, true), '<w:jc w:val="center"/>')];
+  String(md || '').replace(/\r/g, '').split('\n').forEach((l) => {
+    const h = l.match(/^(#{1,4})\s+(.*)/);
+    if (h) out.push(para(runs(h[2], [36, 32, 30, 28][h[1].length - 1], true)));
+    else if (/^\s*([-•*])\s+/.test(l)) out.push(para(runs('• ' + l.replace(/^\s*[-•*]\s+/, ''), 28), '<w:ind w:right="360"/>'));
+    else if (/^\s*\d+[.)]\s+/.test(l)) out.push(para(runs(l.trim(), 28), '<w:ind w:right="360"/>'));
+    else if (/^\s*\|/.test(l)) { if (!/^\s*\|?\s*:?-{2,}/.test(l)) out.push(para(runs(l.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim()).join('  ·  '), 26))); }
+    else if (l.trim()) out.push(para(runs(l.replace(/^>\s?/, ''), 28)));
+  });
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${out.join('')}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/><w:bidi/></w:sectPr></w:body></w:document>`;
+}
+async function makeDocx(title, md) {
+  const JSZip = await loadJSZip(); const z = new JSZip();
+  z.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
+  z.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+  z.file('word/document.xml', docxXml(title, md));
+  return z.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+}
+async function makePptx(title, subtitle, slides) {
+  const PptxGenJS = await loadPptxGen(); const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE'; pptx.rtlMode = true; pptx.title = title;
+  const W = 13.333, T = { fontFace: 'Sakkal Majalla', rtlMode: true, lang: 'ar-AE', margin: 0 };
+  let bg = null, logo = null; try { bg = await urlData(state.assignments?.bg || 'assets/assign/bg.jpg'); } catch {} try { logo = await svgData('assets/logo-mono.svg', 1038, 359); } catch {}
+  const c = pptx.addSlide(); c.background = bg ? { data: bg } : { color: '0A1C4A' };
+  if (logo) c.addImage({ data: logo, x: 0.6, y: 0.5, w: 2.6, h: 0.9 });
+  c.addText(title, { ...T, x: 0.8, y: 2.2, w: W - 1.6, h: 1.4, fontSize: 40, bold: true, color: 'FFFFFF', align: 'right', valign: 'bottom', fit: 'shrink' });
+  if (subtitle) c.addText(subtitle, { ...T, x: 0.8, y: 3.7, w: W - 1.6, h: 0.6, fontSize: 20, color: 'C9D6E3', align: 'right' });
+  (slides || []).slice(0, 40).forEach((sl) => {
+    const s = pptx.addSlide(); s.background = bg ? { data: bg } : { color: '0A1C4A' };
+    if (logo) s.addImage({ data: logo, x: 0.45, y: 0.32, w: 1.75, h: 0.6 });
+    s.addText(String(sl.title || ''), { ...T, x: 2.6, y: 0.3, w: W - 3.1, h: 0.8, fontSize: 30, bold: true, color: 'FFFFFF', align: 'right', valign: 'middle', fit: 'shrink' });
+    const bullets = (sl.bullets || []).slice(0, 10).map((b) => ({ text: String(b), options: { bullet: true, breakLine: true } }));
+    if (bullets.length) s.addText(bullets, { ...T, x: 0.8, y: 1.5, w: W - 1.6, h: 5.4, fontSize: 20, color: 'FFFFFF', align: 'right', valign: 'top', paraSpaceAfter: 10, fit: 'shrink' });
+    if (sl.notes) s.addNotes(String(sl.notes));
+  });
+  return pptx.write({ outputType: 'blob' });
+}
+function fileAction(acts, blob, name, kind) { const id = uid('f'); agFiles.set(id, { blob, name }); acts.push({ type: 'file', id, name, kind }); return id; }
+
 function actionCard(a, k, j) {
+  if (a.type === 'file') return `<div class="act-card">${ICON.doc}<span>${esc(a.kind || 'ملف')} جاهز: <b dir="auto">${esc(a.name)}</b></span><button class="btn sm primary" data-act="ag-file" data-id="${a.id}">تنزيل</button></div>`;
   if (a.type === 'done') return `<div class="act-card ok">${ICON.check}<span>${a.undone ? 'تم التراجع عن' : 'تم تحديد'} ${a.ids.length} ${a.ids.length === 1 ? 'توجيه' : 'توجيهات'} ${a.undone ? '' : 'كمنجزة'}: ${esc(a.label)}</span>${a.undone ? '' : `<button class="link" data-act="ag-undo" data-k="${k}" data-j="${j}">تراجع</button>`}</div>`;
   if (a.type === 'note') return `<div class="act-card">${ICON.note}<span>أُضيفت ملاحظة على «${esc(a.label)}»</span></div>`;
   if (a.type === 'launch') return `<div class="act-card ok">${ICON.check}<span>${esc(a.label)}</span></div>`;
@@ -2171,13 +2241,16 @@ function pickTools(turns, max) {
   const boost = [
     [/عرض|باوربوينت|بوربوينت|ppt|شرائح|سلايد|متابع|مسار|عمر|تكليف/i, ['export_followup_deck', 'get_assignments', 'prepare_followup']],
     [/تكليف|مشروع|مشاريع|حالة/, ['get_assignments', 'update_assignment_status']],
+    [/وورد|word|docx|مستند|خطاب|رسالة|مذكرة|تقرير|ملف|اكتب/i, ['create_document', 'create_file']],
+    [/عرض|باوربوينت|بوربوينت|ppt|شرائح|سلايد|presentation/i, ['create_presentation']],
+    [/جدول|اكسل|excel|csv|بيانات/i, ['create_file']],
     [/إطلاق|اطلاق|إعلان/, ['get_launches', 'update_launch']],
     [/فكر|مقترح|بنك|قالب/, ['list_ideas', 'add_idea', 'export_project_template']],
     [/محضر|محاضر|ملاحظات|صياغة/, ['prepare_minutes_draft', 'open_meeting']],
     [/اللجنة الوطنية|اجتماع/, ['prepare_committee_deck', 'open_meeting']],
     [/منجز|أنجز|علّم|علم|تم /, ['mark_items_done', 'add_item_note']],
   ];
-  const base = ['get_project_status', 'get_pending_items', 'export_followup_deck', 'prepare_followup', 'get_assignments', 'mark_items_done', 'add_item_note', 'prepare_minutes_draft', 'prepare_committee_deck', 'update_assignment_status', 'get_launches', 'list_ideas', 'open_meeting', 'update_launch', 'add_idea', 'export_project_template'];
+  const base = ['get_project_status', 'get_pending_items', 'create_document', 'create_presentation', 'create_file', 'export_followup_deck', 'prepare_followup', 'get_assignments', 'mark_items_done', 'add_item_note', 'prepare_minutes_draft', 'prepare_committee_deck', 'update_assignment_status', 'get_launches', 'list_ideas', 'open_meeting', 'update_launch', 'add_idea', 'export_project_template'];
   const score = Object.fromEntries(base.map((n, i) => [n, base.length - i]));
   boost.forEach(([re, names]) => { if (re.test(q)) names.forEach((n) => { score[n] = (score[n] || 0) + 100; }); });
   return [...AG_TOOLS].sort((a, b) => (score[b.name] || 0) - (score[a.name] || 0)).slice(0, max);
@@ -2303,6 +2376,29 @@ const AG_TOOLS = [
     },
   },
   {
+    name: 'create_presentation',
+    description: 'Creates a PowerPoint deck (in the project\'s visual style: dark blue background, project logo, RTL Arabic, Sakkal Majalla) from a title, optional subtitle and slides (each with a title, bullet points and optional speaker notes), and gives the user a download button. Use for any presentation the user asks for. Write the full content yourself.',
+    schema: { type: 'object', properties: { title: { type: 'string' }, subtitle: { type: 'string' }, filename: { type: 'string' }, slides: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } }, notes: { type: 'string' } }, required: ['title'] } } }, required: ['title', 'slides'], additionalProperties: false },
+    async run(inp, acts) { const blob = await makePptx(String(inp.title), inp.subtitle, inp.slides); fileAction(acts, blob, safeName(inp.filename || inp.title, 'pptx'), 'عرض PowerPoint'); return { ok: true, slides: (inp.slides || []).length + 1 }; },
+  },
+  {
+    name: 'create_document',
+    description: 'Creates a Word document (.docx, RTL Arabic, Sakkal Majalla) from a title and Markdown-style content (# headings, - bullets, numbered lists, **bold**, simple | tables |), and gives the user a download button. Use for letters, memos, reports, minutes, summaries or any document the user asks for. Write the full text yourself.',
+    schema: { type: 'object', properties: { title: { type: 'string' }, content: { type: 'string' }, filename: { type: 'string' } }, required: ['title', 'content'], additionalProperties: false },
+    async run(inp, acts) { const blob = await makeDocx(String(inp.title), String(inp.content)); fileAction(acts, blob, safeName(inp.filename || inp.title, 'docx'), 'مستند Word'); return { ok: true }; },
+  },
+  {
+    name: 'create_file',
+    description: 'Creates a downloadable text file from content you write: CSV (opens in Excel), Markdown, plain text, HTML, JSON, XML or SVG. Give the filename with its extension. Use for tables or data the user wants as a spreadsheet (CSV), or any other file.',
+    schema: { type: 'object', properties: { filename: { type: 'string' }, content: { type: 'string' } }, required: ['filename', 'content'], additionalProperties: false },
+    run(inp, acts) {
+      const ext = (String(inp.filename).match(/\.(\w+)$/) || [])[1]?.toLowerCase() || 'txt';
+      const body = ext === 'csv' ? '\ufeff' + inp.content : String(inp.content);
+      fileAction(acts, new Blob([body], { type: (MIME[ext] || 'text/plain') + ';charset=utf-8' }), safeName(inp.filename.replace(/\.\w+$/, ''), ext), ext === 'csv' ? 'جدول (CSV)' : 'ملف');
+      return { ok: true };
+    },
+  },
+  {
     name: 'export_followup_deck',
     description: 'Prepares a follow-up PowerPoint for one track (track name, e.g. "مسار تقنيات الذكاء الاصطناعي والبيانات", or a lead\'s name such as "عمر العلماء") or one meeting (meeting_id). The deck has a cover addressed to the track lead, the pending directives from the minutes, and the track\'s project assignments (تكليفات المشاريع) with their statuses. Gives the user a download button and also prepares the follow-up email draft. Use this whenever the user wants a presentation, slides or a PPT for follow-up.',
     schema: { type: 'object', properties: { track: { type: 'string' }, meeting_id: { type: 'string' } }, additionalProperties: false },
@@ -2379,7 +2475,7 @@ function persistQuiet() {
   if (ghOn()) { clearTimeout(saveTimer); saveTimer = setTimeout(() => ghSave().then(() => setSync('ok', 'تمت المزامنة ✓')).catch(() => setSync('err', 'تعذّرت المزامنة')), 1200); }
 }
 
-const AG_SYSTEM = `قدراتك في هذه الصفحة (استخدمها ولا تقل إنك لا تستطيع ما دامت هناك أداة تغطيه): قراءة حالة المشروع والتوجيهات المعلّقة وتحديدها كمنجزة وإضافة ملاحظات، وإعداد رسائل المتابعة، وإعداد عرض PowerPoint للمتابعة لأي مسار أو اجتماع يشمل التوجيهات المعلّقة وتكليفات المشاريع (export_followup_deck)، وقراءة تكليفات المشاريع وتحديث حالاتها، وإعداد المحاضر وعرض اللجنة الوطنية، والإطلاقات، وبنك الأفكار وقالب المشروع. لا يمكنك إرسال البريد بنفسك: جهّز الملف والمسودة وأخبر المستخدم بإرفاق الملف. إن لم تغطِّ أي أداة الطلب فنفّذ أقرب ما يمكن وقل بوضوح ما الذي يستطيع المستخدم فعله.\n\nأنت أيضاً مساعد عام مثل Claude تماماً: أجب عن أي سؤال أو مهمة (كتابة، ترجمة، تحليل، تلخيص، أفكار، صياغة رسائل وتقارير، شرح الصور والملفات المرفقة، حسابات، برمجة) بنفسك مباشرة وبجودة عالية، واستخدم أدوات الصفحة عندما يتعلق الطلب ببيانات المشروع أو بتنفيذ إجراء. أجب بوضوح وبالقدر الذي يحتاجه السؤال، وفضّل تنفيذ المطلوب بالأدوات التي تعطي المستخدم أزراراً وبطاقات جاهزة (مثل prepare_followup وprepare_minutes_draft وprepare_committee_deck وexport_project_template) بدلاً من الشرح النصي الطويل.\n\nأنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
+const AG_SYSTEM = `قدراتك في هذه الصفحة (استخدمها ولا تقل إنك لا تستطيع ما دامت هناك أداة تغطيه): قراءة حالة المشروع والتوجيهات المعلّقة وتحديدها كمنجزة وإضافة ملاحظات، وإعداد رسائل المتابعة، وإعداد عرض PowerPoint للمتابعة لأي مسار أو اجتماع يشمل التوجيهات المعلّقة وتكليفات المشاريع (export_followup_deck)، وقراءة تكليفات المشاريع وتحديث حالاتها، وإعداد المحاضر وعرض اللجنة الوطنية، والإطلاقات، وبنك الأفكار وقالب المشروع. يمكنك أيضاً إنشاء ملفات قابلة للتنزيل لأي غرض: عروض PowerPoint (create_presentation)، ومستندات Word (create_document)، وجداول CSV تفتح في Excel وملفات نصية أخرى (create_file)؛ اكتب المحتوى كاملاً بنفسك ثم أنشئ الملف بدلاً من الاكتفاء بالنص. لا يمكنك تصفح الإنترنت أو تشغيل برامج، فاعتمد على معرفتك وعلى بيانات الصفحة. لا يمكنك إرسال البريد بنفسك: جهّز الملف والمسودة وأخبر المستخدم بإرفاق الملف. إن لم تغطِّ أي أداة الطلب فنفّذ أقرب ما يمكن وقل بوضوح ما الذي يستطيع المستخدم فعله.\n\nأنت أيضاً مساعد عام مثل Claude تماماً: أجب عن أي سؤال أو مهمة (كتابة، ترجمة، تحليل، تلخيص، أفكار، صياغة رسائل وتقارير، شرح الصور والملفات المرفقة، حسابات، برمجة) بنفسك مباشرة وبجودة عالية، واستخدم أدوات الصفحة عندما يتعلق الطلب ببيانات المشروع أو بتنفيذ إجراء. أجب بوضوح وبالقدر الذي يحتاجه السؤال، وفضّل تنفيذ المطلوب بالأدوات التي تعطي المستخدم أزراراً وبطاقات جاهزة (مثل prepare_followup وprepare_minutes_draft وprepare_committee_deck وexport_project_template) بدلاً من الشرح النصي الطويل.\n\nأنت «المساعد» في لوحة متابعة مشروع الذكاء الاصطناعي المساعد لحكومة دولة الإمارات (Agentic AI for UAE Government). يستخدمك فريق المشروع في وزارة شؤون مجلس الوزراء لمتابعة مراحل المشروع وتوجيهات اللجنة الوطنية للذكاء الاصطناعي المساعد ولجنة الوزارة، ولإعداد أعمالهم المتكررة.
 
 - اكتب بالعربية الفصحى بأسلوب حكومي واضح ومختصر، واستخدم قوائم قصيرة عند الحاجة.
 - اعتمد على الأدوات للاطلاع على البيانات الفعلية قبل الإجابة عن المراحل أو التوجيهات أو المحاضر، ولا تخمّن أرقاماً أو أسماء.
@@ -2418,14 +2514,14 @@ async function agentRunSDK(signal, onText, acts) {
     const uses = msg.content.filter((b) => b.type === 'tool_use');
     if (msg.stop_reason === 'max_tokens' && uses.length) throw new Error('انقطع الرد قبل اكتماله. حاول بطلب أقصر.');
     if (msg.stop_reason !== 'tool_use' || !uses.length) return shown;
-    const results = uses.map((u) => {
+    const results = await Promise.all(uses.map(async (u) => {
       const tool = AG_TOOLS.find((t) => t.name === u.name);
       try {
         const input = u.input && typeof u.input === 'object' ? u.input : {};
         if (!tool) throw new Error('Unknown tool');
-        return { type: 'tool_result', tool_use_id: u.id, content: JSON.stringify(runTool(tool, input, acts)) };
+        return { type: 'tool_result', tool_use_id: u.id, content: JSON.stringify(await runTool(tool, input, acts)) };
       } catch (err) { return { type: 'tool_result', tool_use_id: u.id, content: String(err.message || err), is_error: true }; }
-    });
+    }));
     ag.api.push({ role: 'user', content: results });
   }
   return shown;
@@ -2437,7 +2533,7 @@ async function agentRunSample(signal, onText, acts) {
   const turns = [{ role: 'user', content: AG_SYSTEM + ctx }, ...ag.turns.filter((t) => t.text).map((t) => ({ role: t.role === 'user' ? 'user' : 'assistant', content: t.send || (t.title ? t.title + '\n' + t.text : t.text) }))].reduce((a, m) => { if (a.length && a[a.length - 1].role === m.role) a[a.length - 1].content += '\n\n' + m.content; else a.push({ ...m }); return a; }, []);
   try {
     const { text } = await cap.sample(turns, {
-      signal, onText: ({ text }) => onText(text),
+      signal, onText: ({ text }) => onText(text), modelTier: 'complex',
       ...(ag.pendingImages && ag.pendingImages.length && cap.sampleImages ? { images: ag.pendingImages } : {}),
       ...(lim && lim.tools ? { tools: pickTools(turns, lim.tools.maxCount).map((t) => ({ name: t.name, description: t.description, inputSchema: t.schema, execute: (input) => runTool(t, input || {}, acts) })) } : { cache: false }),
     });
@@ -2453,7 +2549,9 @@ let agReply = null;
 function agLive() { const el = $('#agRes'); if (el) { el.outerHTML = agentResult(); chatScroll(); } }
 function runTool(tool, input, acts) {
   if (agReply) { (agReply.steps ||= []).push(AG_STEP[tool.name] || tool.name); agLive(); }
-  return tool.run(input, acts);
+  const r = tool.run(input, acts);
+  if (r && typeof r.then === 'function') return r.then((v) => { agLive(); return v; });
+  agLive(); return r;
 }
 async function agentAsk(q) {
   q = String(q || '').trim(); const eng = engine();
@@ -2778,6 +2876,7 @@ app.addEventListener('click', (e) => {
     case 'ag-deck': case 'ag-lpptx': runAction(ds.act); break;
     case 'ag-idea': ideaModal(); break;
     case 'ag-fdeck': downloadFollowupDeck(ds.k, t); break;
+    case 'ag-file': { const f = agFiles.get(ds.id); if (f) saveFile(f.blob, f.name); else toast('انتهت صلاحية الملف، اطلبه مرة أخرى'); break; }
     case 'ag-local-close': ag.local = null; render(); break;
     case 'ag-local-copy': navigator.clipboard.writeText($('#agLocalText').value).then(() => toast('تم النسخ'), () => toast('تعذّر النسخ')); break;
     case 'ag-mail': { const d = ag.local; const body = $('#agLocalText').value; location.href = `mailto:?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(body)}`; break; }

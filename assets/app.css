@@ -972,3 +972,17 @@ dialog::backdrop{background:var(--scrim)}
 @media (max-width:640px){.nc-logo[src*="ministry"]{height:28px}.nc-banner img[src*="ministry"]{height:40px}.nc-name{font-size:14px}}
 .nc-banner{flex-wrap:wrap;max-width:100%}
 .nc-banner img{max-width:100%;object-fit:contain}
+.msg-body .ag-text h3,.msg-body .ag-text h4,.msg-body .ag-text h5,.msg-body .ag-text h6{font-family:var(--font-heading);margin:10px 0 4px;line-height:1.4}
+.msg-body .ag-text h3{font-size:19px}.msg-body .ag-text h4{font-size:17px}.msg-body .ag-text h5,.msg-body .ag-text h6{font-size:15.5px}
+.msg-body .ag-text ol{margin:4px 0 8px;padding-inline-start:22px}
+.msg-body .ag-text li{margin:2px 0}
+.msg-body .ag-text code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+.msg-body .ag-text pre{direction:ltr;text-align:left;background:#0F172A;color:#E2E8F0;border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:13px;line-height:1.6;margin:6px 0}
+.msg-body .ag-text pre code{background:none;border:0;padding:0;color:inherit}
+.msg-body .ag-text blockquote{margin:6px 0;padding:4px 12px;border-inline-start:3px solid var(--accent);color:var(--fg-2);background:var(--surface-2);border-radius:6px}
+.msg-body .ag-text hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.msg-body .ag-text a{color:var(--accent-fg)}
+.md-table{overflow-x:auto;margin:6px 0}
+.md-table table{border-collapse:collapse;width:100%;font-size:14px}
+.md-table th,.md-table td{border:1px solid var(--line);padding:6px 10px;text-align:start;vertical-align:top}
+.md-table th{background:var(--surface-2);font-weight:700}
